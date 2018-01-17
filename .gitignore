@@ -1,0 +1,57 @@
+**/.vscode
+target/*
+target
+
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Intellij Files
+*.iml
+/lib
+
+# maven
+target/
+.mvn
+
+# gradle
+gradle/
+
+# eclipse
+.project
+.classpath
+.settings
+.checkstyle
+
+#ant specific
+dist/
+build/
+
+#netbeans specific
+#core
+nbproject/*
+!nbproject/project.properties
+!nbproject/project.xml
+
+#java specific
+*.class
+
+#general swap/backup files
+*.so
+*.log
+*.out
+*~
+*.swp
+*.DS_Store
+*.lock
+
+#spring specific
+.springBeans
