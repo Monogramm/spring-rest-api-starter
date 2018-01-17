@@ -41,6 +41,12 @@
 			<url>https://github.com/madmath03</url>
 			<id>madmath03</id>
 		</developer>
+		<developer>
+			<email>ebacem@gmail.com</email>
+			<name>Bacem EL IDILBI</name>
+			<url>https://github.com/ebacem</url>
+			<id>ebacem</id>
+		</developer>
 	</developers>
 
 	<repositories>
