@@ -5,10 +5,12 @@ jdk:
   - oraclejdk8
 
 install:
-  - mvn clean
+  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script: 
+  -  echo "skip 'gradle check' step"
 
 build: 
-  - mvn install
   - mvn test site
 
 after_success:
