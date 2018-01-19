@@ -4,22 +4,11 @@ sudo: false # faster builds
 jdk:
   - oraclejdk8
 
-before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
 install:
   - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  - echo "skip 'gradle assemble' step"
 
 script: 
   - mvn test site
-  - gradle build --continue
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
