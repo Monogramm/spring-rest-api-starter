@@ -1,5 +1,9 @@
 # README #
 
+[![Build
+Status](https://secure.travis-ci.org/Monogramm/spring-rest-api-starter.png)](https://travis-ci.org/Monogramm/spring-rest-api-starter)
+[![codecov](https://codecov.io/gh/Monogramm/spring-rest-api-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/Monogramm/spring-rest-api-starter)
+
 ### What is this repository for? ###
 
 A "simple" starter project custom RESTful API.
@@ -33,3 +37,4 @@ See the complete license in the bundle:
 ### Who do I talk to? ###
 
 * [madmath03](https://github.com/madmath03)
+* [ebacem](https://github.com/ebacem)

@@ -1,8 +1,17 @@
 language: java
+sudo: false # faster builds
 
 jdk:
-- oraclejdk8
+  - oraclejdk8
 
-script:
-- mvn clean install
-- mvn test site
+install:
+  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+script: 
+  -  echo "skip 'gradle check' step"
+
+build: 
+  - mvn test site
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
