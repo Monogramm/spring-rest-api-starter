@@ -32,7 +32,7 @@ See [CONTRIBUTING](CONTRIBUTING.md) file.
 This product is distributed under the GNU Affero General Public License v3.0.
 See the complete license in the bundle:
 
-[Read the license](https://github.com/madmath03/password/blob/master/LICENSE)
+[Read the license](https://github.com/Monogramm/spring-rest-api-starter/blob/master/LICENSE)
 
 ### Who do I talk to? ###
 
