@@ -1,12 +1,15 @@
 language: java
+sudo: false # faster builds
 
 jdk:
- - oraclejdk8
+  - oraclejdk8
 
-before_install:
- - chmod +x gradlew
- - chmod +x mvnw
+install:
+  - mvn clean
 
-script:
- - mvn clean install
- - mvn test site
+build: 
+  - mvn install
+  - mvn test site
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
