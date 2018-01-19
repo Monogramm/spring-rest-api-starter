@@ -3,6 +3,10 @@ language: java
 jdk:
 - oraclejdk8
 
+before_script:
+ - chmod +x gradlew
+ - chmod +x mvnww
+
 script:
 - mvn clean install
 - mvn test site
