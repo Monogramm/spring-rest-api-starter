@@ -20,7 +20,7 @@ The project uses Spring Boot and a MySQL database.
 * `mysql --user=root --password < src/main/resources/_schema-mysql.sql`
 * `mysql --user=root --password < src/main/resources/_data-mysql.sql`
 
-Finally, edit the properties in `application.yml` to your environment (name, db, mail, etc...).
+Finally, edit the properties in `application.yml` to your needs (name, db, mail, etc...).
 
 ## Run Backend API
 * `mvn spring-boot:run`
