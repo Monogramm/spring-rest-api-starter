@@ -20,7 +20,7 @@ The project uses Spring Boot and a MySQL database.
 * `mysql --user=root --password < src/main/resources/_schema-mysql.sql`
 * `mysql --user=root --password < src/main/resources/_data-mysql.sql`
 
-Finally, edit the properties in `application.yml` to your needs (name, db, mail, etc...).
+Finally, edit the properties in `application.properties` to your needs (name, db, mail, etc...).
 
 ## Run Backend API
 * `mvn spring-boot:run`
@@ -49,3 +49,5 @@ See the complete license in the bundle:
 
 * [madmath03](https://github.com/madmath03)
 * [ebacem](https://github.com/ebacem)
+* [vinctix](https://github.com/vinctix)
+
