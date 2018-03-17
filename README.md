@@ -17,13 +17,17 @@ The project uses Spring Boot and a MySQL database.
 
 * `git clone https://github.com/monogramm/spring-rest-api-starter.git`
 * `cd spring-rest-api-starter`
-* `mysql --user=root --password < src/main/resources/_schema-mysql.sql`
-* `mysql --user=root --password < src/main/resources/_data-mysql.sql`
 
-Finally, edit the properties in `application.properties` to your needs (name, db, mail, etc...).
+Finally, edit the properties in `application.properties` to your needs (name, db, mail, etc...) and compile the project.
+
+* `mvn clean package`
+
+The application will automatically setup the database.
 
 ## Run Backend API
 * `mvn spring-boot:run`
+
+You can now access your API at `http://localhost:8080/spring-rest-api-starter/api/`
 
 ## Tests
 ### Unit Tests
@@ -32,7 +36,9 @@ Finally, edit the properties in `application.properties` to your needs (name, db
 ### Integration Tests
 * `mvn verify`
 
-Be careful as the IT will startup the server and test the actual functions. This means that all application properties are valid for integration, even mail ones (not mocked).
+Be careful as the IT will startup the server and test the actual functions. This means that all application properties must be valid for integration, even mail ones (not mocked).
+
+The IT use there own [application.properties](src/integration-test/resources/application.properties) which defaults to a separate database. Make sure to edit the default parameters to your environment.
 
 ### Contribution guidelines ###
 
