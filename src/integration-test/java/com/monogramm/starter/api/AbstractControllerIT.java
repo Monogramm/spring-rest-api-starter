@@ -65,7 +65,7 @@ public abstract class AbstractControllerIT {
 
   protected static final String PASSWORD_GRANT_TYPE = "password";
 
-  protected static final String CLIENT_ID = "clientIdPassword";
+  protected static final String CLIENT_ID = "clientWebIdPassword";
   protected static final String CLIENT_SECRET = "secret";
 
   /**

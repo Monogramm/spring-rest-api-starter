@@ -60,16 +60,16 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Autowired
   public void globalUserDetails(final AuthenticationManagerBuilder auth) throws Exception {
     final StringBuilder usersByUsernameQuery = new StringBuilder("select email, password, enabled ")
-        .append("from user ").append("where email = ?");
+        .append("from user_account ").append("where email = ?");
 
     final StringBuilder authoritiesByUsernameQuery = new StringBuilder();
     authoritiesByUsernameQuery.append("select u.email, CONCAT('").append(ROLE_PREFIX)
-        .append("', UPPER(r.name)) ").append("from user u, role r ")
+        .append("', UPPER(r.name)) ").append("from user_account u, role r ")
         .append("where u.email = ? ").append("and u.role = r.id");
 
     final StringBuilder groupAuthoritiesByUsername = new StringBuilder();
     groupAuthoritiesByUsername.append("select r.id, r.name, p.name ")
-        .append("from role r, user u, permission p, role_permission rp ")
+        .append("from role r, user_account u, permission p, role_permission rp ")
         .append("where u.email = ? ")
         .append("and p.id = rp.permission_id and r.id = rp.role_id and u.role = r.id");
 

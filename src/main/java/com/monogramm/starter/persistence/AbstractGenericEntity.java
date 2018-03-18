@@ -53,7 +53,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(name = "id", columnDefinition = "BINARY(16)", nullable = false, updatable = false)
+  @Column(name = "id", length = 16, nullable = false, updatable = false)
   private UUID id;
 
   /**
@@ -67,7 +67,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "created_by", columnDefinition = "BINARY(16)", nullable = true)
+  @JoinColumn(name = "created_by", nullable = true)
   private User createdBy = null;
 
   /**
@@ -81,7 +81,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "modified_by", columnDefinition = "BINARY(16)", nullable = true)
+  @JoinColumn(name = "modified_by", nullable = true)
   private User modifiedBy = null;
 
   /**
@@ -89,7 +89,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner", columnDefinition = "BINARY(16)", nullable = true)
+  @JoinColumn(name = "owner", nullable = true)
   private User owner = null;
 
 
