@@ -15,7 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "user")
+@Table(name = "user_account")
 public class User extends AbstractGenericEntity {
   /**
    * The {@code serialVersionUID}.
@@ -102,7 +102,7 @@ public class User extends AbstractGenericEntity {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "role", columnDefinition = "BINARY(16)", nullable = true)
+  @JoinColumn(name = "role", nullable = true)
   private Role role = null;
 
   /**
