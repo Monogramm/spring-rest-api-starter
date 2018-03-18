@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * Verification Token.
  * 
  * @see <a href="http://www.baeldung.com/registration-verify-user-by-email">Registration – Activate
- *      a New Account by Email</a>
+ *      a New User by Email</a>
  * 
  * @author madmath03
  */

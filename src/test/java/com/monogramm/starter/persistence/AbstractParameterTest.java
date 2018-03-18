@@ -46,8 +46,8 @@ public abstract class AbstractParameterTest<T extends AbstractParameter>
   abstract protected T buildTestEntity(T other);
 
   @Override
-  public void testToJSON() throws JsonProcessingException {
-    super.testToJSON();
+  public void testToJson() throws JsonProcessingException {
+    super.testToJson();
 
     this.getEntity().setName(DUMMY_NAME);
     assertNotNull(this.getEntity().toJson());

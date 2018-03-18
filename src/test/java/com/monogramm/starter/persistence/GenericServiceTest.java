@@ -30,7 +30,7 @@ public abstract class GenericServiceTest<E extends AbstractGenericEntity,
    * Test method for {@link GenericService#toDto(AbstractGenericEntity)}.
    */
   @Test
-  public void testToDTO() {
+  public void testToDto() {
     final E entity = this.getService().getBridge().buildEntity();
     final D dto = this.getService().toDto(entity);
 

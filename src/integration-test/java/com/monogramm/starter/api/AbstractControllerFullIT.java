@@ -44,6 +44,7 @@ public abstract class AbstractControllerFullIT extends AbstractControllerIT {
 
 
   private static final String CLIENT_BASIC_AUTH_TOKEN;
+
   static {
     final String token = CLIENT_ID + ":" + CLIENT_SECRET;
     CLIENT_BASIC_AUTH_TOKEN = Base64.getEncoder().encodeToString(token.getBytes());

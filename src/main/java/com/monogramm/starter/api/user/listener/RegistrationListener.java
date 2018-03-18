@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
  * @see OnRegistrationCompleteEvent
  * 
  * @see <a href="http://www.baeldung.com/registration-verify-user-by-email">Registration – Activate
- *      a New Account by Email</a>
+ *      a New User by Email</a>
  * 
  * @author madmath03
  */

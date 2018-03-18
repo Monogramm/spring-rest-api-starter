@@ -35,8 +35,8 @@ public class PermissionTest extends AbstractGenericEntityTest<Permission> {
   }
 
   @Override
-  public void testToJSON() throws JsonProcessingException {
-    super.testToJSON();
+  public void testToJson() throws JsonProcessingException {
+    super.testToJson();
 
     final Role testRole = new Role(this.getClass().toString());
     this.getEntity().addRole(testRole);

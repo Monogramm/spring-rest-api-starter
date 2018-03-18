@@ -85,7 +85,7 @@ public class TypeBridgeTest extends AbstractGenericBridgeTest<Type, TypeDto, Typ
    * Test method for {@link TypeBridge#toEntity(com.monogramm.starter.dto.type.TypeDto)}.
    */
   @Test
-  public void testToEntityTypeDTO() {
+  public void testToEntityTypeDto() {
     final TypeDto dto = this.getBridge().buildDto();
 
     final String name = "TEST";
@@ -100,7 +100,7 @@ public class TypeBridgeTest extends AbstractGenericBridgeTest<Type, TypeDto, Typ
    * Test method for {@link TypeBridge#toDto(com.monogramm.starter.persistence.type.entity.Type)}.
    */
   @Test
-  public void testToDTOType() {
+  public void testToDtoType() {
     final String name = "TEST";
     final Type entity = this.getBridge().buildEntity();
     entity.setName(name);

@@ -120,7 +120,7 @@ public class IVerificationTokenRepositoryIT
    * Test method for {@link IVerificationTokenRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDString() {
+  public void testExistsUuidString() {
     final boolean expected = true;
     final VerificationToken model = this.buildTestEntity();
     final List<VerificationToken> models = new ArrayList<>(1);
@@ -136,7 +136,7 @@ public class IVerificationTokenRepositoryIT
    * Test method for {@link IVerificationTokenRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDStringNotFound() {
+  public void testExistsUuidStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, TOKEN);

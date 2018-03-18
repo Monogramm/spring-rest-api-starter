@@ -22,6 +22,7 @@ public class CustomPasswordEncoderTest {
   private static final String PASSWORD_STR = "password";
   private static final char[] PASSWORD = PASSWORD_STR.toCharArray();
   private static final String HASHED_PASSWORD;
+
   static {
     HASHED_PASSWORD = Passwords.getHash(PASSWORD.clone());
   }

@@ -144,8 +144,8 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
     // FIXME why is there a gap ??
     assertTrue(Math.abs(model.getCreatedAt().getTime() - actual.getCreatedAt().getTime()) < 1_000L);
     // FIXME How to properly test this behavior?!
-//    assertNotNull(actual.getModifiedAt());
-//    assertTrue(actual.getCreatedAt().before(actual.getModifiedAt()));
+    // assertNotNull(actual.getModifiedAt());
+    // assertTrue(actual.getCreatedAt().before(actual.getModifiedAt()));
   }
 
   /**
@@ -185,7 +185,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
    * Test method for {@link GenericRepository#exists(java.util.UUID)}.
    */
   @Test
-  public void testExistsUUID() {
+  public void testExistsUuid() {
     final boolean expected = true;
     final T model = this.buildTestEntity();
     final List<T> models = new ArrayList<>(1);
@@ -201,7 +201,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
    * Test method for {@link GenericRepository#exists(java.util.UUID)}.
    */
   @Test
-  public void testExistsUUIDNotFound() {
+  public void testExistsUuidNotFound() {
     final boolean expected = false;
 
     final boolean actual = repository.exists(RANDOM_ID);

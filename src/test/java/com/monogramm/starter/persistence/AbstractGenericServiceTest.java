@@ -129,7 +129,7 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
    * Test method for {@link AbstractGenericService#createEntityNotFoundException(java.util.UUID)}.
    */
   @Test
-  public void testCreateEntityNotFoundExceptionUUID() {
+  public void testCreateEntityNotFoundExceptionUuid() {
     assertNotNull(service.createEntityNotFoundException(UUID.randomUUID()));
   }
 

@@ -44,14 +44,14 @@ public class RoleServiceTest extends AbstractGenericServiceTest<Role, RoleDto, R
 
   private static final String DISPLAYNAME = "Foo";
 
-  private IPermissionRepository permissionDAO;
+  private IPermissionRepository permissionDao;
 
   /**
    * @throws java.lang.Exception if the test setup crashes.
    */
   @Before
   public void setUp() throws Exception {
-    permissionDAO = mock(IPermissionRepository.class);
+    permissionDao = mock(IPermissionRepository.class);
     super.setUp();
   }
 
@@ -61,12 +61,12 @@ public class RoleServiceTest extends AbstractGenericServiceTest<Role, RoleDto, R
   @After
   public void tearDown() throws Exception {
     super.tearDown();
-    Mockito.reset(permissionDAO);
+    Mockito.reset(permissionDao);
   }
 
   @Override
   protected RoleService buildTestService() {
-    return new RoleService(getMockRepository(), getMockUserRepository(), permissionDAO);
+    return new RoleService(getMockRepository(), getMockUserRepository(), permissionDao);
   }
 
   @Override
@@ -177,7 +177,7 @@ public class RoleServiceTest extends AbstractGenericServiceTest<Role, RoleDto, R
   @Test
   public void testGetPermissionRepository() {
     assertNotNull(getService().getPermissionRepository());
-    assertEquals(permissionDAO, getService().getPermissionRepository());
+    assertEquals(permissionDao, getService().getPermissionRepository());
   }
 
   /**

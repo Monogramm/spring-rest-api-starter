@@ -325,7 +325,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
    * Test method for {@link IUserRepository#exists(UUID, String, String)}.
    */
   @Test
-  public void testExistsUUIDStringString() {
+  public void testExistsUuidStringString() {
     final boolean expected = true;
     final User model = User.builder(USERNAME, EMAIL).build();
     final List<User> models = new ArrayList<>(1);
@@ -342,7 +342,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
    * Test method for {@link IUserRepository#exists(UUID, String, String)}.
    */
   @Test
-  public void testExistsUUIDStringStringNotFound() {
+  public void testExistsUuidStringStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, USERNAME, EMAIL);

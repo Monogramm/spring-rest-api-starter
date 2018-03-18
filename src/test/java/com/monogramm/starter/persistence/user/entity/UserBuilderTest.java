@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import com.github.madmath03.password.Passwords;
 import com.monogramm.starter.persistence.AbstractGenericEntityBuilderTest;
 import com.monogramm.starter.persistence.role.entity.Role;
-import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.entity.User.UserBuilder;
 
 import org.junit.Test;

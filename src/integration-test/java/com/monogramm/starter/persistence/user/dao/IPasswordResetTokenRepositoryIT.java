@@ -123,7 +123,7 @@ public class IPasswordResetTokenRepositoryIT
    * Test method for {@link IPasswordResetTokenRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDString() {
+  public void testExistsUuidString() {
     final boolean expected = true;
     final List<PasswordResetToken> models = new ArrayList<>(1);
     final PasswordResetToken model = this.buildTestEntity();
@@ -139,7 +139,7 @@ public class IPasswordResetTokenRepositoryIT
    * Test method for {@link IPasswordResetTokenRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDStringNotFound() {
+  public void testExistsUuidStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, TOKEN);

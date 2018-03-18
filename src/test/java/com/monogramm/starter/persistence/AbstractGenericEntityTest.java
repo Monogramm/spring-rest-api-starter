@@ -328,7 +328,7 @@ public abstract class AbstractGenericEntityTest<T extends AbstractGenericEntity>
    * Test method for {@link AbstractGenericEntity#toJson()}.
    */
   @Test
-  public void testToJSON() throws JsonProcessingException {
+  public void testToJson() throws JsonProcessingException {
     assertNotNull(entity.toJson());
     LOG.debug(entity.toJson());
 

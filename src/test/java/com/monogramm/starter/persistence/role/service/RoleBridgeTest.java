@@ -149,7 +149,7 @@ public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, Rol
    * Test method for {@link RoleBridge#toEntity(com.monogramm.starter.dto.role.RoleDto)}.
    */
   @Test
-  public void testToEntityRoleDTONoPermissionRepository() {
+  public void testToEntityRoleDtoNoPermissionRepository() {
     final RoleDto dto = this.getBridge().buildDto();
     this.getBridge().setPermissionRepository(null);
     Role entity = this.getBridge().toEntity(dto);
@@ -234,7 +234,7 @@ public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, Rol
    * Test method for {@link RoleBridge#toDto(com.monogramm.starter.persistence.role.entity.Role)}.
    */
   @Test
-  public void testToDTORole() {
+  public void testToDtoRole() {
     final String name = "TEST";
     final Role entity = this.getBridge().buildEntity();
 

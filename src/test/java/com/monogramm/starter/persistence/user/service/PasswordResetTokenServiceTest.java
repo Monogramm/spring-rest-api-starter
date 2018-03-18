@@ -147,7 +147,7 @@ public class PasswordResetTokenServiceTest extends
    * @throws PasswordResetTokenNotFoundException if the passwordResetToken is not found.
    */
   @Test
-  public void testFindByUserAndTokenUUIDString() {
+  public void testFindByUserAndTokenUuidString() {
     final PasswordResetToken model = new PasswordResetToken(TOKEN, DUMMY_EXPIRY_DATE);
     model.setId(ID);
     model.setUser(USER);
@@ -185,8 +185,7 @@ public class PasswordResetTokenServiceTest extends
    * @throws PasswordResetTokenNotFoundException if the passwordResetToken is not found.
    */
   @Test(expected = PasswordResetTokenNotFoundException.class)
-  public void testFindByUserAndTokenPasswordResetTokenNotFoundException()
-      {
+  public void testFindByUserAndTokenPasswordResetTokenNotFoundException() {
     when(passwordResetTokenDao.findByUserAndCode(USER_ID, TOKEN))
         .thenThrow(new PasswordResetTokenNotFoundException());
 
@@ -292,8 +291,7 @@ public class PasswordResetTokenServiceTest extends
    * @throws PasswordResetTokenNotFoundException if the passwordResetToken is not found.
    */
   @Test(expected = PasswordResetTokenNotFoundException.class)
-  public void testUpdatePasswordResetTokenNotFoundException()
-      {
+  public void testUpdatePasswordResetTokenNotFoundException() {
     final PasswordResetToken model = new PasswordResetToken(TOKEN, DUMMY_EXPIRY_DATE);
     model.setId(ID);
 
@@ -335,8 +333,7 @@ public class PasswordResetTokenServiceTest extends
    * @throws PasswordResetTokenNotFoundException if the passwordResetToken is not found.
    */
   @Test(expected = PasswordResetTokenNotFoundException.class)
-  public void testDeletePasswordResetTokenNotFoundException()
-      {
+  public void testDeletePasswordResetTokenNotFoundException() {
     when(passwordResetTokenDao.deleteById(ID)).thenThrow(new PasswordResetTokenNotFoundException());
 
     service.deleteById(ID);

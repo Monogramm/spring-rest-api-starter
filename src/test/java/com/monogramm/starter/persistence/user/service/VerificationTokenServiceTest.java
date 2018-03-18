@@ -125,7 +125,7 @@ public class VerificationTokenServiceTest
    * @throws VerificationTokenNotFoundException if the verificationToken is not found.
    */
   @Test
-  public void testFindByUserAndTokenUUID() {
+  public void testFindByUserAndTokenUuid() {
     final VerificationToken model = new VerificationToken(TOKEN, DUMMY_EXPIRY_DATE);
     model.setId(ID);
     model.setUser(USER);
@@ -146,7 +146,7 @@ public class VerificationTokenServiceTest
    * @throws VerificationTokenNotFoundException if the verificationToken is not found.
    */
   @Test
-  public void testFindByUserAndTokenUUIDNotFound() {
+  public void testFindByUserAndTokenUuidNotFound() {
     when(verificationTokenDao.findByUserAndCode(USER_ID, TOKEN)).thenReturn(null);
 
     final VerificationToken actual = service.findByUserAndCode(USER_ID, TOKEN);

@@ -24,10 +24,10 @@ public class PasswordConfirmationDtoTest {
   }
 
   /**
-   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDTO()}.
+   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDto()}.
    */
   @Test
-  public void testPasswordConfirmationDTO() {
+  public void testPasswordConfirmationDto() {
     final PasswordConfirmationDto passwordConfirmationDto = this.buildTestDto();
 
     assertNull(passwordConfirmationDto.getPassword());
@@ -35,10 +35,10 @@ public class PasswordConfirmationDtoTest {
   }
 
   /**
-   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDTO(char[], char[])}.
+   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDto(char[], char[])}.
    */
   @Test
-  public void testPasswordConfirmationDTOCharArrayCharArray() {
+  public void testPasswordConfirmationDtoCharArrayCharArray() {
     final PasswordConfirmationDto passwordConfirmationDto =
         new PasswordConfirmationDto(PASSWORD, DROWSSAP);
 
@@ -49,26 +49,26 @@ public class PasswordConfirmationDtoTest {
   }
 
   /**
-   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDTO(char[], char[])}.
+   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDto(char[], char[])}.
    */
   @Test(expected = NullPointerException.class)
-  public void testPasswordConfirmationDTONullCharArray() {
+  public void testPasswordConfirmationDtoNullCharArray() {
     new PasswordConfirmationDto(null, DROWSSAP);
   }
 
   /**
-   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDTO(char[], char[])}.
+   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDto(char[], char[])}.
    */
   @Test(expected = NullPointerException.class)
-  public void testPasswordConfirmationDTOCharArrayNull() {
+  public void testPasswordConfirmationDtoCharArrayNull() {
     new PasswordConfirmationDto(PASSWORD, null);
   }
 
   /**
-   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDTO(char[], char[])}.
+   * Test method for {@link PasswordConfirmationDto#PasswordConfirmationDto(char[], char[])}.
    */
   @Test(expected = NullPointerException.class)
-  public void testPasswordConfirmationDTONullNull() {
+  public void testPasswordConfirmationDtoNullNull() {
     new PasswordConfirmationDto(null, null);
   }
 
