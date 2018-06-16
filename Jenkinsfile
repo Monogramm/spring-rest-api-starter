@@ -39,7 +39,9 @@ stages {
                 sh 'mvn package -Dmaven.test.skip=true' 
             }
             post {
-                archiveArtifacts '*target/*.jar'
+                success {
+                    archiveArtifacts '*target/*.jar'
+                }
             }
         }
 
