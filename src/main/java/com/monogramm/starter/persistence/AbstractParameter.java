@@ -32,7 +32,7 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
   /**
    * Parameter name length.
    */
-  public static final int MAX_LENGTH_DESCRIPTION = 32;
+  public static final int MAX_LENGTH_DESCRIPTION = 512;
 
   /**
    * Parameter type length.
