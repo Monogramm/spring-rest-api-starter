@@ -59,6 +59,9 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
    */
   @Autowired
   public void globalUserDetails(final AuthenticationManagerBuilder auth) throws Exception {
+    // TODO Add a LDAP authentication if configuration provided
+    // https://spring.io/guides/gs/authenticating-ldap/
+
     final StringBuilder usersByUsernameQuery = new StringBuilder("select email, password, enabled ")
         .append("from user_account ").append("where email = ?");
 
@@ -89,8 +92,7 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(final HttpSecurity http) throws Exception {
     http.addFilterBefore(jsonFilter, ChannelProcessingFilter.class).csrf().and().httpBasic()
-        .disable().authorizeRequests().anyRequest().authenticated().and().formLogin()
-        .permitAll();
+        .disable().authorizeRequests().anyRequest().authenticated().and().formLogin().permitAll();
   }
 
   @Override

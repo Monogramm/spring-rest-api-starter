@@ -68,6 +68,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   private WebRequest request;
 
   /**
+   * Setup test case.
+   * 
    * @throws java.lang.Exception if the test setup crashes.
    */
   @Before
@@ -88,6 +90,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
+   * Tear down test case.
+   * 
    * @throws java.lang.Exception if the test cleanup crashes.
    */
   @After
@@ -150,7 +154,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   /**
    * Test method for
-   * {@link UserController#UserController(com.monogramm.starter.persistence.user.getMockService().IUserService)}.
+   * {@link UserController#UserController(IUserService, ApplicationEventPublisher, IVerificationTokenService, IPasswordResetTokenService)}.
    */
   @Test
   public void testUserController() {
@@ -431,8 +435,6 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   /**
    * Test method for {@link UserController#resetPassword(java.lang.String)}.
-   * 
-   * @throws PasswordResetTokenNotFoundException
    */
   @Test
   public void testResetPasswordPasswordResetDtoTokenNotFoundException() {
