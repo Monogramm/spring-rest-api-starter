@@ -92,12 +92,12 @@ public class CustomTokenEnhancer implements TokenEnhancer {
       for (GrantedAuthority authority : authorities) {
         final String auth = authority.getAuthority();
 
-        if (auth == null || auth.isEmpty()) {
-          continue;
-        } else if (auth.startsWith(OAuth2WebSecurityConfig.ROLE_PREFIX)) {
-          roleList.add(auth);
-        } else {
-          authList.add(auth);
+        if (auth != null && !auth.isEmpty()) {
+          if (auth.startsWith(OAuth2WebSecurityConfig.ROLE_PREFIX)) {
+            roleList.add(auth);
+          } else {
+            authList.add(auth);
+          }
         }
       }
 
