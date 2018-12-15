@@ -34,7 +34,7 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "roles";
 
   /**
    * The Authority data type of this controller.

@@ -38,7 +38,7 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "parameters";
 
   /**
    * The Authority data type of this controller.

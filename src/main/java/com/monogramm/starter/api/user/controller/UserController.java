@@ -63,7 +63,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "users";
   /**
    * The request path for registration.
    */
@@ -536,7 +536,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   /**
-   * Activate a user account
+   * Activate a user account.
    * 
    * <p>
    * Change the active status of a user account.
@@ -833,7 +833,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   /**
-   * Verify a user account
+   * Verify a user account.
    * 
    * <p>
    * Mark a user account as verified.
