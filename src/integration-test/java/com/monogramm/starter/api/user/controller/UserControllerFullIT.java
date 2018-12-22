@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.github.madmath03.password.Passwords;
 import com.monogramm.Application;
+import com.monogramm.starter.SmtpServerRule;
 import com.monogramm.starter.api.AbstractControllerFullIT;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
@@ -24,13 +25,18 @@ import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService
 import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +97,9 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
   @Autowired
   private IPasswordResetTokenService passwordResetTokenService;
+
+  @Rule
+  public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
   @Before
   public void setUp() throws URISyntaxException {
@@ -452,11 +461,14 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
    * and {@link UserController#resetPassword(com.monogramm.starter.dto.user.PasswordResetDto)}.
    * 
    * @throws URISyntaxException if the test crashes.
+   * @throws MessagingException for other mail related failures
+   * @throws IOException this is typically thrown by the DataHandler. Refer to the documentation for
+   *         javax.activation.DataHandler for more details.
    * @throws PasswordResetTokenNotFoundException if the password reset token is not found.
    */
   @Test
   public void testResetPasswordNoAuthorization()
-      throws URISyntaxException, PasswordResetTokenNotFoundException {
+      throws URISyntaxException, IOException, MessagingException {
     final HttpHeaders headers = getHeaders();
 
     final String url = this.getUrl(CONTROLLER_PATH, "/reset_password");
@@ -478,7 +490,14 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     assertEquals(1, tokens.size());
     assertNotNull(tokens.get(0));
     assertNotNull(tokens.get(0).getCode());
-    final String tokenCode = tokens.get(0).getCode();
+    final PasswordResetToken token = tokens.get(0);
+    final String tokenCode = token.getCode();
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(tokenCode));
 
     final char[] password = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
     final PasswordResetDto dto =
@@ -491,9 +510,9 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     assertEquals(HttpStatus.NO_CONTENT, resetResponseEntity.getStatusCode());
 
     // FIXME This test should be rollbacked
-    for (final PasswordResetToken token : tokens) {
-      if (this.testEntity.getEmail().equals(token.getUser().getEmail())) {
-        passwordResetTokenService.deleteById(token.getId());
+    for (final PasswordResetToken tmpToken : tokens) {
+      if (this.testEntity.getEmail().equals(tmpToken.getUser().getEmail())) {
+        passwordResetTokenService.deleteById(tmpToken.getId());
       }
     }
   }
@@ -645,6 +664,10 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     final Void responseBody = responseEntity.getBody();
     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     assertNull(responseBody);
+
+    // Check email received
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
 
     final User registeredUser = getUserService().findByUsernameOrEmail(username, email);
     assertNotNull(registeredUser);

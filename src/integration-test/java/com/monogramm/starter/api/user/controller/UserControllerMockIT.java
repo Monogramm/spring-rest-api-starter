@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.github.madmath03.password.Passwords;
 import com.monogramm.Application;
+import com.monogramm.starter.SmtpServerRule;
 import com.monogramm.starter.api.AbstractControllerIT;
 import com.monogramm.starter.api.AbstractControllerMockIT;
 import com.monogramm.starter.config.data.GenericOperation;
@@ -37,10 +38,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +119,9 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
 
   @Autowired
   private IPasswordResetTokenService passwordResetTokenService;
+
+  @Rule
+  public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
   @Before
   public void setUp() {
@@ -351,8 +357,15 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     assertNotNull(tokens.get(0));
     assertNotNull(tokens.get(0).getCode());
     final PasswordResetToken token = tokens.get(0);
+    final String tokenCode = token.getCode();
     final Date initialExpiration = token.getExpiryDate();
     assertNotNull(initialExpiration);
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(tokenCode));
 
     final char[] password = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
     final PasswordResetDto dto =
@@ -442,6 +455,7 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
         .perform(post(REGISTER_PATH).contentType(MediaType.APPLICATION_JSON_UTF8).content(userJson))
         .andExpect(status().isNoContent()).andExpect(content().bytes(new byte[] {}));
 
+    // Check verification token generated
     final List<VerificationToken> tokens = verificationService.findAll();
     assertNotNull(tokens);
     assertEquals(1, tokens.size());
@@ -450,6 +464,12 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     final VerificationToken token = tokens.get(0);
     final Date initialExpiration = token.getExpiryDate();
     assertNotNull(initialExpiration);
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(token.getCode()));
 
     // Register again should generate conflict
     getMockMvc()
@@ -498,6 +518,7 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
         .headers(getHeaders(getMockToken())).content(this.testEntity.getEmail()))
         .andExpect(status().isNoContent());
 
+    // Check verification token generated
     tokens = verificationService.findAll();
     assertNotNull(tokens);
     assertEquals(1, tokens.size());
@@ -506,6 +527,12 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     final VerificationToken token = tokens.get(0);
     final Date initialExpiration = token.getExpiryDate();
     assertNotNull(initialExpiration);
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(token.getCode()));
 
     // Verifying on random UUID should not find any user
     getMockMvc().perform(put(VERIFY_PATH + "/" + randomId).headers(getHeaders(getMockToken()))
