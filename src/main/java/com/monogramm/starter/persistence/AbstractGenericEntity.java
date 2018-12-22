@@ -47,19 +47,61 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   private static final long serialVersionUID = 1L;
 
+
+  /**
+   * Entity <em>id</em> property.
+   */
+  public static final String ID_PROPERTY = "id";
+  /**
+   * Entity <em>id</em> length.
+   */
+  public static final int ID_MAX_LENGTH = 16;
+
+
+  /**
+   * Entity <em>created at</em> property.
+   */
+  public static final String CREATED_AT_PROPERTY = "created_at";
+
+
+  /**
+   * Entity <em>created by</em> property.
+   */
+  public static final String CREATED_BY_PROPERTY = "created_by";
+
+
+  /**
+   * Entity <em>modified at</em> property.
+   */
+  public static final String MODIFIED_AT_PROPERTY = "modified_at";
+
+
+  /**
+   * Entity <em>modified by</em> property.
+   */
+  public static final String MODIFIED_BY_PROPERTY = "modified_by";
+
+
+  /**
+   * Entity <em>owner</em> property.
+   */
+  public static final String OWNER_PROPERTY = "owner";
+
+
   /**
    * The Universally Unique Identifier (primary key) of this record.
    */
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(name = "id", length = 16, nullable = false, updatable = false)
+  @Column(name = ID_PROPERTY, length = ID_MAX_LENGTH, nullable = false, updatable = false)
   private UUID id;
 
   /**
    * An auto-populating date/time stamp of when the record was created.
    */
-  @Column(name = "created_at", columnDefinition = "TIMESTAMP", nullable = false, updatable = false)
+  @Column(name = CREATED_AT_PROPERTY, columnDefinition = "TIMESTAMP", nullable = false,
+      updatable = false)
   private Date createdAt;
 
   /**
@@ -67,13 +109,14 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "created_by", nullable = true)
+  @JoinColumn(name = CREATED_BY_PROPERTY, nullable = true)
   private User createdBy = null;
 
   /**
    * An auto-populating date/time stamp of when the record was last modified.
    */
-  @Column(name = "modified_at", columnDefinition = "TIMESTAMP", nullable = true, insertable = false)
+  @Column(name = MODIFIED_AT_PROPERTY, columnDefinition = "TIMESTAMP", nullable = true,
+      insertable = false)
   private Date modifiedAt = null;
 
   /**
@@ -81,7 +124,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "modified_by", nullable = true)
+  @JoinColumn(name = MODIFIED_BY_PROPERTY, nullable = true)
   private User modifiedBy = null;
 
   /**
@@ -89,7 +132,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @JsonIdentityReference(alwaysAsId = true)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner", nullable = true)
+  @JoinColumn(name = OWNER_PROPERTY, nullable = true)
   private User owner = null;
 
 

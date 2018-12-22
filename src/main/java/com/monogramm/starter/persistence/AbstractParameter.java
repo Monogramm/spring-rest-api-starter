@@ -24,49 +24,70 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    */
   private static final long serialVersionUID = 984519142288845529L;
 
+
+  /**
+   * Parameter name property.
+   */
+  public static final String NAME_PROPERTY = "name";
   /**
    * Parameter name length.
    */
   public static final int MAX_LENGTH_NAME = 32;
 
+
   /**
-   * Parameter name length.
+   * Parameter description property.
+   */
+  public static final String DESCRIPTION_PROPERTY = "description";
+  /**
+   * Parameter description length.
    */
   public static final int MAX_LENGTH_DESCRIPTION = 512;
 
+
+  /**
+   * Parameter type property.
+   */
+  public static final String TYPE_PROPERTY = "type";
   /**
    * Parameter type length.
    */
   public static final int MAX_LENGTH_TYPE = 255;
 
+
+  /**
+   * Parameter value property.
+   */
+  public static final String VALUE_PROPERTY = "value";
   /**
    * Parameter value length.
    */
   public static final int MAX_LENGTH_VALUE = 1024;
 
+
   /**
    * The parameter name.
    */
-  @Column(name = "name", unique = true, nullable = false, length = MAX_LENGTH_NAME)
+  @Column(name = NAME_PROPERTY, unique = true, nullable = false, length = MAX_LENGTH_NAME)
   private String name;
 
   /**
    * The parameter description.
    */
-  @Column(name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
+  @Column(name = DESCRIPTION_PROPERTY, nullable = true, length = MAX_LENGTH_DESCRIPTION)
   private String description;
 
   /**
    * The parameter type.
    */
-  @Column(name = "type", nullable = false, length = MAX_LENGTH_TYPE)
+  @Column(name = TYPE_PROPERTY, nullable = false, length = MAX_LENGTH_TYPE)
   @Enumerated(EnumType.STRING)
   private ParameterType type = ParameterType.ANY;
 
   /**
    * The parameter value.
    */
-  @Column(name = "value", nullable = true, length = MAX_LENGTH_VALUE)
+  @Column(name = VALUE_PROPERTY, nullable = true, length = MAX_LENGTH_VALUE)
   private String value;
 
   /**
