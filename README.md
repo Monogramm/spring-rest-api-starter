@@ -1,5 +1,9 @@
 # README #
 
+[uri_license]: http://www.gnu.org/licenses/agpl.html
+[uri_license_image]: https://img.shields.io/badge/License-AGPL%20v3-blue.svg
+
+[![License: AGPL v3][uri_license_image]][uri_license]
 [![Build
 Status](https://secure.travis-ci.org/Monogramm/spring-rest-api-starter.png)](https://travis-ci.org/Monogramm/spring-rest-api-starter)
 [![codecov](https://codecov.io/gh/Monogramm/spring-rest-api-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/Monogramm/spring-rest-api-starter)
@@ -39,6 +43,14 @@ You can now access your API at `http://localhost:8080/spring-rest-api-starter/ap
 Be careful as the IT will startup the server and test the actual functions. This means that all application properties must be valid for integration, even mail ones (not mocked).
 
 The IT use there own [application.properties](src/integration-test/resources/application.properties) which defaults to a separate database. Make sure to edit the default parameters to your environment.
+
+### Documentation
+
+It is possible to generate documentation using JavaDoc
+* `mvn site`
+
+Also, the application uses Swagger to document the API.
+When running the backend API, go to  `http://localhost:8080/spring-rest-api-starter/api/v2/api-docs`
 
 ### Contribution guidelines ###
 
