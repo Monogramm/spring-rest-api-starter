@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-public class ITApplication {
+public class ApplicationIT {
 
   @Test
   public void testContextLoads() throws Exception {
