@@ -77,7 +77,7 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "permissions";
 
   private static final String DISPLAYNAME = "Foo";
 

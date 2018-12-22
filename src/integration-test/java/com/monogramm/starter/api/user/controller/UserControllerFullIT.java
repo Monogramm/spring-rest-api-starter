@@ -72,7 +72,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "users";
 
   private static final String DUMMY_USERNAME = "Foo";
   private static final String DUMMY_EMAIL = "foo@email.com";

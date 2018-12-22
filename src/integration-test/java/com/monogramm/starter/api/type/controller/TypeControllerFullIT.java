@@ -68,7 +68,7 @@ public class TypeControllerFullIT extends AbstractControllerFullIT {
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "types";
 
   private static final String DISPLAYNAME = "Foo";
 

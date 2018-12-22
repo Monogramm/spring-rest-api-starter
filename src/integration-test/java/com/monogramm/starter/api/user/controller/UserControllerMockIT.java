@@ -81,7 +81,7 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "users";
 
   /**
    * The request path for registration.

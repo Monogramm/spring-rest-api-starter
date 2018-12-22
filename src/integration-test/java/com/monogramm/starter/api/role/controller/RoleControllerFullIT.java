@@ -59,7 +59,7 @@ public class RoleControllerFullIT extends AbstractControllerFullIT {
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "roles";
 
   private static final String DISPLAYNAME = "Foo";
 

@@ -82,7 +82,7 @@ public class ParameterControllerMockIT extends AbstractControllerMockIT {
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = '/' + "parameters";
 
   protected static final String DUMMY_NAME = "Foo";
   protected static final Object DUMMY_VALUE = 42;
