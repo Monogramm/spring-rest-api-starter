@@ -443,6 +443,19 @@ public class OAuthControllerFullIT extends AbstractControllerFullIT {
   }
 
   @Test
+  public void testRevokeSelfToken() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(TOKEN_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<String> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, String.class);
+
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+  }
+
+  @Test
   public void testRevokeToken() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
