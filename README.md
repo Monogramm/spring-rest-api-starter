@@ -1,9 +1,6 @@
 # README #
 
-[uri_license]: http://www.gnu.org/licenses/agpl.html
-[uri_license_image]: https://img.shields.io/badge/License-AGPL%20v3-blue.svg
-
-[![License: AGPL v3][uri_license_image]][uri_license]
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](http://www.gnu.org/licenses/agpl.html)
 [![Build
 Status](https://secure.travis-ci.org/Monogramm/spring-rest-api-starter.png)](https://travis-ci.org/Monogramm/spring-rest-api-starter)
 [![codecov](https://codecov.io/gh/Monogramm/spring-rest-api-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/Monogramm/spring-rest-api-starter)
