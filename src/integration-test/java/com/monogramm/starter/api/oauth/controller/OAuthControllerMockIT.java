@@ -2,6 +2,8 @@ package com.monogramm.starter.api.oauth.controller;
 
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +52,11 @@ import org.springframework.util.MultiValueMap;
 @AutoConfigureMockMvc
 @Transactional
 public class OAuthControllerMockIT extends AbstractControllerMockIT {
+
+  /**
+   * The request base path of this tested controller.
+   */
+  public static final String REVOKE_TOKEN_PATH = OAuthController.REVOKE_TOKEN_PATH;
 
   @Before
   public void setUp() {
@@ -162,7 +169,7 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
         .andExpect(jsonPath("$.principal_id", equalToIgnoringCase(model.getId().toString())))
         .andExpect(jsonPath("$.principal_name", equalToIgnoringCase(model.getUsername())))
         .andExpect(jsonPath("$.principal_email", equalToIgnoringCase(model.getEmail())));
-    
+
     this.deleteUser(model);
   }
 
@@ -245,6 +252,51 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     // Request without a grant type should fail
     getMockTokenResponse(params).andExpect(status().isBadRequest()).andExpect(content()
         .json("{\"error\":\"invalid_request\",\"error_description\":\"Missing grant type\"}"));
+  }
+
+  /**
+   * Test method for
+   * {@link RevokeTokenEndpoint#revokeSelfToken(javax.servlet.http.HttpServletRequest)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testRevokeSelfToken() throws Exception {
+    final String token = getMockToken();
+
+    // Revoke self OAuth access token should work
+    getMockMvc().perform(delete(TOKEN_PATH).headers(getHeaders(token)))
+        .andExpect(status().is2xxSuccessful()).andExpect(content().json(token));
+  }
+
+  /**
+   * Test method for {@link OAuthController#revokeToken(String)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testRevokeToken() throws Exception {
+    final String token = getMockToken();
+
+    // Revoke OAuth access token should work
+    getMockMvc()
+        .perform(post(REVOKE_TOKEN_PATH + "/" + token).with(csrf()).headers(getHeaders(token)))
+        .andExpect(status().is2xxSuccessful()).andExpect(content().json(token));
+  }
+
+  /**
+   * Test method for {@link OAuthController#revokeToken(String)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testRevokeTokenNotExist() throws Exception {
+    final String token = getMockToken();
+
+    // Revoke OAuth refresh token should work
+    getMockMvc()
+        .perform(post(REVOKE_TOKEN_PATH + "/" + "dummy").with(csrf()).headers(getHeaders(token)))
+        .andExpect(status().is2xxSuccessful()).andExpect(content().json("dummy"));
   }
 
 }
