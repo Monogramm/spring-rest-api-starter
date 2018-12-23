@@ -524,11 +524,11 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     }
 
     if (user == null) {
-      LOG.warn(" ");
-      LOG.warn("User name: " + username);
-      LOG.warn("User email: " + email);
-      LOG.warn("User password: " + Arrays.toString(password));
-      LOG.warn(" ");
+      LOG.info(" ");
+      LOG.info("User name: " + username);
+      LOG.info("User email: " + email);
+      LOG.info("User password: " + Arrays.toString(password));
+      LOG.info(" ");
       user = User.builder(username, email).password(password).role(userRole).build();
 
       userService.add(user);
