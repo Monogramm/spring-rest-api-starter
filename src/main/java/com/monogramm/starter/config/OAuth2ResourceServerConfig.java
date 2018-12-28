@@ -6,6 +6,7 @@ package com.monogramm.starter.config;
 
 import com.monogramm.starter.api.oauth.controller.OAuthController;
 import com.monogramm.starter.api.user.controller.UserController;
+import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @Configuration
 @EnableResourceServer
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {
+
   @Override
   public void configure(ResourceServerSecurityConfigurer config) {
     config.tokenServices(tokenServices());
@@ -61,6 +63,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     // TODO Use an asymmetric key: http://www.baeldung.com/spring-security-oauth-jwt#asymmetric
     converter.setSigningKey("123");
+    converter.setAccessTokenConverter(new JwtConverter());
 
     return converter;
   }
@@ -73,10 +76,10 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
   @Bean
   @Primary
   public DefaultTokenServices tokenServices() {
-    final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+    final DefaultTokenServices tokenServices = new DefaultTokenServices();
 
-    defaultTokenServices.setTokenStore(tokenStore());
+    tokenServices.setTokenStore(tokenStore());
 
-    return defaultTokenServices;
+    return tokenServices;
   }
 }

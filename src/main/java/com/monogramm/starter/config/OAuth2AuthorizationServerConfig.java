@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.config;
 
+import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 import com.monogramm.starter.config.component.CustomPasswordEncoder;
 import com.monogramm.starter.config.component.CustomTokenEnhancer;
 import com.monogramm.starter.persistence.user.service.IUserService;
@@ -82,12 +83,12 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
   @Bean
   @Primary
   public DefaultTokenServices tokenServices() {
-    final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+    final DefaultTokenServices tokenServices = new DefaultTokenServices();
 
-    defaultTokenServices.setTokenStore(tokenStore());
-    defaultTokenServices.setSupportRefreshToken(true);
+    tokenServices.setTokenStore(tokenStore());
+    tokenServices.setSupportRefreshToken(true);
 
-    return defaultTokenServices;
+    return tokenServices;
   }
 
   @Bean
@@ -106,6 +107,7 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
 
     // TODO Use an asymmetric key: http://www.baeldung.com/spring-security-oauth-jwt#asymmetric
     converter.setSigningKey("123");
+    converter.setAccessTokenConverter(new JwtConverter());
 
     return converter;
   }

@@ -25,7 +25,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 
 /**
- * WebSecurityConfig.
+ * Web Security Config.
  * 
  * @author madmath03
  */
@@ -71,7 +71,8 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .append("where u.email = ? ").append("and u.role = r.id");
 
     final StringBuilder groupAuthoritiesByUsername = new StringBuilder();
-    groupAuthoritiesByUsername.append("select r.id, r.name, p.name ")
+    groupAuthoritiesByUsername.append("select r.id, r.name, CONCAT('").append(AUTH_PREFIX)
+        .append("', UPPER(p.name)) ")
         .append("from role r, user_account u, permission p, role_permission rp ")
         .append("where u.email = ? ")
         .append("and p.id = rp.permission_id and r.id = rp.role_id and u.role = r.id");
@@ -99,11 +100,7 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
   public void configure(final WebSecurity web) throws Exception {
     final String securityDebug = env.getProperty("spring.security.debug");
 
-    if ("true".equalsIgnoreCase(securityDebug)) {
-      web.debug(true);
-    } else {
-      web.debug(false);
-    }
+    web.debug("true".equalsIgnoreCase(securityDebug));
   }
 
   // JDBC configuration
