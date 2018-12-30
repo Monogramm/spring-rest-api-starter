@@ -11,12 +11,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The OAuth API Controller.
+ * 
+ * @see RevokeTokenEndpoint
  * 
  * @author madmath03
  */
@@ -85,7 +86,7 @@ public final class OAuthController {
    * 
    * @param tokenId <em>Required Parameter:</em> the access token id.
    */
-  @RequestMapping(value = REVOKE_TOKEN_PATH, method = RequestMethod.POST)
+  @PostMapping(value = REVOKE_TOKEN_PATH)
   public String revokeToken(@PathVariable final String tokenId) {
     if (tokenServices.revokeToken(tokenId) && LOG.isInfoEnabled()) {
       final String msg = messageSource.getMessage("controller.oauth.token_revoked",
@@ -115,7 +116,7 @@ public final class OAuthController {
    * 
    * @param tokenId <em>Required Parameter:</em> the refresh token id.
    */
-  @RequestMapping(value = REVOKE_REFRESH_TOKEN_PATH + "/{tokenId:.*}", method = RequestMethod.POST)
+  @PostMapping(value = REVOKE_REFRESH_TOKEN_PATH + "/{tokenId:.*}")
   public String revokeRefreshToken(@PathVariable final String tokenId) {
     if (tokenServices instanceof JdbcTokenStore) {
       ((JdbcTokenStore) tokenServices).removeRefreshToken(tokenId);

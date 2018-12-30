@@ -62,11 +62,11 @@ public class PermissionControllerFullIT extends AbstractControllerFullIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Permissions";
+  public static final String TYPE = PermissionController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "permissions";
+  public static final String CONTROLLER_PATH = PermissionController.CONTROLLER_PATH;
 
   private static final String DISPLAYNAME = "Foo";
 

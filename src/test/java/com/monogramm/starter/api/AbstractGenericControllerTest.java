@@ -21,6 +21,8 @@ import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.GenericService;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +34,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -50,6 +55,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   private GenericService<T, D> mockService;
   private AbstractGenericController<T, D> controller;
   private AbstractGenericBridge<T, D> bridge;
+  private Authentication mockAuthentication;
 
   /**
    * @throws java.lang.Exception
@@ -72,6 +78,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
     this.bridge = this.buildTestBridge();
 
+    this.mockAuthentication = this.buildMockAuthentication();
+
     this.controller = this.buildTestController();
   }
 
@@ -88,6 +96,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   protected abstract AbstractGenericController<T, D> buildTestController();
 
   protected abstract AbstractGenericBridge<T, D> buildTestBridge();
+
+  protected abstract Authentication buildMockAuthentication();
 
   protected abstract T buildTestEntity();
 
@@ -113,6 +123,15 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
    */
   protected GenericService<T, D> getMockService() {
     return mockService;
+  }
+
+  /**
+   * Set the {@link #mockService}.
+   * 
+   * @param mockService the {@link #mockService} to set.
+   */
+  protected final void setService(GenericService<T, D> service) {
+    this.mockService = service;
   }
 
   /**
@@ -142,12 +161,11 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Set the {@link #mockService}.
-   * 
-   * @param mockService the {@link #mockService} to set.
+   * Test method for {@link AbstractGenericController#getAdminAuthorities()}.
    */
-  protected final void setService(GenericService<T, D> service) {
-    this.mockService = service;
+  @Test
+  public void testGetAdminAuthorities() {
+    assertNotNull(this.controller.getAdminAuthorities());
   }
 
   /**
@@ -283,7 +301,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#addData(AbstractGenericDto, UriComponentsBuilder)}.
+   * Test method for
+   * {@link AbstractGenericController#addData(AbstractGenericDto, UriComponentsBuilder)}.
    */
   @Test
   public void testAddData() {
@@ -313,7 +332,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#addData(AbstractGenericDto, UriComponentsBuilder)}.
+   * Test method for
+   * {@link AbstractGenericController#addData(AbstractGenericDto, UriComponentsBuilder)}.
    */
   @Test
   public void testAddDataAlreadyExists() {
@@ -344,12 +364,23 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.OK);
 
+    final String[] adminAuthorities = controller.getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : controller.getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.update(model)).thenReturn(model);
     when(mockService.toDto(model)).thenReturn(dto);
 
-    final ResponseEntity<D> actual = controller.updateData(model.getId().toString(), dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, model.getId().toString(), dto);
 
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).toEntity(dto);
     verify(mockService, times(1)).update(model);
     verify(mockService, times(1)).toDto(model);
@@ -365,16 +396,90 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
    * @throws EntityNotFoundException if the type entity to update is not found.
    */
   @Test
+  public void testUpdateDataNotAdmin() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+    final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.OK);
+    final UUID principalId = null;
+
+    when(mockAuthentication.getAuthorities()).thenReturn(Collections.emptyList());
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    when(mockService.toEntity(dto)).thenReturn(model);
+    when(mockService.updateByOwner(model, principalId)).thenReturn(model);
+    when(mockService.toDto(model)).thenReturn(dto);
+
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, model.getId().toString(), dto);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+    verify(mockService, times(1)).toEntity(dto);
+    verify(mockService, times(1)).updateByOwner(model, principalId);
+    verify(mockService, times(1)).toDto(model);
+    verifyNoMoreInteractions(mockService);
+
+    assertThat(actual, is(expectedResponse));
+    assertNotNull(actual.getBody());
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#updateData(String, AbstractGenericDto)}.
+   * 
+   * @throws EntityNotFoundException if the type entity to update is not found.
+   */
+  @Test
+  public void testUpdateDataNotAdminNotOwner() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+    final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    final UUID principalId = null;
+
+    when(mockAuthentication.getAuthorities()).thenReturn(Collections.emptyList());
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    when(mockService.toEntity(dto)).thenReturn(model);
+    when(mockService.updateByOwner(model, principalId)).thenReturn(null);
+
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, model.getId().toString(), dto);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+    verify(mockService, times(1)).toEntity(dto);
+    verify(mockService, times(1)).updateByOwner(model, principalId);
+    verifyNoMoreInteractions(mockService);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#updateData(String, AbstractGenericDto)}.
+   * 
+   * @throws EntityNotFoundException if the type entity to update is not found.
+   */
+  @Test
   public void testUpdateDataNotFound() {
     final T model = this.buildTestEntity();
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = controller.getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : controller.getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.update(model)).thenReturn(null);
 
-    final ResponseEntity<D> actual = controller.updateData(model.getId().toString(), dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, model.getId().toString(), dto);
 
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).toEntity(dto);
     verify(mockService, times(1)).update(model);
     verifyNoMoreInteractions(mockService);
@@ -393,11 +498,22 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = controller.getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : controller.getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.update(model)).thenThrow(this.buildTestEntityNotFound());
 
-    final ResponseEntity<D> actual = controller.updateData(model.getId().toString(), dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, model.getId().toString(), dto);
 
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).toEntity(dto);
     verify(mockService, times(1)).update(model);
     verifyNoMoreInteractions(mockService);
@@ -416,7 +532,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<D> actual = controller.updateData(RANDOM_ID.toString(), dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, RANDOM_ID.toString(), dto);
 
     verifyNoMoreInteractions(mockService);
 
@@ -435,7 +552,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<D> actual = controller.updateData(null, dto);
+    final ResponseEntity<D> actual = controller.updateData(mockAuthentication, null, dto);
 
     verifyNoMoreInteractions(mockService);
 
@@ -454,7 +571,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<D> actual = controller.updateData("this_is_not_a_uuid", dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, "this_is_not_a_uuid", dto);
 
     verifyNoMoreInteractions(mockService);
 
@@ -472,7 +590,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = null;
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<D> actual = controller.updateData(RANDOM_ID.toString(), dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, RANDOM_ID.toString(), dto);
 
     verifyNoMoreInteractions(mockService);
 
@@ -492,7 +611,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<D> actual = controller.updateData(RANDOM_ID.toString(), dto);
+    final ResponseEntity<D> actual =
+        controller.updateData(mockAuthentication, RANDOM_ID.toString(), dto);
 
     verifyNoMoreInteractions(mockService);
 
@@ -509,9 +629,46 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testDeleteData() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-    final ResponseEntity<Void> actual = controller.deleteData(RANDOM_ID.toString());
+    final String[] adminAuthorities = controller.getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : controller.getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
 
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+
+    final ResponseEntity<Void> actual =
+        controller.deleteData(mockAuthentication, RANDOM_ID.toString());
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).deleteById(RANDOM_ID);
+    verifyNoMoreInteractions(mockService);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#deleteData(java.lang.String)}.
+   * 
+   * @throws EntityNotFoundException if the type entity to delete is not found.
+   */
+  @Test
+  public void testDeleteDataNotAdmin() {
+    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    final UUID principalId = null;
+
+    when(mockAuthentication.getAuthorities()).thenReturn(Collections.emptyList());
+    when(mockAuthentication.getDetails()).thenReturn(null);
+
+    final ResponseEntity<Void> actual =
+        controller.deleteData(mockAuthentication, RANDOM_ID.toString());
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+    verify(mockService, times(1)).deleteByIdAndOwner(RANDOM_ID, principalId);
     verifyNoMoreInteractions(mockService);
 
     assertThat(actual, is(expectedResponse));
@@ -526,11 +683,49 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testDeleteDataNotFoundException() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = controller.getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : controller.getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     doThrow(this.buildTestEntityNotFound()).when(mockService).deleteById(RANDOM_ID);
 
-    final ResponseEntity<Void> actual = controller.deleteData(RANDOM_ID.toString());
+    final ResponseEntity<Void> actual =
+        controller.deleteData(mockAuthentication, RANDOM_ID.toString());
 
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).deleteById(RANDOM_ID);
+    verifyNoMoreInteractions(mockService);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#deleteData(java.lang.String)}.
+   * 
+   * @throws EntityNotFoundException if the type entity to delete is not found.
+   */
+  @Test
+  public void testDeleteDataNotAdminNotFoundException() {
+    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    final UUID principalId = null;
+
+    when(mockAuthentication.getAuthorities()).thenReturn(Collections.emptyList());
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    doThrow(this.buildTestEntityNotFound()).when(mockService).deleteByIdAndOwner(RANDOM_ID,
+        principalId);
+
+    final ResponseEntity<Void> actual =
+        controller.deleteData(mockAuthentication, RANDOM_ID.toString());
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+    verify(mockService, times(1)).deleteByIdAndOwner(RANDOM_ID, principalId);
     verifyNoMoreInteractions(mockService);
 
     assertThat(actual, is(expectedResponse));
@@ -543,7 +738,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testDeleteDataIdIllegal() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final ResponseEntity<Void> actual = controller.deleteData("this_is_not_a_UUID");
+    final ResponseEntity<Void> actual =
+        controller.deleteData(mockAuthentication, "this_is_not_a_UUID");
 
     verifyNoMoreInteractions(mockService);
 

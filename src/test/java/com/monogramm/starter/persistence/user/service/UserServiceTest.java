@@ -74,7 +74,7 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
 
   @Override
   protected UserService buildTestService() {
-    return new UserService(getMockRepository(), roleDao);
+    return new UserService(getMockRepository(), roleDao, getMockAuthenticationFacade());
   }
 
   @Override
@@ -175,7 +175,7 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
    */
   @Test(expected = IllegalArgumentException.class)
   public void testUserServiceIRoleRepositoryNull() {
-    new UserService(getMockRepository(), null);
+    new UserService(getMockRepository(), null, getMockAuthenticationFacade());
   }
 
   /**

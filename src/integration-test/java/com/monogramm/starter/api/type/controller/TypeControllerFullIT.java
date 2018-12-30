@@ -64,13 +64,13 @@ public class TypeControllerFullIT extends AbstractControllerFullIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Types";
+  public static final String TYPE = TypeController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "types";
+  public static final String CONTROLLER_PATH = TypeController.CONTROLLER_PATH;
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = TypeControllerFullIT.class.getSimpleName();
 
   @Autowired
   private ITypeService typeService;

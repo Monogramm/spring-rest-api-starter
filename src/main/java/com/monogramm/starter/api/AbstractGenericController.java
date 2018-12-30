@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.api;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.persistence.EntityNotFoundException;
@@ -19,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -44,12 +46,12 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    */
   private static final Logger LOG = LogManager.getLogger(AbstractGenericController.class);
 
-  private GenericService<T, D> service;
+  private final GenericService<T, D> service;
 
   /**
    * Create a {@link AbstractGenericController}.
    * 
-   * @param service the entity service
+   * @param service the entity service.
    */
   public AbstractGenericController(final GenericService<T, D> service) {
     super();
@@ -65,6 +67,18 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   protected GenericService<T, D> getService() {
     return service;
   }
+
+  /**
+   * Get the controller administration authorities.
+   * 
+   * <p>
+   * This is used to secure entity modifications by ownership if authenticated user does not have
+   * administration permissions.
+   * </p>
+   * 
+   * @return the controller administration authorities.
+   */
+  protected abstract String[] getAdminAuthorities();
 
   /**
    * Get the controller base path.
@@ -262,6 +276,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * Update an entity and return a {@link D} JSON representation about the entity updated.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier ( i.e.
    *        {@code UUID}).
    * @param dto <em>Required Body Content:</em> a {@link D} JSON representation about the {@link T}
@@ -323,7 +338,8 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public ResponseEntity<D> updateData(@PathVariable @ValidUuid String id, @RequestBody D dto) {
+  public ResponseEntity<D> updateData(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody D dto) {
     HttpStatus status;
     D updatedDto = null;
 
@@ -331,12 +347,23 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
       if (dto == null || dto.getId() == null || !Objects.equals(id, dto.getId().toString())) {
         status = HttpStatus.BAD_REQUEST;
       } else {
-        final T entity = service.update(this.service.toEntity(dto));
+        // Only update if owner or has administration authorities
+        final T updatedEntity;
 
-        if (entity == null) {
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          updatedEntity = service.updateByOwner(this.service.toEntity(dto), ownerId);
+        } else {
+          updatedEntity = service.update(this.service.toEntity(dto));
+        }
+
+        if (updatedEntity == null) {
           status = HttpStatus.NOT_FOUND;
         } else {
-          updatedDto = this.service.toDto(entity);
+          updatedDto = this.service.toDto(updatedEntity);
           status = HttpStatus.OK;
         }
       }
@@ -351,6 +378,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   /**
    * Delete a {@link T}.
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * 
    * @return
@@ -394,11 +422,22 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public ResponseEntity<Void> deleteData(@PathVariable @ValidUuid String id) {
+  public ResponseEntity<Void> deleteData(Authentication authentication,
+      @PathVariable @ValidUuid String id) {
     HttpStatus status;
 
     try {
-      service.deleteById(UUID.fromString(id));
+      // Only delete if owner or has administration authorities
+      final String[] adminAuthorities = this.getAdminAuthorities();
+      if (adminAuthorities != null && adminAuthorities.length > 0
+          && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+        final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+        service.deleteByIdAndOwner(UUID.fromString(id), ownerId);
+      } else {
+        service.deleteById(UUID.fromString(id));
+      }
+
       status = HttpStatus.NO_CONTENT;
     } catch (EntityNotFoundException | IllegalArgumentException e) {
       LOG.debug("deleteData(id=" + id + ")", e);

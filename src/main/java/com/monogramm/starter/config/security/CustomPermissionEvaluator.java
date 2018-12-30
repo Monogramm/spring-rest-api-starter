@@ -1,6 +1,7 @@
-package com.monogramm.starter.config.component;
+package com.monogramm.starter.config.security;
 
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
+import com.monogramm.starter.config.component.CustomTokenEnhancer;
 import com.monogramm.starter.dto.AbstractGenericDto;
 
 import java.io.Serializable;

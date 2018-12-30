@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 /**
  * {@link PermissionController} Unit Test.
@@ -59,6 +60,11 @@ public class PermissionControllerTest
   @Override
   protected IPermissionService buildTestService() {
     return mock(IPermissionService.class);
+  }
+
+  @Override
+  protected Authentication buildMockAuthentication() {
+    return mock(Authentication.class);
   }
 
   @Override

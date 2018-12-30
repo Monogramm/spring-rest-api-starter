@@ -1,4 +1,4 @@
-package com.monogramm.starter.config.component;
+package com.monogramm.starter.config.security;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;

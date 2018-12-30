@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 /**
  * {@link RoleController} Unit Test.
@@ -58,6 +59,11 @@ public class RoleControllerTest extends AbstractGenericControllerTest<Role, Role
   @Override
   protected IRoleService buildTestService() {
     return mock(IRoleService.class);
+  }
+
+  @Override
+  protected Authentication buildMockAuthentication() {
+    return mock(Authentication.class);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package com.monogramm.starter.persistence.user.service;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
@@ -36,12 +37,14 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
    * 
    * @param userDao the user repository.
    * @param roleDao the role repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    * 
    * @throws IllegalArgumentException if {@code roleDao} is {@code null}.
    */
   @Autowired
-  public UserService(final IUserRepository userDao, final IRoleRepository roleDao) {
-    super(userDao, userDao, new UserBridge(userDao, roleDao));
+  public UserService(final IUserRepository userDao, final IRoleRepository roleDao,
+      IAuthenticationFacade authenticationFacade) {
+    super(userDao, userDao, new UserBridge(userDao, roleDao), authenticationFacade);
     if (roleDao == null) {
       throw new IllegalArgumentException("Role repository cannot be null.");
     }

@@ -42,7 +42,7 @@ import org.mockito.Mockito;
  */
 public class RoleServiceTest extends AbstractGenericServiceTest<Role, RoleDto, RoleService> {
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = RoleServiceTest.class.getSimpleName();
 
   private IPermissionRepository permissionDao;
 
@@ -66,7 +66,7 @@ public class RoleServiceTest extends AbstractGenericServiceTest<Role, RoleDto, R
 
   @Override
   protected RoleService buildTestService() {
-    return new RoleService(getMockRepository(), getMockUserRepository(), permissionDao);
+    return new RoleService(getMockRepository(), getMockUserRepository(), permissionDao, getMockAuthenticationFacade());
   }
 
   @Override
@@ -168,7 +168,7 @@ public class RoleServiceTest extends AbstractGenericServiceTest<Role, RoleDto, R
    */
   @Test(expected = IllegalArgumentException.class)
   public void testRoleServiceIRoleRepositoryNull() {
-    new RoleService(getMockRepository(), getMockUserRepository(), null);
+    new RoleService(getMockRepository(), getMockUserRepository(), null, getMockAuthenticationFacade());
   }
 
   /**

@@ -4,8 +4,10 @@
 
 package com.monogramm.starter.persistence;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,24 +36,30 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
 
   private final AbstractGenericBridge<T, D> bridge;
 
+  private final IAuthenticationFacade authenticationFacade;
+
   /**
    * Create a {@link AbstractGenericService}.
    * 
    * @param repository The Entity Data Access Object (DAO).
    * @param userRepository The User Entity Data Access Object (DAO).
    * @param bridge a bridge to convert this DTO to an entity and vice versa.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    * 
    * @throws IllegalArgumentException if {@code repository} or {@code bridge} is {@code null}.
    */
-  protected AbstractGenericService(GenericRepository<T> repository,
-      final IUserRepository userRepository, AbstractGenericBridge<T, D> bridge) {
+  protected AbstractGenericService(final GenericRepository<T> repository,
+      final IUserRepository userRepository, final AbstractGenericBridge<T, D> bridge,
+      final IAuthenticationFacade authenticationFacade) {
     super();
-    if (repository == null || userRepository == null || bridge == null) {
+    if (repository == null || userRepository == null || bridge == null
+        || authenticationFacade == null) {
       throw new IllegalArgumentException("Repositories and bridge cannot be null.");
     }
     this.repository = repository;
     this.userRepository = userRepository;
     this.bridge = bridge;
+    this.authenticationFacade = authenticationFacade;
   }
 
   /**
@@ -101,6 +109,15 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
     return userRepository;
   }
 
+  /**
+   * Get the {@link #authenticationFacade}.
+   * 
+   * @return the {@link #authenticationFacade}.
+   */
+  public final IAuthenticationFacade getAuthenticationFacade() {
+    return authenticationFacade;
+  }
+
   @Override
   public AbstractGenericBridge<T, D> getBridge() {
     return bridge;
@@ -114,6 +131,11 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
   @Override
   public T findById(UUID entityId) {
     return repository.findById(entityId);
+  }
+
+  @Override
+  public T findByIdAndOwner(final UUID entityId, final User owner) {
+    return repository.findByIdAndOwner(entityId, owner);
   }
 
   @Override
@@ -133,6 +155,7 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
   @Override
   @Transactional(rollbackFor = {EntityNotFoundException.class})
   public T update(T entity) {
+    // Only update if has administration authorities
     final T updatedEntity = repository.update(entity);
 
     if (updatedEntity == null) {
@@ -144,8 +167,33 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
 
   @Override
   @Transactional(rollbackFor = {EntityNotFoundException.class})
+  public T updateByOwner(T entity, User owner) {
+    // Only update if owner
+    final T updatedEntity = repository.updateByOwner(entity, owner);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(entity);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
+  @Transactional(rollbackFor = {EntityNotFoundException.class})
   public void deleteById(UUID entityId) {
+    // Only delete if has administration authorities
     final Integer deleted = repository.deleteById(entityId);
+
+    if (deleted == null || deleted == 0) {
+      throw this.createEntityNotFoundException(entityId);
+    }
+  }
+
+  @Override
+  @Transactional(rollbackFor = {EntityNotFoundException.class})
+  public void deleteByIdAndOwner(UUID entityId, User owner) {
+    // Only delete if owner
+    final Integer deleted = repository.deleteByIdAndOwner(entityId, owner);
 
     if (deleted == null || deleted == 0) {
       throw this.createEntityNotFoundException(entityId);

@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ITypeRepositoryIT extends AbstractGenericRepositoryIT<Type, ITypeRepository> {
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = ITypeRepositoryIT.class.getSimpleName();
 
   @Autowired
   private InitialDataLoader initialDataLoader;

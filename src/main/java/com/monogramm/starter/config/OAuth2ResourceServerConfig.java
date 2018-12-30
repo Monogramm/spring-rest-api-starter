@@ -5,7 +5,6 @@
 package com.monogramm.starter.config;
 
 import com.monogramm.starter.api.oauth.controller.OAuthController;
-import com.monogramm.starter.api.user.controller.UserController;
 import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 
 import org.springframework.context.annotation.Bean;
@@ -43,8 +42,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     http.authorizeRequests().antMatchers("/tokens/**").permitAll()
         .antMatchers(OAuthController.TOKEN_PATH, OAuthController.REVOKE_TOKEN_PATH + "/**",
             OAuthController.REVOKE_REFRESH_TOKEN_PATH + "/**")
-        .permitAll().antMatchers(UserController.REGISTER_PATH, UserController.RESET_PWD_PATH)
-        .anonymous().antMatchers(UserController.VERIFY_PATH).permitAll();
+        .permitAll();
   }
 
   @Bean

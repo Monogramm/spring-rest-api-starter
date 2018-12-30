@@ -33,11 +33,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
@@ -126,6 +130,11 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   public static final String AUTH_DELETE = OAuth2WebSecurityConfig.AUTH_PREFIX + AUTH_TYPE
       + GenericOperation.PERM_SEP + GenericOperation.PERM_DELETE;
 
+  /**
+   * The Authorities describing Administration permissions of this controller.
+   */
+  protected static final String[] ADMIN_AUTH = {AUTH_LIST};
+
   private ApplicationEventPublisher eventPublisher;
 
   private IVerificationTokenService verificationTokenService;
@@ -152,6 +161,11 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   @Override
+  protected String[] getAdminAuthorities() {
+    return ADMIN_AUTH;
+  }
+
+  @Override
   protected String getControllerPath() {
     return CONTROLLER_PATH;
   }
@@ -162,41 +176,41 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
+  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
   public ResponseEntity<UserDto> getDataById(@PathVariable @ValidUuid String id) {
     return super.getDataById(id);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public ResponseEntity<List<UserDto>> getAllData() {
     return super.getAllData();
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.POST,
-      consumes = "application/json")
+  @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
   public ResponseEntity<UserDto> addData(@RequestBody UserDto dto, UriComponentsBuilder builder) {
     return super.addData(dto, builder);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CONTROLLER_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<UserDto> updateData(@PathVariable @ValidUuid String id,
-      @RequestBody UserDto dto) {
-    return super.updateData(id, dto);
+  public ResponseEntity<UserDto> updateData(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody UserDto dto) {
+    return super.updateData(authentication, id, dto);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.DELETE)
+  @DeleteMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
-  public ResponseEntity<Void> deleteData(@PathVariable @ValidUuid String id) {
-    return super.deleteData(id);
+  public ResponseEntity<Void> deleteData(Authentication authentication,
+      @PathVariable @ValidUuid String id) {
+    return super.deleteData(authentication, id);
   }
 
 
@@ -253,8 +267,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = CONTROLLER_PATH + "/get", method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH + "/get")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
+  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
   public ResponseEntity<UserDto> getUserByUsernameOrEmail(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String email) {
@@ -313,7 +328,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    *         </ul>
    * 
    */
-  @RequestMapping(value = "/" + RESET_PWD_PATH, method = RequestMethod.POST)
+  @PostMapping(value = RESET_PWD_PATH)
+  @PreAuthorize(value = "isAnonymous()")
   public ResponseEntity<Void> resetPassword(@RequestBody String email, WebRequest request) {
     User user;
     try {
@@ -391,7 +407,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = "/" + RESET_PWD_PATH, method = RequestMethod.PUT)
+  @PutMapping(value = RESET_PWD_PATH)
+  @PreAuthorize(value = "isAnonymous() || hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> resetPassword(@RequestBody @Valid PasswordResetDto passwordReset) {
     HttpStatus status;
 
@@ -507,8 +524,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = CHANGE_PWD_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CHANGE_PWD_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> changePassword(@PathVariable String id,
       @RequestBody @Valid PasswordConfirmationDto password) {
@@ -609,8 +625,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}/activate", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CONTROLLER_PATH + "/{id}/activate", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> activate(@PathVariable String id, @RequestBody Boolean enabled) {
     HttpStatus status;
@@ -696,7 +711,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * @throws EntityNotFoundException if a default entity associated to a new user account is not
    *         found.
    */
-  @RequestMapping(value = REGISTER_PATH, method = RequestMethod.POST, consumes = "application/json")
+  @PostMapping(value = REGISTER_PATH, consumes = "application/json")
+  @PreAuthorize(value = "isAnonymous()")
   public ResponseEntity<Void> register(@RequestBody @Valid RegistrationDto registration,
       WebRequest request) {
     boolean registered;
@@ -798,9 +814,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    *         </ul>
    * 
    */
-  @RequestMapping(value = SEND_VERIFICATION_PATH, method = RequestMethod.POST,
-      consumes = "application/json")
-  @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
+  @PostMapping(value = SEND_VERIFICATION_PATH, consumes = "application/json")
+  @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> sendVerification(@RequestBody String email, WebRequest request) {
     User user;
     try {
@@ -890,8 +905,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = "/" + VERIFY_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = VERIFY_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> verify(@PathVariable String id, @RequestBody String token) {
     HttpStatus status;

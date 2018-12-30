@@ -8,12 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpoint;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Logout functionality for an OAuth2 Spring Security application.
+ * 
+ * @see OAuthController
  * 
  * @see <a href="http://www.baeldung.com/logout-spring-security-oauth">Baeldung - Logout in a OAuth
  *      Secured Application</a>
@@ -45,7 +46,7 @@ public class RevokeTokenEndpoint {
    * 
    * @param request <em>Required Parameter:</em> the HTTP request.
    */
-  @RequestMapping(value = OAuthController.TOKEN_PATH, method = RequestMethod.DELETE)
+  @DeleteMapping(value = OAuthController.TOKEN_PATH)
   @ResponseBody
   public void revokeSelfToken(final HttpServletRequest request) {
     final String authorization = request.getHeader(TOKEN_HEADER);

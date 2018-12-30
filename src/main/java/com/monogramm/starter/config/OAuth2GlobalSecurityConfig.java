@@ -4,8 +4,8 @@
 
 package com.monogramm.starter.config;
 
-import com.monogramm.starter.config.component.CustomMethodSecurityExpressionHandler;
-import com.monogramm.starter.config.component.CustomPermissionEvaluator;
+import com.monogramm.starter.config.security.CustomMethodSecurityExpressionHandler;
+import com.monogramm.starter.config.security.CustomPermissionEvaluator;
 
 import java.util.Map;
 

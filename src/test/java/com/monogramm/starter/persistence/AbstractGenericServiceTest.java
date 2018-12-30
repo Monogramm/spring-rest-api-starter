@@ -11,14 +11,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,8 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
 
   private IUserRepository mockUserRepository;
 
+  private IAuthenticationFacade mockAuthenticationFacade;
+
   private S service;
 
 
@@ -63,6 +69,7 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
   public void setUp() throws Exception {
     mockUserRepository = mock(IUserRepository.class);
     mockRepository = this.buildMockRepository();
+    mockAuthenticationFacade = mock(IAuthenticationFacade.class);
 
     this.service = this.buildTestService();
     assertNotNull(this.service);
@@ -94,6 +101,15 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
    */
   public IUserRepository getMockUserRepository() {
     return mockUserRepository;
+  }
+
+  /**
+   * Get the {@link #mockAuthenticationFacade}.
+   * 
+   * @return the {@link #mockAuthenticationFacade}.
+   */
+  public IAuthenticationFacade getMockAuthenticationFacade() {
+    return mockAuthenticationFacade;
   }
 
   /**
@@ -321,6 +337,41 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
   }
 
   /**
+   * Test method for {@link AbstractGenericService#updateByOwner(AbstractGenericEntity, UUID)}.
+   * 
+   * @throws EntityNotFoundException if the type is not found.
+   */
+  @Test
+  public void testUpdateByOwner() {
+    final T model = this.buildTestEntity();
+    final UUID ownerId = null;
+
+    when(mockRepository.updateByOwner(eq(model), any(User.class))).thenReturn(model);
+
+    final T actual = service.updateByOwner(model, ownerId);
+
+    verify(mockRepository, times(1)).updateByOwner(eq(model), any(User.class));
+    verifyNoMoreInteractions(mockRepository);
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericService#updateByOwner(AbstractGenericEntity, UUID)}.
+   * 
+   * @throws EntityNotFoundException if the type is not found.
+   */
+  @Test(expected = EntityNotFoundException.class)
+  public void testUpdateByOwnerNotOwner() {
+    final T model = this.buildTestEntity();
+    final UUID ownerId = null;
+
+    when(mockRepository.updateByOwner(eq(model), any(User.class))).thenReturn(null);
+
+    service.updateByOwner(model, ownerId);
+  }
+
+  /**
    * Test method for {@link AbstractGenericService#deleteById(java.util.UUID)}.
    * 
    * @throws EntityNotFoundException if the type is not found.
@@ -369,6 +420,37 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
     when(mockRepository.deleteById(ID)).thenThrow(this.buildEntityNotFoundException());
 
     service.deleteById(ID);
+  }
+
+  /**
+   * Test method for {@link AbstractGenericService#deleteByIdAndOwner(UUID, UUID)}.
+   * 
+   * @throws EntityNotFoundException if the type is not found.
+   */
+  @Test
+  public void testDeleteByIdAndOwner() {
+    final UUID ownerId = null;
+
+    when(mockRepository.deleteByIdAndOwner(eq(ID), any(User.class))).thenReturn(1);
+
+    service.deleteByIdAndOwner(ID, ownerId);
+
+    verify(mockRepository, times(1)).deleteByIdAndOwner(eq(ID), any());
+    verifyNoMoreInteractions(mockRepository);
+  }
+
+  /**
+   * Test method for {@link AbstractGenericService#deleteByIdAndOwner(UUID, UUID)}.
+   * 
+   * @throws EntityNotFoundException if the type is not found.
+   */
+  @Test(expected = EntityNotFoundException.class)
+  public void testDeleteByIdAndOwnerNotOwner() {
+    final UUID ownerId = null;
+
+    when(mockRepository.deleteByIdAndOwner(eq(ID), any(User.class))).thenReturn(0);
+
+    service.deleteByIdAndOwner(ID, ownerId);
   }
 
 }

@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 /**
  * {@link TypeController} Unit Test.
@@ -58,6 +59,11 @@ public class TypeControllerTest extends AbstractGenericControllerTest<Type, Type
   @Override
   protected ITypeService buildTestService() {
     return mock(ITypeService.class);
+  }
+
+  @Override
+  protected Authentication buildMockAuthentication() {
+    return mock(Authentication.class);
   }
 
   @Override

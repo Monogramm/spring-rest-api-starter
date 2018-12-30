@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.persistence.parameter.service;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
 import com.monogramm.starter.persistence.EntityNotFoundException;
@@ -32,10 +33,12 @@ public class ParameterService extends AbstractGenericService<Parameter, Paramete
    * 
    * @param repository the entity repository.
    * @param userRepository the user repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    */
   @Autowired
-  public ParameterService(IParameterRepository repository, IUserRepository userRepository) {
-    super(repository, userRepository, new ParameterBridge(userRepository));
+  public ParameterService(IParameterRepository repository, IUserRepository userRepository,
+      IAuthenticationFacade authenticationFacade) {
+    super(repository, userRepository, new ParameterBridge(userRepository), authenticationFacade);
   }
 
   @Override

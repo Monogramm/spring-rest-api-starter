@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class IPermissionRepositoryIT
     extends AbstractGenericRepositoryIT<Permission, IPermissionRepository> {
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = IPermissionRepositoryIT.class.getSimpleName();
 
   @Autowired
   private InitialDataLoader initialDataLoader;

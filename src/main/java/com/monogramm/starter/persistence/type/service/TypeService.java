@@ -1,5 +1,6 @@
 package com.monogramm.starter.persistence.type.service;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
 import com.monogramm.starter.persistence.type.dao.ITypeRepository;
@@ -22,10 +23,12 @@ public class TypeService extends AbstractGenericService<Type, TypeDto> implement
    * 
    * @param typeDao the type repository.
    * @param userDao the user repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    */
   @Autowired
-  public TypeService(final ITypeRepository typeDao, final IUserRepository userDao) {
-    super(typeDao, userDao, new TypeBridge(userDao));
+  public TypeService(final ITypeRepository typeDao, final IUserRepository userDao,
+      IAuthenticationFacade authenticationFacade) {
+    super(typeDao, userDao, new TypeBridge(userDao), authenticationFacade);
   }
 
   @Override

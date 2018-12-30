@@ -80,26 +80,31 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Users";
+  public static final String TYPE = UserController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "users";
-
+  public static final String CONTROLLER_PATH = UserController.CONTROLLER_PATH;
   /**
    * The request path for registration.
    */
-  public static final String REGISTER_PATH = CONTROLLER_PATH + "/register";
-
+  public static final String REGISTER_PATH = UserController.REGISTER_PATH;
   /**
-   * The request path for registration.
+   * The request path for resetting password.
    */
-  public static final String RESET_PWD_PATH = CONTROLLER_PATH + "/reset_password";
-
+  public static final String RESET_PWD_PATH = UserController.RESET_PWD_PATH;
   /**
-   * The request path for account verification.
+   * The request path for verification request.
    */
-  public static final String VERIFY_PATH = CONTROLLER_PATH + "/verify";
+  public static final String SEND_VERIFICATION_PATH = UserController.SEND_VERIFICATION_PATH;
+  /**
+   * The request path for user verification.
+   */
+  public static final String VERIFY_PATH = UserController.VERIFY_PATH;
+  /**
+   * The request path for changing password.
+   */
+  public static final String CHANGE_PWD_PATH = UserController.CHANGE_PWD_PATH;
 
   private static final String DUMMY_USERNAME = "Foo";
   private static final String DUMMY_EMAIL = "foo@email.com";
@@ -391,15 +396,13 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     final char[] password = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
     final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
 
-    getMockMvc()
-        .perform(put(CONTROLLER_PATH + "/change_password/" + randomId)
-            .headers(getHeaders(getMockToken())).content(toJsonBytes(dto)))
-        .andExpect(status().isNotFound());
+    getMockMvc().perform(put(CHANGE_PWD_PATH + "/" + randomId).headers(getHeaders(getMockToken()))
+        .content(toJsonBytes(dto))).andExpect(status().isNotFound());
 
     // Update test user password should work
     final byte[] passwordJsonBytes = toJsonBytes(dto);
     getMockMvc()
-        .perform(put(CONTROLLER_PATH + "/change_password/" + this.testEntity.getId())
+        .perform(put(CHANGE_PWD_PATH + "/" + this.testEntity.getId())
             .headers(getHeaders(getMockToken())).content(passwordJsonBytes))
         .andExpect(status().isNoContent());
 
@@ -505,18 +508,16 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
   @Test
   public void testSendVerificationAndVerify() throws Exception {
     // Verifying already verified user should not send any email but work anyway
-    getMockMvc().perform(post(CONTROLLER_PATH + "/send_verification")
-        .headers(getHeaders(getMockToken())).content(getTestUser().getEmail()))
-        .andExpect(status().isOk());
+    getMockMvc().perform(post(SEND_VERIFICATION_PATH).headers(getHeaders(getMockToken()))
+        .content(getTestUser().getEmail())).andExpect(status().isOk());
 
     List<VerificationToken> tokens = verificationService.findAll();
     assertNotNull(tokens);
     assertEquals(0, tokens.size());
 
     // Request to send a verification email should work
-    getMockMvc().perform(post(CONTROLLER_PATH + "/send_verification")
-        .headers(getHeaders(getMockToken())).content(this.testEntity.getEmail()))
-        .andExpect(status().isNoContent());
+    getMockMvc().perform(post(SEND_VERIFICATION_PATH).headers(getHeaders(getMockToken()))
+        .content(this.testEntity.getEmail())).andExpect(status().isNoContent());
 
     // Check verification token generated
     tokens = verificationService.findAll();

@@ -12,11 +12,15 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,8 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author madmath03
  */
 @RestController
-public class PermissionController
-    extends AbstractGenericController<Permission, PermissionDto> {
+public class PermissionController extends AbstractGenericController<Permission, PermissionDto> {
   /**
    * The main data type handled by this controller.
    */
@@ -78,6 +81,11 @@ public class PermissionController
   public static final String AUTH_DELETE = OAuth2WebSecurityConfig.AUTH_PREFIX + AUTH_TYPE
       + GenericOperation.PERM_SEP + GenericOperation.PERM_DELETE;
 
+  /**
+   * The Authorities describing Administration permissions of this controller.
+   */
+  protected static final String[] ADMIN_AUTH = {AUTH_LIST};
+
 
   /**
    * Create a {@link PermissionController}.
@@ -90,32 +98,37 @@ public class PermissionController
   }
 
   @Override
+  protected String[] getAdminAuthorities() {
+    return ADMIN_AUTH;
+  }
+
+  @Override
   protected String getControllerPath() {
     return CONTROLLER_PATH;
   }
-  
+
   @Override
   protected IPermissionService getService() {
     return (IPermissionService) super.getService();
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
+  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
   public ResponseEntity<PermissionDto> getDataById(@PathVariable @ValidUuid String id) {
     return super.getDataById(id);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public ResponseEntity<List<PermissionDto>> getAllData() {
     return super.getAllData();
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.POST,
-      consumes = "application/json")
+  @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
   public ResponseEntity<PermissionDto> addData(@RequestBody PermissionDto dto,
       UriComponentsBuilder builder) {
@@ -123,18 +136,18 @@ public class PermissionController
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CONTROLLER_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<PermissionDto> updateData(@PathVariable @ValidUuid String id,
-      @RequestBody PermissionDto dto) {
-    return super.updateData(id, dto);
+  public ResponseEntity<PermissionDto> updateData(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody PermissionDto dto) {
+    return super.updateData(authentication, id, dto);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.DELETE)
+  @DeleteMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
-  public ResponseEntity<Void> deleteData(@PathVariable @ValidUuid String id) {
-    return super.deleteData(id);
+  public ResponseEntity<Void> deleteData(Authentication authentication,
+      @PathVariable @ValidUuid String id) {
+    return super.deleteData(authentication, id);
   }
 }

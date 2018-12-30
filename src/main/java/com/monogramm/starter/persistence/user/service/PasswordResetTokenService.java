@@ -1,5 +1,6 @@
 package com.monogramm.starter.persistence.user.service;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.PasswordResetTokenDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
 import com.monogramm.starter.persistence.user.dao.IPasswordResetTokenRepository;
@@ -24,11 +25,13 @@ public class PasswordResetTokenService
    * 
    * @param verificationTokenDao the verificationToken repository.
    * @param userDao the user repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    */
   @Autowired
   public PasswordResetTokenService(final IPasswordResetTokenRepository verificationTokenDao,
-      final IUserRepository userDao) {
-    super(verificationTokenDao, userDao, new PasswordResetTokenBridge(userDao));
+      final IUserRepository userDao, IAuthenticationFacade authenticationFacade) {
+    super(verificationTokenDao, userDao, new PasswordResetTokenBridge(userDao),
+        authenticationFacade);
   }
 
   @Override

@@ -67,11 +67,11 @@ public class ParameterControllerFullIT extends AbstractControllerFullIT {
   /**
    * The managed parameter of this tested controller.
    */
-  public static final String TYPE = "Parameters";
+  public static final String TYPE = ParameterController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "parameters";
+  public static final String CONTROLLER_PATH = ParameterController.CONTROLLER_PATH;
 
   protected static final String DUMMY_NAME = "Foo";
   protected static final Object DUMMY_VALUE = 42;

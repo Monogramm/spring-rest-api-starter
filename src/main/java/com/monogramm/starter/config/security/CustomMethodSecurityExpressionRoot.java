@@ -1,5 +1,6 @@
-package com.monogramm.starter.config.component;
+package com.monogramm.starter.config.security;
 
+import com.monogramm.starter.config.component.CustomTokenEnhancer;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.persistence.user.entity.User;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 
 /**
  * Custom Method Security Expression.
@@ -46,7 +46,7 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
 
     final Map<?, ?> details = this.getAuthDetails();
     if (data != null && details != null) {
-      final UUID principalId = this.getPrincipalId(details);
+      final UUID principalId = IAuthenticationFacade.getPrincipalId(details);
 
       if (principalId != null) {
         if (data instanceof AbstractGenericDto) {
@@ -62,35 +62,9 @@ public class CustomMethodSecurityExpressionRoot extends SecurityExpressionRoot
   }
 
   private Map<?, ?> getAuthDetails() {
-    Map<?, ?> details = null;
-
     final Authentication authentication = this.getAuthentication();
-    if (authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
-      final Object decodedDetails =
-          ((OAuth2AuthenticationDetails) authentication.getDetails()).getDecodedDetails();
 
-      if (decodedDetails instanceof Map) {
-        details = (Map<?, ?>) decodedDetails;
-      }
-    }
-
-    return details;
-  }
-
-  private UUID getPrincipalId(Map<?, ?> details) {
-    UUID principalId = null;
-
-    if (details.containsKey(CustomTokenEnhancer.UUID)) {
-      final Object idValue = details.get(CustomTokenEnhancer.UUID);
-
-      try {
-        principalId = UUID.fromString((String) idValue);
-      } catch (Exception e) {
-        principalId = null;
-      }
-    }
-
-    return principalId;
+    return IAuthenticationFacade.getAuthDetails(authentication);
   }
 
   private Object getReturnData() {

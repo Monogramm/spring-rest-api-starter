@@ -66,11 +66,11 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Roles";
+  public static final String TYPE = RoleController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "roles";
+  public static final String CONTROLLER_PATH = RoleController.CONTROLLER_PATH;
 
   private static final String DISPLAYNAME = "Foo";
 

@@ -32,12 +32,12 @@ import org.mockito.ArgumentCaptor;
 public class ParameterServiceTest
     extends AbstractGenericServiceTest<Parameter, ParameterDto, ParameterService> {
 
-  protected static final String DUMMY_NAME = "Foo";
+  protected static final String DUMMY_NAME = ParameterServiceTest.class.getSimpleName();
   protected static final Object DUMMY_VALUE = 42;
 
   @Override
   protected ParameterService buildTestService() {
-    return new ParameterService(getMockRepository(), getMockUserRepository());
+    return new ParameterService(getMockRepository(), getMockUserRepository(), getMockAuthenticationFacade());
   }
 
   @Override

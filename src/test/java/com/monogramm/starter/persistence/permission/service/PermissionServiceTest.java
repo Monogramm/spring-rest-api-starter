@@ -40,7 +40,7 @@ public class PermissionServiceTest
 
   @Override
   protected PermissionService buildTestService() {
-    return new PermissionService(getMockRepository(), getMockUserRepository());
+    return new PermissionService(getMockRepository(), getMockUserRepository(), getMockAuthenticationFacade());
   }
 
   @Override
