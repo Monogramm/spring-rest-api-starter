@@ -189,7 +189,7 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    * @return the {@link #value}.
    */
   public Object readValue() {
-    return type.read(value);
+    return type.read(this.value);
   }
 
   /**
@@ -198,16 +198,18 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    * @return the {@link #value}.
    */
   public String getValue() {
-    return value;
+    return this.value;
   }
 
   /**
    * Write the {@link #value} using the {@link #type} writer.
    * 
    * @see ParameterType#write(Object)
+   * 
+   * @param value value to write in the type's format.
    */
   public void writeValue(String value) {
-    type.write(value);
+    this.value = type.write(value);
   }
 
   /**

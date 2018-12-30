@@ -36,18 +36,18 @@
 
 	<developers>
 		<developer>
-			<email>mb.mathieu.brunot@gmail.com</email>
 			<name>Mathieu Brunot</name>
 			<url>https://github.com/madmath03</url>
 			<id>madmath03</id>
 		</developer>
-		<developer>
-			<email>ebacem@gmail.com</email>
+	</developers>
+
+	<contributors>
+		<contributor>
 			<name>Bacem EL IDILBI</name>
 			<url>https://github.com/ebacem</url>
-			<id>ebacem</id>
-		</developer>
-	</developers>
+		</contributor>
+	</contributors>
 
 	<repositories>
 		<repository>

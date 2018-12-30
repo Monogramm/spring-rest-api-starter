@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 /**
  * Custom User Details Service.
  * 
+ * <strong>NOT USED YET!</strong>
+ * 
  * @see <a href="https://www.baeldung.com/spring-security-authentication-with-a-database">Spring
  *      Security: Authentication with a Database-backed UserDetailsService</a>
  * @see <a href="https://www.baeldung.com/spring-security-create-new-custom-security-expression">A
@@ -31,6 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
   /**
    * Create a {@link CustomUserDetailsService}.
    * 
+   * @param userRepository user repository.
    */
   @Autowired
   public CustomUserDetailsService(final IUserRepository userRepository) {

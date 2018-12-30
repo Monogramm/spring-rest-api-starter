@@ -85,6 +85,8 @@ public final class OAuthController {
    *      OAuth2 – Simple Token Revocation</a>
    * 
    * @param tokenId <em>Required Parameter:</em> the access token id.
+   * 
+   * @return the access token id which was revoked.
    */
   @PostMapping(value = REVOKE_TOKEN_PATH)
   public String revokeToken(@PathVariable final String tokenId) {
@@ -115,6 +117,8 @@ public final class OAuthController {
    *      OAuth2 – Simple Token Revocation</a>
    * 
    * @param tokenId <em>Required Parameter:</em> the refresh token id.
+   * 
+   * @return the access token id which was revoked.
    */
   @PostMapping(value = REVOKE_REFRESH_TOKEN_PATH + "/{tokenId:.*}")
   public String revokeRefreshToken(@PathVariable final String tokenId) {

@@ -21,6 +21,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * Custom Spring Security User Details.
  * 
+ * <strong>NOT USED YET!</strong>
+ * 
  * @see <a href="https://www.baeldung.com/spring-security-authentication-with-a-database">Spring
  *      Security: Authentication with a Database-backed UserDetailsService</a>
  * @see <a href="https://www.baeldung.com/spring-security-create-new-custom-security-expression">A
