@@ -123,13 +123,14 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
 
   /**
    * Test method for
-   * {@link AbstractGenericService#AbstractGenericService(GenericRepository, IUserRepository, AbstractGenericBridge)}.
+   * {@link AbstractGenericService#AbstractGenericService(GenericRepository, IUserRepository, AbstractGenericBridge, IAuthenticationFacade)}.
    */
   @Test
   public void testAbstractGenericService() {
     assertNotNull(service);
     assertEquals(mockRepository, service.getRepository());
     assertEquals(mockUserRepository, service.getUserRepository());
+    assertEquals(mockAuthenticationFacade, service.getAuthenticationFacade());
   }
 
   /**
@@ -205,6 +206,8 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
     verifyNoMoreInteractions(mockRepository);
   }
 
+
+
   /**
    * Test method for {@link AbstractGenericService#findById(java.util.UUID)}.
    */
@@ -236,6 +239,45 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
 
     assertNull(actual);
   }
+
+
+  /**
+   * Test method for {@link AbstractGenericService#findByIdAndOwner(UUID, User)}.
+   */
+  @Test
+  public void testFindByIdAndOwner() {
+    final T model = this.buildTestEntity();
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(mockRepository.findByIdAndOwner(model.getId(), owner)).thenReturn(model);
+
+    final T actual = service.findByIdAndOwner(model.getId(), ownerId);
+
+    verify(mockRepository, times(1)).findByIdAndOwner(model.getId(), owner);
+    verifyNoMoreInteractions(mockRepository);
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericService#findByIdAndOwner(UUID, User)}.
+   */
+  @Test
+  public void testFindByIdAndOwnerNotFound() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(mockRepository.findByIdAndOwner(ID, owner)).thenReturn(null);
+
+    final T actual = service.findByIdAndOwner(ID, ownerId);
+
+    verify(mockRepository, times(1)).findByIdAndOwner(ID, owner);
+    verifyNoMoreInteractions(mockRepository);
+
+    assertNull(actual);
+  }
+
 
   /**
    * Test method for {@link AbstractGenericService#findAll()}.

@@ -318,4 +318,35 @@ public abstract class AbstractParameterTest<T extends AbstractParameter>
     assertEquals(ParameterType.DOUBLE, this.getEntity().getType());
   }
 
+  /**
+   * Test method for {@link AbstractParameter#readValue()}.
+   */
+  @Test
+  public void testReadValueTypeString() {
+    final String test = "TEST";
+    this.getEntity().setType(ParameterType.STRING);
+    this.getEntity().setValue(test);
+    assertEquals(test, this.getEntity().readValue());
+  }
+
+  /**
+   * Test method for {@link AbstractParameter#readValue()}.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void testReadValueTypeAny() {
+    this.getEntity().setType(ParameterType.ANY);
+    this.getEntity().readValue();
+  }
+
+  /**
+   * Test method for {@link AbstractParameter#writeValue(String)}.
+   */
+  @Test
+  public void testWriteValueTypeString() {
+    final String test = "TEST";
+    this.getEntity().setType(ParameterType.STRING);
+    this.getEntity().writeValue(test);
+    assertEquals(test, this.getEntity().getValue());
+  }
+
 }
