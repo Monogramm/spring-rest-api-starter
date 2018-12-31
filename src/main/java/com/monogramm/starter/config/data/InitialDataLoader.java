@@ -45,6 +45,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class InitialDataLoader extends AbstractDataLoader {
 
+  public static final String USER_ROLE = "User";
+  public static final String SUPPORT_ROLE = "Support";
+  public static final String ADMIN_ROLE = "Admin";
+
+  public static final String SAMPLE_USER_NAME = "demo";
+  public static final String SAMPLE_USER_EMAIL = "demo@monogramm.io";
+  public static final char[] SAMPLE_USER_PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+
+  public static final String SAMPLE_SUPPORT_NAME = "support";
+  public static final String SAMPLE_SUPPORT_EMAIL = "support@monogramm.io";
+
+  public static final String SAMPLE_ADMIN_NAME = "admin";
+  public static final String SAMPLE_ADMIN_EMAIL = "admin@monogramm.io";
+
   private Type userType;
   private Type roleType;
   private Type typeType;
@@ -106,7 +120,7 @@ public class InitialDataLoader extends AbstractDataLoader {
 
     // Setup the initial roles
     if (this.adminRole == null) {
-      this.adminRole = this.createRole("Admin");
+      this.adminRole = this.createRole(ADMIN_ROLE);
       this.addAllPermissions(userType, adminRole);
       this.addAllPermissions(roleType, adminRole);
       this.addAllPermissions(typeType, adminRole);
@@ -115,7 +129,7 @@ public class InitialDataLoader extends AbstractDataLoader {
     }
 
     if (this.supportRole == null) {
-      this.supportRole = this.createRole("Support");
+      this.supportRole = this.createRole(SUPPORT_ROLE);
       this.addAllPermissions(userType, supportRole);
       // Construct regular operations arrays
       final GenericOperation[] supportOperations = {GenericOperation.READ, GenericOperation.LIST};
@@ -126,7 +140,7 @@ public class InitialDataLoader extends AbstractDataLoader {
     }
 
     if (this.userRole == null) {
-      this.userRole = this.createRole("User");
+      this.userRole = this.createRole(USER_ROLE);
       this.addPermission(userType, GenericOperation.READ, userRole);
       this.addPermission(userType, GenericOperation.UPDATE, userRole);
     }
@@ -144,14 +158,16 @@ public class InitialDataLoader extends AbstractDataLoader {
   @Override
   public boolean initDemoData() {
     final char[] adminPassword = Passwords.generateRandomPassword();
-    final User adminUser = this.createUser("admin", "admin@monogramm.io", adminPassword, adminRole);
+    final User adminUser =
+        this.createUser(SAMPLE_ADMIN_NAME, SAMPLE_ADMIN_EMAIL, adminPassword, adminRole);
 
     final char[] supportPassword = Passwords.generateRandomPassword();
     final User supportUser =
-        this.createUser("support", "support@monogramm.io", supportPassword, supportRole);
+        this.createUser(SAMPLE_SUPPORT_NAME, SAMPLE_SUPPORT_EMAIL, supportPassword, supportRole);
 
-    final char[] demoPassword = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
-    final User demoUser = this.createUser("demo", "demo@monogramm.io", demoPassword, userRole);
+    final char[] demoPassword = SAMPLE_USER_PASSWORD.clone();
+    final User demoUser =
+        this.createUser(SAMPLE_USER_NAME, SAMPLE_USER_EMAIL, demoPassword, userRole);
 
 
 
