@@ -5,6 +5,7 @@ import com.monogramm.starter.api.user.event.OnPasswordResetEvent;
 import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
 import com.monogramm.starter.config.data.GenericOperation;
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.PasswordResetDto;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
@@ -193,8 +194,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<UserDto> addData(@RequestBody UserDto dto, UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<UserDto> addData(Authentication authentication, @RequestBody UserDto dto,
+      UriComponentsBuilder builder) {
+    return super.addData(authentication, dto, builder);
   }
 
   @Override
@@ -457,6 +459,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * Update a user's password.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * @param password <em>Required Body Content:</em> a JSON data about the new user password.
    * 
@@ -526,21 +529,38 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    */
   @PutMapping(value = CHANGE_PWD_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<Void> changePassword(@PathVariable String id,
-      @RequestBody @Valid PasswordConfirmationDto password) {
+  public ResponseEntity<Void> changePassword(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody @Valid PasswordConfirmationDto password) {
     HttpStatus status;
 
     try {
       if (password == null) {
         status = HttpStatus.BAD_REQUEST;
       } else {
-        final User user =
-            this.getService().setPassword(UUID.fromString(id), password.getPassword());
+        // Only activate if owner or has administration authorities
+        final User user;
+
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          user = this.getService().setPasswordByOwner(UUID.fromString(id), password.getPassword(),
+              ownerId);
+        } else {
+          user = this.getService().setPassword(UUID.fromString(id), password.getPassword());
+        }
 
         if (user == null) {
           status = HttpStatus.NOT_FOUND;
         } else {
           status = HttpStatus.NO_CONTENT;
+
+          // XXX This should be done using Spring Data Auditing
+          // Set last modification user
+          final User principalUser = this.getPrincipalUser(authentication);
+          user.setModifiedBy(principalUser);
+          this.getService().update(user);
         }
       }
     } catch (UserNotFoundException | IllegalArgumentException e) {
@@ -558,6 +578,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * Change the active status of a user account.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * @param enabled <em>Required Body Content:</em> a JSON data about the new user active status.
    * 
@@ -627,19 +648,37 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    */
   @PutMapping(value = CONTROLLER_PATH + "/{id}/activate", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<Void> activate(@PathVariable String id, @RequestBody Boolean enabled) {
+  public ResponseEntity<Void> activate(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody Boolean enabled) {
     HttpStatus status;
 
     if (enabled == null) {
       status = HttpStatus.BAD_REQUEST;
     } else {
       try {
-        final User user = this.getService().setEnabled(UUID.fromString(id), enabled);
+        // Only activate if owner or has administration authorities
+        final User user;
+
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          user = this.getService().setEnabledByOwner(UUID.fromString(id), enabled, ownerId);
+        } else {
+          user = this.getService().setEnabled(UUID.fromString(id), enabled);
+        }
 
         if (user == null) {
           status = HttpStatus.NOT_FOUND;
         } else {
           status = HttpStatus.NO_CONTENT;
+
+          // XXX This should be done using Spring Data Auditing
+          // Set last modification user
+          final User principalUser = this.getPrincipalUser(authentication);
+          user.setModifiedBy(principalUser);
+          this.getService().update(user);
         }
       } catch (UserNotFoundException | IllegalArgumentException e) {
         LOG.debug("activate(id=" + id + ", enabled=" + enabled + ")", e);
@@ -725,6 +764,10 @@ public class UserController extends AbstractGenericController<User, UserDto> {
     HttpStatus status;
     if (registered) {
       final User user = this.getService().findByEmail(registration.getEmail());
+
+      // Make the registered user owner of its own account
+      user.setOwner(user);
+      this.getService().update(user);
 
       this.sendEmailVerificationEvent(user, request);
       status = HttpStatus.NO_CONTENT;
@@ -854,6 +897,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * Mark a user account as verified.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * @param token <em>Required Body Content:</em> a JSON data about the
    *        {@link VerificationToken#getCode()} to verify a user account.
@@ -907,7 +951,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    */
   @PutMapping(value = VERIFY_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<Void> verify(@PathVariable String id, @RequestBody String token) {
+  public ResponseEntity<Void> verify(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody String token) {
     HttpStatus status;
 
     final Date now = new Date();
@@ -918,16 +963,39 @@ public class UserController extends AbstractGenericController<User, UserDto> {
       final VerificationToken verificationToken =
           verificationTokenService.findByUserAndCode(userId, token);
 
-      // If a valid token exists and verification is successful
       // TODO use more complex request body to verify email attached to token
-      if (verificationToken != null && now.before(verificationToken.getExpiryDate())
-          && this.getService().verify(userId) != null) {
+      // If a valid token exists
+      final User user;
+      if (verificationToken != null && now.before(verificationToken.getExpiryDate())) {
+
+        // Only verify if owner or has administration authorities
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          user = this.getService().verifyByOwner(userId, ownerId);
+        } else {
+          user = this.getService().verify(userId);
+        }
+
+      } else {
+        user = null;
+      }
+
+      if (user == null) {
+        status = HttpStatus.NOT_FOUND;
+      } else {
         status = HttpStatus.NO_CONTENT;
         // Invalidate the token
         verificationToken.setExpiryDate(now);
         verificationTokenService.update(verificationToken);
-      } else {
-        status = HttpStatus.NOT_FOUND;
+
+        // XXX This should be done using Spring Data Auditing
+        // Set last modification user
+        final User principalUser = this.getPrincipalUser(authentication);
+        user.setModifiedBy(principalUser);
+        this.getService().update(user);
       }
 
     } catch (VerificationTokenNotFoundException | UserNotFoundException

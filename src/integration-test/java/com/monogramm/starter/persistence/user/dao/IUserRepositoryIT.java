@@ -40,8 +40,11 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   private char[] testPassword;
 
   @Before
+  @Override
   public void setUp() {
     testPassword = PASSWORD.clone();
+    
+    super.setUp();
   }
 
   @Override
@@ -60,6 +63,8 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
     if (initialDataLoader.getUsers() != null) {
       expectedSize += initialDataLoader.getUsers().size();
     }
+    // ...plus 1 for the default owner created in abstract test class
+    expectedSize++;
 
     final List<User> actual = getRepository().findAll();
 
@@ -258,6 +263,8 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
     assertThat(actual, is(model));
   }
 
+
+
   /**
    * Test method for {@link IUserRepository#setPassword(java.util.UUID, char[])}.
    */
@@ -278,6 +285,30 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   public void testSetPasswordNotFound() {
     assertNull(getRepository().setPassword(RANDOM_ID, testPassword));
   }
+
+
+  /**
+   * Test method for {@link IUserRepository#setPasswordByOwner(UUID, char[], User)}.
+   */
+  @Test
+  public void testSetPasswordByOwner() {
+    final User model = User.builder(USERNAME, EMAIL).owner(owner).build();
+    getRepository().add(model);
+
+    final User actual = getRepository().setPasswordByOwner(model.getId(), testPassword, owner);
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link IUserRepository#setPasswordByOwner(UUID, char[], User)}.
+   */
+  @Test
+  public void testSetPasswordByOwnerNotFound() {
+    assertNull(getRepository().setPasswordByOwner(RANDOM_ID, testPassword, null));
+  }
+
+
 
   /**
    * Test method for {@link IUserRepository#setEnabled(java.util.UUID, boolean)}.
@@ -300,6 +331,30 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
     assertNull(getRepository().setEnabled(RANDOM_ID, false));
   }
 
+
+  /**
+   * Test method for {@link IUserRepository#setEnabledByOwner(UUID, boolean, User)}.
+   */
+  @Test
+  public void testSetEnabledByOwner() {
+    final User model = User.builder(USERNAME, EMAIL).owner(owner).build();
+    getRepository().add(model);
+
+    final User actual = getRepository().setEnabledByOwner(model.getId(), false, owner);
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link IUserRepository#setEnabledByOwner(UUID, boolean, User)}.
+   */
+  @Test
+  public void testSetEnabledByOwnerNotFound() {
+    assertNull(getRepository().setEnabledByOwner(RANDOM_ID, false, null));
+  }
+
+
+
   /**
    * Test method for {@link IUserRepository#setVerified(java.util.UUID, boolean)}.
    */
@@ -320,6 +375,30 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   public void testSetVerifiedNotFound() {
     assertNull(getRepository().setVerified(RANDOM_ID, false));
   }
+
+
+  /**
+   * Test method for {@link IUserRepository#setVerifiedByOwner(UUID, boolean, User)}.
+   */
+  @Test
+  public void testSetVerifiedByOwner() {
+    final User model = User.builder(USERNAME, EMAIL).owner(owner).build();
+    getRepository().add(model);
+
+    final User actual = getRepository().setVerifiedByOwner(model.getId(), false, owner);
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link IUserRepository#setVerifiedByOwner(UUID, boolean, User)}.
+   */
+  @Test
+  public void testSetVerifiedByOwnerNotFound() {
+    assertNull(getRepository().setVerifiedByOwner(RANDOM_ID, false, null));
+  }
+
+
 
   /**
    * Test method for {@link IUserRepository#exists(UUID, String, String)}.

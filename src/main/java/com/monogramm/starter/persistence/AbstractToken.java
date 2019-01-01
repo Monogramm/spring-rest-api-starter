@@ -55,6 +55,10 @@ public abstract class AbstractToken extends AbstractGenericEntity {
    * User id property.
    */
   public static final String USER_PROPERTY = "user_id";
+  /**
+   * User id field.
+   */
+  public static final String USER_FIELD = "user";
 
   /**
    * Token default length.

@@ -130,9 +130,9 @@ public class PermissionController extends AbstractGenericController<Permission, 
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<PermissionDto> addData(@RequestBody PermissionDto dto,
-      UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<PermissionDto> addData(Authentication authentication,
+      @RequestBody PermissionDto dto, UriComponentsBuilder builder) {
+    return super.addData(authentication, dto, builder);
   }
 
   @Override

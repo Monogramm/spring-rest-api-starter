@@ -134,9 +134,9 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<ParameterDto> addData(@RequestBody ParameterDto dto,
-      UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<ParameterDto> addData(Authentication authentication,
+      @RequestBody ParameterDto dto, UriComponentsBuilder builder) {
+    return super.addData(authentication, dto, builder);
   }
 
   @Override

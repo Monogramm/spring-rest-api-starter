@@ -23,6 +23,8 @@ import javax.persistence.PreUpdate;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 /**
  * An abstract for generic entities.
@@ -68,6 +70,12 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    * Entity <em>created by</em> property.
    */
   public static final String CREATED_BY_PROPERTY = "created_by";
+  /**
+   * Entity <em>created by</em> field.
+   * 
+   * @see AbstractGenericEntity#createdBy
+   */
+  public static final String CREATED_BY_FIELD = "createdBy";
 
 
   /**
@@ -80,12 +88,24 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    * Entity <em>modified by</em> property.
    */
   public static final String MODIFIED_BY_PROPERTY = "modified_by";
+  /**
+   * Entity <em>modified by</em> field.
+   * 
+   * @see AbstractGenericEntity#modifiedBy
+   */
+  public static final String MODIFIED_BY_FIELD = "modifiedBy";
 
 
   /**
    * Entity <em>owner</em> property.
    */
   public static final String OWNER_PROPERTY = "owner";
+  /**
+   * Entity <em>owner</em> field.
+   * 
+   * @see AbstractGenericEntity#owner
+   */
+  public static final String OWNER_FIELD = "owner";
 
 
   /**
@@ -102,13 +122,18 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @Column(name = CREATED_AT_PROPERTY, columnDefinition = "TIMESTAMP", nullable = false,
       updatable = false)
+  @CreatedDate
   private Date createdAt;
 
   /**
    * Foreign key (relation) to whom created the record.
+   * 
+   * <p>
+   * TODO Use CreatedBy annotation and AuditorAware
+   * </p>
    */
   @JsonIdentityReference(alwaysAsId = true)
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = CREATED_BY_PROPERTY, nullable = true)
   private User createdBy = null;
 
@@ -117,13 +142,18 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    */
   @Column(name = MODIFIED_AT_PROPERTY, columnDefinition = "TIMESTAMP", nullable = true,
       insertable = false)
+  @LastModifiedDate
   private Date modifiedAt = null;
 
   /**
    * Foreign key (relation) to whom last modified the record.
+   * 
+   * <p>
+   * TODO Use LastModifiedBy annotation and AuditorAware
+   * </p>
    */
   @JsonIdentityReference(alwaysAsId = true)
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = MODIFIED_BY_PROPERTY, nullable = true)
   private User modifiedBy = null;
 
@@ -131,7 +161,7 @@ public abstract class AbstractGenericEntity implements Serializable, Jsonable {
    * Foreign key (relation) to whom owns the record.
    */
   @JsonIdentityReference(alwaysAsId = true)
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = OWNER_PROPERTY, nullable = true)
   private User owner = null;
 

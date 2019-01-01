@@ -1,17 +1,27 @@
 package com.monogramm.starter.persistence.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.madmath03.password.Passwords;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
+import com.monogramm.starter.persistence.AbstractToken;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.role.entity.Role;
+import com.monogramm.starter.persistence.type.entity.Type;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 
 @Entity
@@ -104,6 +114,168 @@ public class User extends AbstractGenericEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "role", nullable = true)
   private Role role = null;
+
+
+  // ################################################################
+  // Relationships with all other entities
+  // ################################################################
+
+  /**
+   * User accounts created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<User> createdUsers = new HashSet<>();
+  /**
+   * User accounts modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<User> modifiedUsers = new HashSet<>();
+  /**
+   * User accounts owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<User> ownedUsers = new HashSet<>();
+
+
+  /**
+   * Types created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Type> createdTypes = new HashSet<>();
+  /**
+   * Types modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Type> modifiedTypes = new HashSet<>();
+  /**
+   * Types owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<Type> ownedTypes = new HashSet<>();
+
+
+  /**
+   * Roles created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Role> createdRoles = new HashSet<>();
+  /**
+   * Roles modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Role> modifiedRoles = new HashSet<>();
+  /**
+   * Roles owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<Role> ownedRoles = new HashSet<>();
+
+
+  /**
+   * Permissions created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Permission> createdPermissions = new HashSet<>();
+  /**
+   * Permissions modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Permission> modifiedPermissions = new HashSet<>();
+  /**
+   * Permissions owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<Permission> ownedPermissions = new HashSet<>();
+
+
+  /**
+   * Parameters created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Parameter> createdParameters = new HashSet<>();
+  /**
+   * Parameters modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Parameter> modifiedParameters = new HashSet<>();
+  /**
+   * Parameters owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<Parameter> ownedParameters = new HashSet<>();
+
+
+  /**
+   * Password reset tokens created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<PasswordResetToken> createdPasswordResetTokens = new HashSet<>();
+  /**
+   * Password reset tokens modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<PasswordResetToken> modifiedPasswordResetTokens = new HashSet<>();
+  /**
+   * Password reset tokens owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<PasswordResetToken> ownedPasswordResetTokens = new HashSet<>();
+  /**
+   * Password reset tokens associated to this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = AbstractToken.USER_FIELD, fetch = FetchType.LAZY,
+      cascade = CascadeType.REMOVE)
+  private final Set<PasswordResetToken> passwordResetTokens = new HashSet<>();
+
+
+  /**
+   * Parameters created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<VerificationToken> createdVerificationTokens = new HashSet<>();
+  /**
+   * Parameters modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<VerificationToken> modifiedVerificationTokens = new HashSet<>();
+  /**
+   * Parameters owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<VerificationToken> ownedVerificationTokens = new HashSet<>();
+  /**
+   * Password reset tokens associated to this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = AbstractToken.USER_FIELD, fetch = FetchType.LAZY,
+      cascade = CascadeType.REMOVE)
+  private final Set<VerificationToken> verificationTokens = new HashSet<>();
+
+
+  // ################################################################
+
 
   /**
    * Create a {@link User}.
@@ -340,6 +512,89 @@ public class User extends AbstractGenericEntity {
     }
 
     return equals;
+  }
+
+  @PreRemove
+  protected void preRemove() {
+    // Set to null references to this user
+    for (User entity : this.createdUsers) {
+      entity.setCreatedBy(null);
+    }
+    for (User entity : this.modifiedUsers) {
+      entity.setModifiedBy(null);
+    }
+    for (User entity : this.ownedUsers) {
+      entity.setOwner(null);
+    }
+
+    // Set to null references to this user
+    for (Type entity : this.createdTypes) {
+      entity.setCreatedBy(null);
+    }
+    for (Type entity : this.modifiedTypes) {
+      entity.setModifiedBy(null);
+    }
+    for (Type entity : this.ownedTypes) {
+      entity.setOwner(null);
+    }
+
+    // Set to null references to this user
+    for (Role entity : this.createdRoles) {
+      entity.setCreatedBy(null);
+    }
+    for (Role entity : this.modifiedRoles) {
+      entity.setModifiedBy(null);
+    }
+    for (Role entity : this.ownedRoles) {
+      entity.setOwner(null);
+    }
+
+    // Set to null references to this user
+    for (Permission entity : this.createdPermissions) {
+      entity.setCreatedBy(null);
+    }
+    for (Permission entity : this.modifiedPermissions) {
+      entity.setModifiedBy(null);
+    }
+    for (Permission entity : this.ownedPermissions) {
+      entity.setOwner(null);
+    }
+
+    // Set to null references to this user
+    for (Parameter entity : this.createdParameters) {
+      entity.setCreatedBy(null);
+    }
+    for (Parameter entity : this.modifiedParameters) {
+      entity.setModifiedBy(null);
+    }
+    for (Parameter entity : this.ownedParameters) {
+      entity.setOwner(null);
+    }
+
+    // Set to null references to this user
+    for (PasswordResetToken entity : this.createdPasswordResetTokens) {
+      entity.setCreatedBy(null);
+    }
+    for (PasswordResetToken entity : this.modifiedPasswordResetTokens) {
+      entity.setModifiedBy(null);
+    }
+    for (PasswordResetToken entity : this.ownedPasswordResetTokens) {
+      entity.setOwner(null);
+    }
+    // associated tokens should be removed as well
+
+    // Set to null references to this user
+    for (VerificationToken entity : this.createdVerificationTokens) {
+      entity.setCreatedBy(null);
+    }
+    for (VerificationToken entity : this.modifiedVerificationTokens) {
+      entity.setModifiedBy(null);
+    }
+    for (VerificationToken entity : this.ownedVerificationTokens) {
+      entity.setOwner(null);
+    }
+    // associated tokens should be removed as well
+
   }
 
   /**

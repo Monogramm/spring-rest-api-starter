@@ -130,8 +130,9 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<RoleDto> addData(@RequestBody RoleDto dto, UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<RoleDto> addData(Authentication authentication, @RequestBody RoleDto dto,
+      UriComponentsBuilder builder) {
+    return super.addData(authentication, dto, builder);
   }
 
   @Override

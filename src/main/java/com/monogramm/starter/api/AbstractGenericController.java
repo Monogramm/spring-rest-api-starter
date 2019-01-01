@@ -9,6 +9,7 @@ import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.GenericService;
+import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -90,6 +91,17 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * @return the controller base path.
    */
   protected abstract String getControllerPath();
+
+  protected UUID getPrincipalId(final Authentication authentication) {
+    return IAuthenticationFacade.getPrincipalId(authentication);
+  }
+
+  protected User getPrincipalUser(final Authentication authentication) {
+    // XXX Improve Security by storing the User as Principal
+    final UUID principalId = this.getPrincipalId(authentication);
+
+    return User.builder().id(principalId).build();
+  }
 
   /**
    * Get a {@link T} entity by its unique identifier.
@@ -206,6 +218,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * Create an entity and return a {@link D} JSON representation about the entity created.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param dto <em>Required Body Content:</em> a {@link D} JSON representation about the {@link T}
    *        to create.
    * @param builder an URI builder to build the URI to the created {@link T} in the response.
@@ -251,8 +264,15 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public ResponseEntity<D> addData(@RequestBody D dto, UriComponentsBuilder builder) {
+  public ResponseEntity<D> addData(Authentication authentication, @RequestBody D dto,
+      UriComponentsBuilder builder) {
     final T entity = this.service.toEntity(dto);
+
+    // Set creator and owner
+    final UUID principalId = this.getPrincipalId(authentication);
+    dto.setCreatedBy(principalId);
+    dto.setOwner(principalId);
+
     final boolean added = service.add(entity);
 
     final ResponseEntity<D> response;
@@ -347,15 +367,17 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
       if (dto == null || dto.getId() == null || !Objects.equals(id, dto.getId().toString())) {
         status = HttpStatus.BAD_REQUEST;
       } else {
+        // Set last modification user
+        final UUID principalId = this.getPrincipalId(authentication);
+        dto.setModifiedBy(principalId);
+
         // Only update if owner or has administration authorities
         final T updatedEntity;
 
         final String[] adminAuthorities = this.getAdminAuthorities();
         if (adminAuthorities != null && adminAuthorities.length > 0
             && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
-          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
-
-          updatedEntity = service.updateByOwner(this.service.toEntity(dto), ownerId);
+          updatedEntity = service.updateByOwner(this.service.toEntity(dto), principalId);
         } else {
           updatedEntity = service.update(this.service.toEntity(dto));
         }

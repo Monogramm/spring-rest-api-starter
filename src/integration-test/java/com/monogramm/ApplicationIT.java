@@ -4,8 +4,6 @@
 
 package com.monogramm;
 
-import com.monogramm.Application;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

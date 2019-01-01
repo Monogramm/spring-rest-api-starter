@@ -34,6 +34,9 @@ import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
 import com.monogramm.starter.persistence.user.service.UserBridge;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
@@ -45,6 +48,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.context.request.WebRequest;
 
 /**
@@ -466,7 +471,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#changePassword(String, PasswordConfirmationDto)}.
+   * Test method for
+   * {@link UserController#changePassword(Authentication, String, PasswordConfirmationDto)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -476,11 +482,25 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+    when(getMockAuthentication().getDetails()).thenReturn(null);
     when(getMockService().setPassword(ID, password)).thenReturn(model);
 
-    final ResponseEntity<Void> actual = getController().changePassword(ID.toString(), dto);
+    final ResponseEntity<Void> actual =
+        getController().changePassword(getMockAuthentication(), ID.toString(), dto);
 
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verify(getMockAuthentication(), times(1)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
     verify(getMockService(), times(1)).setPassword(ID, password);
+    verify(getMockService(), times(1)).update(model);
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual.getStatusCode(), is(expectedResponse.getStatusCode()));
@@ -490,7 +510,41 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#changePassword(String, char[])}.
+   * Test method for
+   * {@link UserController#changePassword(Authentication, String, PasswordConfirmationDto)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test
+  public void testChangePasswordNotAdmin() {
+    final User model = User.builder(USERNAME, EMAIL).id(ID).build();
+    final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
+    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    final UUID principalId = null;
+
+    when(getMockAuthentication().getAuthorities()).thenReturn(Collections.emptyList());
+    when(getMockAuthentication().getDetails()).thenReturn(null);
+    when(getMockService().setPasswordByOwner(ID, password, principalId)).thenReturn(model);
+
+    final ResponseEntity<Void> actual =
+        getController().changePassword(getMockAuthentication(), ID.toString(), dto);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verify(getMockAuthentication(), times(2)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
+    verify(getMockService(), times(1)).setPasswordByOwner(ID, password, principalId);
+    verify(getMockService(), times(1)).update(model);
+    verifyNoMoreInteractions(getMockService());
+
+    assertThat(actual.getStatusCode(), is(expectedResponse.getStatusCode()));
+
+    assertThat(actual, is(expectedResponse));
+    assertNull(actual.getBody());
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#changePassword(Authentication, String, PasswordConfirmationDto)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -499,8 +553,10 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final PasswordConfirmationDto dto = null;
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<Void> actual = getController().changePassword(ID.toString(), dto);
+    final ResponseEntity<Void> actual =
+        getController().changePassword(getMockAuthentication(), ID.toString(), dto);
 
+    verifyNoMoreInteractions(getMockAuthentication());
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual, is(expectedResponse));
@@ -508,7 +564,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#changePassword(String, char[])}.
+   * Test method for
+   * {@link UserController#changePassword(Authentication, String, PasswordConfirmationDto)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -517,10 +574,21 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
     when(getMockService().setPassword(ID, password)).thenReturn(null);
 
-    final ResponseEntity<Void> actual = getController().changePassword(ID.toString(), dto);
+    final ResponseEntity<Void> actual =
+        getController().changePassword(getMockAuthentication(), ID.toString(), dto);
 
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
     verify(getMockService(), times(1)).setPassword(ID, password);
     verifyNoMoreInteractions(getMockService());
 
@@ -529,7 +597,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#changePassword(String, char[])}.
+   * Test method for
+   * {@link UserController#changePassword(Authentication, String, PasswordConfirmationDto)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -538,10 +607,21 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
     when(getMockService().setPassword(ID, password)).thenThrow(new UserNotFoundException());
 
-    final ResponseEntity<Void> actual = getController().changePassword(ID.toString(), dto);
+    final ResponseEntity<Void> actual =
+        getController().changePassword(getMockAuthentication(), ID.toString(), dto);
 
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
     verify(getMockService(), times(1)).setPassword(ID, password);
     verifyNoMoreInteractions(getMockService());
 
@@ -550,23 +630,38 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#changePassword(String, char[])}.
+   * Test method for
+   * {@link UserController#changePassword(Authentication, String, PasswordConfirmationDto)}.
    */
   @Test
   public void testChangePasswordIdIllegal() {
     final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final ResponseEntity<Void> actual = getController().changePassword("this_is_not_a_UUID", dto);
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
 
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+
+    final ResponseEntity<Void> actual =
+        getController().changePassword(getMockAuthentication(), "this_is_not_a_UUID", dto);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual, is(expectedResponse));
     assertNull(actual.getBody());
   }
 
+
+
   /**
-   * Test method for {@link UserController#activate(String, Boolean)}.
+   * Test method for {@link UserController#activate(Authentication, String, Boolean)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -575,11 +670,25 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final User model = User.builder(USERNAME, EMAIL).id(ID).build();
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+    when(getMockAuthentication().getDetails()).thenReturn(null);
     when(getMockService().setEnabled(ID, false)).thenReturn(model);
 
-    final ResponseEntity<Void> actual = getController().activate(ID.toString(), Boolean.FALSE);
+    final ResponseEntity<Void> actual =
+        getController().activate(getMockAuthentication(), ID.toString(), Boolean.FALSE);
 
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verify(getMockAuthentication(), times(1)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
     verify(getMockService(), times(1)).setEnabled(ID, false);
+    verify(getMockService(), times(1)).update(model);
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual.getStatusCode(), is(expectedResponse.getStatusCode()));
@@ -589,7 +698,38 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#activate(String, Boolean)}.
+   * Test method for {@link UserController#activate(Authentication, String, Boolean)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test
+  public void testActivateNotAdmin() {
+    final User model = User.builder(USERNAME, EMAIL).id(ID).build();
+    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    final UUID principalId = null;
+
+    when(getMockAuthentication().getAuthorities()).thenReturn(Collections.emptyList());
+    when(getMockAuthentication().getDetails()).thenReturn(null);
+    when(getMockService().setEnabledByOwner(ID, false, principalId)).thenReturn(model);
+
+    final ResponseEntity<Void> actual =
+        getController().activate(getMockAuthentication(), ID.toString(), Boolean.FALSE);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verify(getMockAuthentication(), times(2)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
+    verify(getMockService(), times(1)).setEnabledByOwner(ID, false, principalId);
+    verify(getMockService(), times(1)).update(model);
+    verifyNoMoreInteractions(getMockService());
+
+    assertThat(actual.getStatusCode(), is(expectedResponse.getStatusCode()));
+    assertNull(expectedResponse.getBody());
+
+    assertNull(actual.getBody());
+  }
+
+  /**
+   * Test method for {@link UserController#activate(Authentication, String, Boolean)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -597,8 +737,10 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void testActivateNull() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-    final ResponseEntity<Void> actual = getController().activate(ID.toString(), null);
+    final ResponseEntity<Void> actual =
+        getController().activate(getMockAuthentication(), ID.toString(), null);
 
+    verifyNoMoreInteractions(getMockAuthentication());
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual, is(expectedResponse));
@@ -606,7 +748,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#activate(String, Boolean)}.
+   * Test method for {@link UserController#activate(Authentication, String, Boolean)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -614,10 +756,22 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void testActivateNotFound() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+
     when(getMockService().setEnabled(ID, false)).thenReturn(null);
 
-    final ResponseEntity<Void> actual = getController().activate(ID.toString(), Boolean.FALSE);
+    final ResponseEntity<Void> actual =
+        getController().activate(getMockAuthentication(), ID.toString(), Boolean.FALSE);
 
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
     verify(getMockService(), times(1)).setEnabled(ID, false);
     verifyNoMoreInteractions(getMockService());
 
@@ -626,7 +780,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#activate(String, Boolean)}.
+   * Test method for {@link UserController#activate(Authentication, String, Boolean)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -634,10 +788,21 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void testActivateNotFoundException() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
     when(getMockService().setEnabled(ID, false)).thenThrow(new UserNotFoundException());
 
-    final ResponseEntity<Void> actual = getController().activate(ID.toString(), Boolean.FALSE);
+    final ResponseEntity<Void> actual =
+        getController().activate(getMockAuthentication(), ID.toString(), Boolean.FALSE);
 
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
     verify(getMockService(), times(1)).setEnabled(ID, false);
     verifyNoMoreInteractions(getMockService());
 
@@ -646,15 +811,26 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#activate(String, Boolean)}.
+   * Test method for {@link UserController#activate(Authentication, String, Boolean)}.
    */
   @Test
   public void testActivateIdIllegal() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final ResponseEntity<Void> actual =
-        getController().activate("this_is_not_a_UUID", Boolean.FALSE);
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
 
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+
+    final ResponseEntity<Void> actual =
+        getController().activate(getMockAuthentication(), "this_is_not_a_UUID", Boolean.FALSE);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual, is(expectedResponse));
@@ -688,6 +864,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
     verify(getMockService(), times(1)).register(model);
     verify(getMockService(), times(1)).findByEmail(model.getEmail());
+    verify(getMockService(), times(1)).update(user);
     verifyNoMoreInteractions(getMockService());
   }
 
@@ -821,8 +998,10 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     assertNull(actual.getBody());
   }
 
+
+
   /**
-   * Test method for {@link UserController#verify(String, String)}.
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    * @throws VerificationTokenNotFoundException if the verification token entity is not found.
@@ -833,16 +1012,31 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final User model = User.builder(USERNAME, EMAIL).id(ID).build();
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+    when(getMockAuthentication().getDetails()).thenReturn(null);
     when(verificationService.findByUserAndCode(ID, TOKEN)).thenReturn(verificationToken);
     when(getMockService().verify(ID)).thenReturn(model);
 
-    final ResponseEntity<Void> actual = getController().verify(ID.toString(), TOKEN);
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), ID.toString(), TOKEN);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verify(getMockAuthentication(), times(1)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
 
     verify(verificationService, times(1)).findByUserAndCode(ID, TOKEN);
     verify(verificationService, times(1)).update(verificationToken);
     verifyNoMoreInteractions(verificationService);
 
     verify(getMockService(), times(1)).verify(ID);
+    verify(getMockService(), times(1)).update(model);
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual.getStatusCode(), is(expectedResponse.getStatusCode()));
@@ -852,7 +1046,46 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#verify(String, String)}.
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   * @throws VerificationTokenNotFoundException if the verification token entity is not found.
+   */
+  @Test
+  public void testVerifyNotAdmin() {
+    final VerificationToken verificationToken = new VerificationToken();
+    final User model = User.builder(USERNAME, EMAIL).id(ID).build();
+    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    final UUID principalId = null;
+
+    when(getMockAuthentication().getAuthorities()).thenReturn(Collections.emptyList());
+    when(getMockAuthentication().getDetails()).thenReturn(null);
+    when(verificationService.findByUserAndCode(ID, TOKEN)).thenReturn(verificationToken);
+    when(getMockService().verifyByOwner(ID, principalId)).thenReturn(model);
+
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), ID.toString(), TOKEN);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verify(getMockAuthentication(), times(2)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
+
+    verify(verificationService, times(1)).findByUserAndCode(ID, TOKEN);
+    verify(verificationService, times(1)).update(verificationToken);
+    verifyNoMoreInteractions(verificationService);
+
+    verify(getMockService(), times(1)).verifyByOwner(ID, principalId);
+    verify(getMockService(), times(1)).update(model);
+    verifyNoMoreInteractions(getMockService());
+
+    assertThat(actual.getStatusCode(), is(expectedResponse.getStatusCode()));
+    assertNull(expectedResponse.getBody());
+
+    assertNull(actual.getBody());
+  }
+
+  /**
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    * @throws VerificationTokenNotFoundException if the verification token entity is not found.
@@ -863,7 +1096,10 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
     when(verificationService.findByUserAndCode(ID, TOKEN)).thenReturn(null);
 
-    final ResponseEntity<Void> actual = getController().verify(ID.toString(), TOKEN);
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), ID.toString(), TOKEN);
+
+    verifyNoMoreInteractions(getMockAuthentication());
 
     verify(verificationService, times(1)).findByUserAndCode(ID, TOKEN);
     verifyNoMoreInteractions(verificationService);
@@ -875,7 +1111,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#verify(String, String)}.
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    * @throws VerificationTokenNotFoundException if the verification token entity is not found.
@@ -885,10 +1121,23 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final VerificationToken verificationToken = new VerificationToken();
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+
     when(verificationService.findByUserAndCode(ID, TOKEN)).thenReturn(verificationToken);
     when(getMockService().verify(ID)).thenReturn(null);
 
-    final ResponseEntity<Void> actual = getController().verify(ID.toString(), TOKEN);
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), ID.toString(), TOKEN);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
 
     verify(verificationService, times(1)).findByUserAndCode(ID, TOKEN);
     verifyNoMoreInteractions(verificationService);
@@ -901,7 +1150,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#verify(String, String)}.
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    * @throws VerificationTokenNotFoundException if the verification token entity is not found.
@@ -913,7 +1162,10 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     when(verificationService.findByUserAndCode(ID, TOKEN))
         .thenThrow(new VerificationTokenNotFoundException());
 
-    final ResponseEntity<Void> actual = getController().verify(ID.toString(), TOKEN);
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), ID.toString(), TOKEN);
+
+    verifyNoMoreInteractions(getMockAuthentication());
 
     verify(verificationService, times(1)).findByUserAndCode(ID, TOKEN);
     verifyNoMoreInteractions(verificationService);
@@ -925,7 +1177,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#verify(String, String)}.
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    * @throws VerificationTokenNotFoundException if the verification token entity is not found.
@@ -935,10 +1187,23 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     final VerificationToken verificationToken = new VerificationToken();
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
+    final String[] adminAuthorities = getController().getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : getController().getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    when(getMockAuthentication().getAuthorities()).then(invocation -> userAuthorities);
+
     when(verificationService.findByUserAndCode(ID, TOKEN)).thenReturn(verificationToken);
     when(getMockService().verify(ID)).thenThrow(new UserNotFoundException());
 
-    final ResponseEntity<Void> actual = getController().verify(ID.toString(), TOKEN);
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), ID.toString(), TOKEN);
+
+    verify(getMockAuthentication(), times(1)).getAuthorities();
+    verifyNoMoreInteractions(getMockAuthentication());
 
     verify(verificationService, times(1)).findByUserAndCode(ID, TOKEN);
     verifyNoMoreInteractions(verificationService);
@@ -951,7 +1216,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   /**
-   * Test method for {@link UserController#verify(String, String)}.
+   * Test method for {@link UserController#verify(Authentication, String, String)}.
    * 
    * @throws UserNotFoundException if the user entity to update is not found.
    */
@@ -959,8 +1224,10 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void testVerifyIdIllegal() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final ResponseEntity<Void> actual = getController().verify("this_is_not_a_UUID", TOKEN);
+    final ResponseEntity<Void> actual =
+        getController().verify(getMockAuthentication(), "this_is_not_a_UUID", TOKEN);
 
+    verifyNoMoreInteractions(getMockAuthentication());
     verifyNoMoreInteractions(getMockService());
 
     assertThat(actual, is(expectedResponse));

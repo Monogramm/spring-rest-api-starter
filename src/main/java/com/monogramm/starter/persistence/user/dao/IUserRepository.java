@@ -121,6 +121,34 @@ public interface IUserRepository extends GenericRepository<User> {
   }
 
   /**
+   * Set the password of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setPassword(UUID, char[])} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param password the clear password to hash and set.
+   * @param owner the entity owner.
+   * 
+   * @return the updated user account, {@code null} if user account was not found in persistence
+   *         layer.
+   */
+  default User setPasswordByOwner(final UUID userId, final char[] password, final User owner) {
+    User updateEntity = this.findByIdAndOwner(userId, owner);
+
+    if (updateEntity != null) {
+      updateEntity.setPassword(password);
+
+      updateEntity = this.save(updateEntity);
+    }
+
+    return updateEntity;
+  }
+
+  /**
    * Set the active status of a user account.
    * 
    * @param userId the user account identifier.
@@ -142,6 +170,34 @@ public interface IUserRepository extends GenericRepository<User> {
   }
 
   /**
+   * Set the active status of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setEnabled(UUID, boolean)} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param enabled the enabled status to set.
+   * @param owner the entity owner.
+   * 
+   * @return the updated user account, {@code null} if user account was not found in persistence
+   *         layer.
+   */
+  default User setEnabledByOwner(final UUID userId, final boolean enabled, final User owner) {
+    User updateEntity = this.findByIdAndOwner(userId, owner);
+
+    if (updateEntity != null) {
+      updateEntity.setEnabled(enabled);
+
+      updateEntity = this.save(updateEntity);
+    }
+
+    return updateEntity;
+  }
+
+  /**
    * Set the verified status of a user account.
    * 
    * @param userId the user account identifier.
@@ -152,6 +208,34 @@ public interface IUserRepository extends GenericRepository<User> {
    */
   default User setVerified(final UUID userId, final boolean verified) {
     User updateEntity = this.findById(userId);
+
+    if (updateEntity != null) {
+      updateEntity.setVerified(verified);
+
+      updateEntity = this.save(updateEntity);
+    }
+
+    return updateEntity;
+  }
+
+  /**
+   * Set the verified status of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setVerified(UUID, boolean)} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param verified the verified status to set.
+   * @param owner the entity owner.
+   * 
+   * @return the updated user account, {@code null} if user account was not found in persistence
+   *         layer.
+   */
+  default User setVerifiedByOwner(final UUID userId, final boolean verified, final User owner) {
+    User updateEntity = this.findByIdAndOwner(userId, owner);
 
     if (updateEntity != null) {
       updateEntity.setVerified(verified);

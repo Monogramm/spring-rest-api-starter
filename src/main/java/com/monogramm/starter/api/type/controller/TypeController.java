@@ -130,8 +130,9 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<TypeDto> addData(@RequestBody TypeDto dto, UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<TypeDto> addData(Authentication authentication, @RequestBody TypeDto dto,
+      UriComponentsBuilder builder) {
+    return super.addData(authentication, dto, builder);
   }
 
   @Override

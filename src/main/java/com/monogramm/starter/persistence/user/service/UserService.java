@@ -140,6 +140,17 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
   }
 
   @Override
+  public User setPasswordByOwner(UUID userId, char[] password, User owner) {
+    final User updatedEntity = getRepository().setPasswordByOwner(userId, password, owner);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(userId);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
   public User setEnabled(final UUID userId, boolean enabled) {
     final User updatedEntity = getRepository().setEnabled(userId, enabled);
 
@@ -151,8 +162,30 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
   }
 
   @Override
+  public User setEnabledByOwner(UUID userId, boolean enabled, User owner) {
+    final User updatedEntity = getRepository().setEnabledByOwner(userId, enabled, owner);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(userId);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
   public User setVerified(final UUID userId, boolean verified) {
     final User updatedEntity = getRepository().setVerified(userId, true);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(userId);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
+  public User setVerifiedByOwner(UUID userId, boolean verified, User owner) {
+    final User updatedEntity = getRepository().setVerifiedByOwner(userId, true, owner);
 
     if (updatedEntity == null) {
       throw this.createEntityNotFoundException(userId);

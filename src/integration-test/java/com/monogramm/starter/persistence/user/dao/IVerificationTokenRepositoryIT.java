@@ -9,7 +9,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import com.monogramm.starter.persistence.AbstractGenericRepositoryIT;
-import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
 
@@ -18,9 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * {@link IVerificationTokenRepository} Integration Test.
@@ -33,24 +30,9 @@ public class IVerificationTokenRepositoryIT
   private static final String TOKEN = "Foo";
   private static final Date DUMMY_EXPIRY_DATE = new Date();
 
-  private static final String USERNAME = "Foo";
-  private static final String EMAIL = "foo@email.com";
-  private static final char[] PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
-
-  private User testUser;
-
-  @Autowired
-  private IUserRepository userRepository;
-
-  @Before
-  public void setUp() {
-    this.testUser = User.builder(USERNAME, EMAIL).password(PASSWORD.clone()).build();
-    this.userRepository.add(testUser);
-  }
-
   @Override
   protected VerificationToken buildTestEntity() {
-    return VerificationToken.builder(TOKEN, DUMMY_EXPIRY_DATE).user(testUser).build();
+    return VerificationToken.builder(TOKEN, DUMMY_EXPIRY_DATE).user(owner).build();
   }
 
   /**
@@ -77,7 +59,7 @@ public class IVerificationTokenRepositoryIT
     getRepository().add(model);
 
     final VerificationToken actual =
-        getRepository().findByUserAndCode(testUser.getId(), model.getCode());
+        getRepository().findByUserAndCode(owner.getId(), model.getCode());
 
     assertThat(actual, is(model));
   }
@@ -89,21 +71,20 @@ public class IVerificationTokenRepositoryIT
    */
   @Test
   public void testFindByUserAndTokenNoResult() {
-    assertNull(getRepository().findByUserAndCode(testUser.getId(), TOKEN));
+    assertNull(getRepository().findByUserAndCode(owner.getId(), TOKEN));
   }
 
   /**
-   * Test method for
-   * {@link IVerificationTokenRepository#findByNameIgnoreCase(java.lang.String)}.
+   * Test method for {@link IVerificationTokenRepository#findByNameIgnoreCase(java.lang.String)}.
    */
   @Test
   public void testFindByUserAndTokenNonUnique() {
     getRepository()
-        .add(VerificationToken.builder(TOKEN + "1", DUMMY_EXPIRY_DATE).user(testUser).build());
+        .add(VerificationToken.builder(TOKEN + "1", DUMMY_EXPIRY_DATE).user(owner).build());
     getRepository()
-        .add(VerificationToken.builder(TOKEN + "2", DUMMY_EXPIRY_DATE).user(testUser).build());
+        .add(VerificationToken.builder(TOKEN + "2", DUMMY_EXPIRY_DATE).user(owner).build());
 
-    assertNull(getRepository().findByUserAndCode(testUser.getId(), TOKEN));
+    assertNull(getRepository().findByUserAndCode(owner.getId(), TOKEN));
   }
 
   /**
@@ -113,7 +94,7 @@ public class IVerificationTokenRepositoryIT
    */
   @Test
   public void testFindByUserAndTokenNotFound() {
-    assertNull(getRepository().findByUserAndCode(testUser, null));
+    assertNull(getRepository().findByUserAndCode(owner, null));
   }
 
   /**

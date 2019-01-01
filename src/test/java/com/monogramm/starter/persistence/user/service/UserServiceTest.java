@@ -403,6 +403,8 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     getService().update(model);
   }
 
+
+
   /**
    * Test method for {@link UserService#setPassword(UUID, char[])}.
    * 
@@ -445,6 +447,61 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
 
     getService().setPassword(ID, password);
   }
+
+
+  /**
+   * Test method for {@link UserService#setPasswordByOwner(UUID, char[], UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test
+  public void testSetPasswordByOwner() {
+    final User model = this.buildTestEntity();
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setPasswordByOwner(ID, password, owner)).thenReturn(model);
+
+    final User actual = getService().setPasswordByOwner(ID, password, ownerId);
+
+    verify(getMockRepository(), times(1)).setPasswordByOwner(ID, password, owner);
+    verifyNoMoreInteractions(getMockRepository());
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link UserService#setPasswordByOwner(UUID, char[], UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testSetPasswordByOwnerNotFound() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setPasswordByOwner(ID, password, owner)).thenReturn(null);
+
+    getService().setPasswordByOwner(ID, password, ownerId);
+  }
+
+  /**
+   * Test method for {@link UserService#setPasswordByOwner(UUID, char[], UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testSetPasswordByOwnerNotFoundException() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setPasswordByOwner(ID, password, owner))
+        .thenThrow(new UserNotFoundException());
+
+    getService().setPasswordByOwner(ID, password, ownerId);
+  }
+
+
 
   /**
    * Test method for {@link UserService#setEnabled(UUID, boolean)}.
@@ -489,6 +546,61 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     getService().setEnabled(ID, false);
   }
 
+
+  /**
+   * Test method for {@link UserService#setEnabled(UUID, boolean)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test
+  public void testSetEnabledByOwner() {
+    final User model = this.buildTestEntity();
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setEnabledByOwner(ID, false, owner)).thenReturn(model);
+
+    final User actual = getService().setEnabledByOwner(ID, false, ownerId);
+
+    verify(getMockRepository(), times(1)).setEnabledByOwner(ID, false, owner);
+    verifyNoMoreInteractions(getMockRepository());
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link UserService#setEnabled(UUID, boolean)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testSetEnabledByOwnerNotFound() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setEnabledByOwner(ID, false, owner)).thenReturn(null);
+
+    getService().setEnabledByOwner(ID, false, ownerId);
+  }
+
+  /**
+   * Test method for {@link UserService#setEnabled(UUID, boolean)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testSetEnabledByOwnerNotFoundException() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setEnabledByOwner(ID, false, owner))
+        .thenThrow(new UserNotFoundException());
+
+    getService().setEnabledByOwner(ID, false, ownerId);
+  }
+
+
+
   /**
    * Test method for {@link UserService#enable(UUID)}.
    * 
@@ -531,6 +643,61 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
 
     getService().enable(ID);
   }
+
+
+  /**
+   * Test method for {@link UserService#enableByOwner(UUID, UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test
+  public void testEnableByOwner() {
+    final User model = this.buildTestEntity();
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setEnabledByOwner(ID, true, owner)).thenReturn(model);
+
+    final User actual = getService().enableByOwner(ID, ownerId);
+
+    verify(getMockRepository(), times(1)).setEnabledByOwner(ID, true, owner);
+    verifyNoMoreInteractions(getMockRepository());
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link UserService#enableByOwner(UUID, UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testEnableByOwnerNotFound() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setEnabledByOwner(ID, true, owner)).thenReturn(null);
+
+    getService().enableByOwner(ID, ownerId);
+  }
+
+  /**
+   * Test method for {@link UserService#enableByOwner(UUID, UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testEnableByOwnerNotFoundException() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setEnabledByOwner(ID, true, owner))
+        .thenThrow(new UserNotFoundException());
+
+    getService().enableByOwner(ID, ownerId);
+  }
+
+
 
   /**
    * Test method for {@link UserService#register(com.monogramm.starter.dto.user.RegistrationDto)}.
@@ -605,6 +772,8 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     getService().register(model);
   }
 
+
+
   /**
    * Test method for {@link UserService#verify(UUID)}.
    * 
@@ -646,6 +815,59 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     when(getMockRepository().setVerified(ID, true)).thenThrow(new UserNotFoundException());
 
     getService().verify(ID);
+  }
+
+
+  /**
+   * Test method for {@link UserService#verifyByOwner(UUID, UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test
+  public void testVerifyByOwner() {
+    final User model = this.buildTestEntity();
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setVerifiedByOwner(ID, true, owner)).thenReturn(model);
+
+    final User actual = getService().verifyByOwner(ID, ownerId);
+
+    verify(getMockRepository(), times(1)).setVerifiedByOwner(ID, true, owner);
+    verifyNoMoreInteractions(getMockRepository());
+
+    assertThat(actual, is(model));
+  }
+
+  /**
+   * Test method for {@link UserService#verifyByOwner(UUID, UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testVerifyByOwnerNotFound() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setVerifiedByOwner(ID, true, owner)).thenReturn(null);
+
+    getService().verifyByOwner(ID, ownerId);
+  }
+
+  /**
+   * Test method for {@link UserService#verifyByOwner(UUID, UUID)}.
+   * 
+   * @throws UserNotFoundException if the user entity to update is not found.
+   */
+  @Test(expected = UserNotFoundException.class)
+  public void testVerifyByOwnerNotFoundException() {
+    final UUID ownerId = UUID.randomUUID();
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().setVerifiedByOwner(ID, true, owner))
+        .thenThrow(new UserNotFoundException());
+
+    getService().verifyByOwner(ID, ownerId);
   }
 
 }

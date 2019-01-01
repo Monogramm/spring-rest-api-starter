@@ -153,6 +153,15 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
+   * Get the {@link #mockAuthentication}.
+   * 
+   * @return the {@link #mockAuthentication}.
+   */
+  protected final Authentication getMockAuthentication() {
+    return mockAuthentication;
+  }
+
+  /**
    * Test method for {@link AbstractGenericController#getService()}.
    */
   @Test
@@ -314,7 +323,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.add(model)).thenReturn(true);
     when(mockService.toDto(model)).thenReturn(dto);
 
-    final ResponseEntity<D> actualResponse = controller.addData(dto, new UriComponentsBuilder() {});
+    final ResponseEntity<D> actualResponse =
+        controller.addData(getMockAuthentication(), dto, new UriComponentsBuilder() {});
 
     assertThat(actualResponse.getStatusCode(), is(expectedResponse.getStatusCode()));
     assertThat(actualResponse.getBody(), is(expectedResponse.getBody()));
@@ -344,7 +354,8 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.add(model)).thenReturn(false);
 
-    final ResponseEntity<D> actualResponse = controller.addData(dto, new UriComponentsBuilder() {});
+    final ResponseEntity<D> actualResponse =
+        controller.addData(getMockAuthentication(), dto, new UriComponentsBuilder() {});
 
     assertThat(actualResponse, is(expectedResponse));
 
@@ -372,6 +383,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     }
 
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.update(model)).thenReturn(model);
     when(mockService.toDto(model)).thenReturn(dto);
@@ -380,6 +392,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
         controller.updateData(mockAuthentication, model.getId().toString(), dto);
 
     verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
     verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).toEntity(dto);
     verify(mockService, times(1)).update(model);
@@ -472,6 +485,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     }
 
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.update(model)).thenReturn(null);
 
@@ -479,6 +493,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
         controller.updateData(mockAuthentication, model.getId().toString(), dto);
 
     verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
     verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).toEntity(dto);
     verify(mockService, times(1)).update(model);
@@ -506,6 +521,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     }
 
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.toEntity(dto)).thenReturn(model);
     when(mockService.update(model)).thenThrow(this.buildTestEntityNotFound());
 
@@ -513,6 +529,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
         controller.updateData(mockAuthentication, model.getId().toString(), dto);
 
     verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
     verifyNoMoreInteractions(mockAuthentication);
     verify(mockService, times(1)).toEntity(dto);
     verify(mockService, times(1)).update(model);
