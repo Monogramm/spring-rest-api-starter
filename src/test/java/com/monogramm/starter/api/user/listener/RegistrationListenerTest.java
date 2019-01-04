@@ -145,7 +145,7 @@ public class RegistrationListenerTest {
     when(messages.getMessage(any(String.class), any(String[].class), any(Locale.class)))
         .thenReturn(message);
 
-    when(env.getProperty("no_reply.email")).thenReturn("no_replay@dummy.com");
+    when(env.getProperty("application.email.no_reply")).thenReturn("no_replay@dummy.com");
 
     // Operation
     this.listener.onApplicationEvent(event);
@@ -160,7 +160,7 @@ public class RegistrationListenerTest {
     verifyNoMoreInteractions(verificationService);
 
     verify(env, times(1)).getProperty("spring.application.name");
-    verify(env, times(1)).getProperty("no_reply.email");
+    verify(env, times(1)).getProperty("application.email.no_reply");
     verifyNoMoreInteractions(env);
 
     verify(mailSender, times(1)).send(any(SimpleMailMessage.class));

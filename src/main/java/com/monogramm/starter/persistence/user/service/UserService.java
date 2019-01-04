@@ -1,5 +1,6 @@
 package com.monogramm.starter.persistence.user.service;
 
+import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
@@ -28,7 +29,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
    */
   private static final Logger LOG = LogManager.getLogger(UserService.class);
 
-  public static final String DEFAULT_ROLE = "User";
+  public static final String DEFAULT_ROLE = InitialDataLoader.USER_ROLE;
 
   private final IRoleRepository roleRepository;
 
@@ -199,6 +200,10 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
     final User user = User.builder(registration.getUsername(), registration.getEmail())
         .password(registration.getPassword()).build();
 
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Registering new user: " + user);
+    }
+
     /*
      * TODO Add password strengths and rules.
      * http://www.baeldung.com/registration-password-strength-and-rules
@@ -211,6 +216,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
       throw e;
     }
     user.setRole(defaultRole);
+    LOG.debug("Applying role to user: " + defaultRole);
 
     return this.add(user);
   }

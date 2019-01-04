@@ -143,7 +143,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     boolean initDone = this.initDefaultData();
 
     // Setup the demo data
-    if (initDone && "true".equalsIgnoreCase(this.env.getProperty("monogramm.data.demo"))) {
+    if (initDone && "true".equalsIgnoreCase(this.env.getProperty("application.data.demo"))) {
       initDone &= this.initDemoData();
     }
 

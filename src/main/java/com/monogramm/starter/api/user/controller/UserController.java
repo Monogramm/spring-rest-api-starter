@@ -448,6 +448,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   private void sendEmailPasswordReset(final User user, WebRequest request) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Requesting to send password reset email for user: " + user);
+    }
     eventPublisher.publishEvent(
         new OnPasswordResetEvent(user, request.getLocale(), request.getContextPath()));
   }
@@ -754,6 +757,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   @PreAuthorize(value = "isAnonymous()")
   public ResponseEntity<Void> register(@RequestBody @Valid RegistrationDto registration,
       WebRequest request) {
+    LOG.debug("Registering new user...");
+
     boolean registered;
     try {
       registered = this.getService().register(registration);
@@ -763,6 +768,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
     HttpStatus status;
     if (registered) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("New user registered: " + registration.getEmail());
+      }
       final User user = this.getService().findByEmail(registration.getEmail());
 
       // Make the registered user owner of its own account
@@ -772,6 +780,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
       this.sendEmailVerificationEvent(user, request);
       status = HttpStatus.NO_CONTENT;
     } else {
+      LOG.debug("Conflict on user registration");
       status = HttpStatus.CONFLICT;
     }
 
@@ -870,6 +879,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
     HttpStatus status;
     if (user == null) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("No user account found matching email: " + email);
+      }
       /*
        * Do not alert the client that no account exists. This would allow an attacker to identify
        * user accounts.
@@ -886,6 +898,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   private void sendEmailVerificationEvent(final User user, final WebRequest request) {
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Requesting to send verification email for user: " + user);
+    }
     eventPublisher.publishEvent(
         new OnRegistrationCompleteEvent(user, request.getLocale(), request.getContextPath()));
   }
@@ -954,6 +969,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   public ResponseEntity<Void> verify(Authentication authentication,
       @PathVariable @ValidUuid String id, @RequestBody String token) {
     HttpStatus status;
+    LOG.debug("Verifying user...");
 
     final Date now = new Date();
     try {
@@ -974,12 +990,24 @@ public class UserController extends AbstractGenericController<User, UserDto> {
             && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
           final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
 
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Verifying owned user account: " + userId);
+          }
+
           user = this.getService().verifyByOwner(userId, ownerId);
         } else {
+
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Verifying user account: " + userId);
+          }
           user = this.getService().verify(userId);
         }
 
       } else {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("No verification token matching: " + userId + ", " + token);
+        }
+
         user = null;
       }
 
