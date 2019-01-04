@@ -12,7 +12,14 @@ A "simple" starter project custom RESTful API.
 The project uses Spring Boot and a MySQL database.
 
 ## Prerequisites
-0. Globally installed [Git](https://git-scm.com/), [JDK](https://www.java.com/download/) (8 at least), [Maven](https://maven.apache.org/) and [MySQL](https://www.mysql.com/)
+0. Globally installed [Git](https://git-scm.com/), [JDK](https://www.java.com/download/) (8 at least) and [Maven](https://maven.apache.org/).
+
+The project should work with the following databases:
+* [MySQL](https://www.mysql.com/) / [MariaDB](https://mariadb.org/)
+* [PostgreSQL](https://www.postgresql.org/)
+* [Java H2](http://www.h2database.com)
+
+Edit the `application.properties` depending on the database system you need (see _installation_).
 
 ### Installation ###
 
@@ -21,9 +28,9 @@ The project uses Spring Boot and a MySQL database.
 
 Finally, edit the properties in `application.properties` to your needs (name, db, mail, etc...) and compile the project.
 
-* `mvn clean package`
+* `mvn clean install`
 
-The application will automatically setup the database.
+The application will automatically setup the database. See `InitialDataLoader.java` for details.
 
 ## Run Backend API
 * `mvn spring-boot:run`
@@ -39,7 +46,12 @@ You can now access your API at `http://localhost:8080/spring-rest-api-starter/ap
 
 Be careful as the IT will startup the server and test the actual functions. This means that all application properties must be valid for integration, even mail ones (not mocked).
 
-The IT use there own [application.properties](src/integration-test/resources/application.properties) which defaults to a separate database. Make sure to edit the default parameters to your environment.
+The IT use there own [application.properties](src/integration-test/resources/application.properties) which defaults to a in memory H2 database and in memory GreenMail mail server.
+
+## Release
+
+* `mvn release:prepare`
+* `mvn release:perform`
 
 ### Documentation
 
@@ -63,6 +75,9 @@ See the complete license in the bundle:
 ### Who do I talk to? ###
 
 * [madmath03](https://github.com/madmath03)
+
+### Awesome contributors ###
+
 * [ebacem](https://github.com/ebacem)
 * [vinctix](https://github.com/vinctix)
 
