@@ -15,6 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link Type} service.
+ * 
+ * @author madmath03
+ */
 @Service
 public class TypeService extends AbstractGenericService<Type, TypeDto> implements ITypeService {
 

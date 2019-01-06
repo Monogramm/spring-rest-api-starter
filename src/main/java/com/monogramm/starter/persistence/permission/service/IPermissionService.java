@@ -11,6 +11,11 @@ import com.monogramm.starter.persistence.permission.exception.PermissionNotFound
 
 import java.util.List;
 
+/**
+ * {@link Permission} service interface.
+ * 
+ * @author madmath03
+ */
 public interface IPermissionService extends GenericService<Permission, PermissionDto> {
 
   @Override
@@ -32,8 +37,7 @@ public interface IPermissionService extends GenericService<Permission, Permissio
    * 
    * @return the permission matching the name.
    * 
-   * @throws PermissionNotFoundException if no permission matches the name in the
-   *         repository.
+   * @throws PermissionNotFoundException if no permission matches the name in the repository.
    */
   Permission findByName(final String name);
 

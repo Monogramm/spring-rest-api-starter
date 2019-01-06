@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The {@link VerificationToken}s Data Access Object (DAO) interface.
+ * The {@link VerificationToken} Data Access Object (DAO) interface.
  * 
  * @author madmath03
  */

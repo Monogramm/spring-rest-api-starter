@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The Permission API Controller.
+ * The {@link Permission} API Controller.
  * 
  * @author madmath03
  */
@@ -38,7 +38,7 @@ public class PermissionController extends AbstractGenericController<Permission, 
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "permissions";
+  public static final String CONTROLLER_PATH = SEP + "permissions";
 
   /**
    * The Authority data type of this controller.

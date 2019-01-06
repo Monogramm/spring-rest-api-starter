@@ -47,6 +47,11 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    */
   private static final Logger LOG = LogManager.getLogger(AbstractGenericController.class);
 
+  /**
+   * Default separator used for controller path.
+   */
+  public static final char SEP = '/';
+
   private final GenericService<T, D> service;
 
   /**

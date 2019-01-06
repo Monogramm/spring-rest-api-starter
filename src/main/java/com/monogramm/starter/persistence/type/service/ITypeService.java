@@ -7,6 +7,11 @@ import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
 
 import java.util.List;
 
+/**
+ * {@link Type} service interface.
+ * 
+ * @author madmath03
+ */
 public interface ITypeService extends GenericService<Type, TypeDto> {
 
   @Override

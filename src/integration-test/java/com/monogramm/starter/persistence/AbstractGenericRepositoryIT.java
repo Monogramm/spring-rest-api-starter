@@ -41,6 +41,9 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 /**
  * Abstract {@link GenericRepository} Integration Test.
  * 
+ * @param <T> Entity type.
+ * @param <R> Repository type.
+ * 
  * @author madmath03
  */
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,

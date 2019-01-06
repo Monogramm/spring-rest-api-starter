@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The Parameter API Controller.
+ * The {@link Parameter} API Controller.
  * 
  * @author madmath03
  */
@@ -42,7 +42,7 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "parameters";
+  public static final String CONTROLLER_PATH = SEP + "parameters";
 
   /**
    * The Authority data type of this controller.

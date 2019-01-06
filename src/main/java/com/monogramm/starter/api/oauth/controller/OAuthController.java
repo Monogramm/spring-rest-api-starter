@@ -1,5 +1,7 @@
 package com.monogramm.starter.api.oauth.controller;
 
+import com.monogramm.starter.api.AbstractGenericController;
+
 import java.util.Locale;
 
 import javax.annotation.Resource;
@@ -35,7 +37,7 @@ public final class OAuthController {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = AbstractGenericController.SEP + TYPE;
 
   /**
    * The request path for login.

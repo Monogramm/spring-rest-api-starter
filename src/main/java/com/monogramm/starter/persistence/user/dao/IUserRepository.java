@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The {@link User}s Data Access Object (DAO) interface.
+ * The {@link User} Data Access Object (DAO) interface.
  * 
  * @author madmath03
  */

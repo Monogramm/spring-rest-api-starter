@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * ParameterService.
+ * {@link Parameter} service.
  * 
  * @author madmath03
  */

@@ -10,6 +10,11 @@ import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * {@link User} service interface.
+ * 
+ * @author madmath03
+ */
 public interface IUserService extends GenericService<User, UserDto> {
 
   @Override

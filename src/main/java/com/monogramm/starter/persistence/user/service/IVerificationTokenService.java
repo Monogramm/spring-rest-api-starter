@@ -12,6 +12,11 @@ import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoun
 
 import java.util.UUID;
 
+/**
+ * {@link VerificationToken} service interface.
+ * 
+ * @author madmath03
+ */
 public interface IVerificationTokenService
     extends GenericService<VerificationToken, VerificationTokenDto> {
 

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The Role API Controller.
+ * The {@link Role} API Controller.
  * 
  * @author madmath03
  */
@@ -38,7 +38,7 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "roles";
+  public static final String CONTROLLER_PATH = SEP + "roles";
 
   /**
    * The Authority data type of this controller.

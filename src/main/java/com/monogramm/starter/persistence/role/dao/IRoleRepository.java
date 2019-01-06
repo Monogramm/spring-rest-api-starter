@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * The Roles Data Access Object (DAO) interface.
+ * The {@link Role} Data Access Object (DAO) interface.
  * 
  * @author madmath03
  */
@@ -28,8 +28,7 @@ public interface IRoleRepository extends GenericRepository<Role> {
    * 
    * @return the list of all the roles matching the search through the repository.
    */
-  @Query("FROM Role AS r "
-      + "WHERE LOWER(r.name) LIKE concat('%', LOWER(:name), '%')")
+  @Query("FROM Role AS r " + "WHERE LOWER(r.name) LIKE concat('%', LOWER(:name), '%')")
   List<Role> findAllContainingNameIgnoreCase(@Param("name") final String name);
 
   /**
@@ -54,6 +53,5 @@ public interface IRoleRepository extends GenericRepository<Role> {
    */
   @Query("SELECT count(r) > 0 FROM Role AS r "
       + "WHERE r.id = :roleId OR LOWER(r.name) = LOWER(:name)")
-  boolean exists(@Param("roleId") final UUID roleId,
-      @Param("name") final String name);
+  boolean exists(@Param("roleId") final UUID roleId, @Param("name") final String name);
 }

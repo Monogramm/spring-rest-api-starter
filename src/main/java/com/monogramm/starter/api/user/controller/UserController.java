@@ -49,7 +49,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The User API Controller.
+ * The {@link User} API Controller.
  * 
  * @author madmath03
  */
@@ -68,7 +68,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "users";
+  public static final String CONTROLLER_PATH = SEP + "users";
   /**
    * The request path for registration.
    */

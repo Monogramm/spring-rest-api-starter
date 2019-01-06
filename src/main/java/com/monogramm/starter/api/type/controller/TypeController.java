@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The Type API Controller.
+ * The {@link Type} API Controller.
  * 
  * @author madmath03
  */
@@ -38,7 +38,7 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + "types";
+  public static final String CONTROLLER_PATH = SEP + "types";
 
   /**
    * The Authority data type of this controller.

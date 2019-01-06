@@ -16,6 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link Role} service.
+ * 
+ * @author madmath03
+ */
 @Service
 public class RoleService extends AbstractGenericService<Role, RoleDto> implements IRoleService {
 
