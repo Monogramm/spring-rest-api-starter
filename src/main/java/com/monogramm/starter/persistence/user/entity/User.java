@@ -10,6 +10,7 @@ import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.type.entity.Type;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -517,84 +518,56 @@ public class User extends AbstractGenericEntity {
   @PreRemove
   protected void preRemove() {
     // Set to null references to this user
-    for (User entity : this.createdUsers) {
-      entity.setCreatedBy(null);
-    }
-    for (User entity : this.modifiedUsers) {
-      entity.setModifiedBy(null);
-    }
-    for (User entity : this.ownedUsers) {
-      entity.setOwner(null);
-    }
+    resetRelationships(createdUsers, modifiedUsers, ownedUsers);
 
     // Set to null references to this user
-    for (Type entity : this.createdTypes) {
-      entity.setCreatedBy(null);
-    }
-    for (Type entity : this.modifiedTypes) {
-      entity.setModifiedBy(null);
-    }
-    for (Type entity : this.ownedTypes) {
-      entity.setOwner(null);
-    }
+    resetRelationships(createdTypes, modifiedTypes, ownedTypes);
 
     // Set to null references to this user
-    for (Role entity : this.createdRoles) {
-      entity.setCreatedBy(null);
-    }
-    for (Role entity : this.modifiedRoles) {
-      entity.setModifiedBy(null);
-    }
-    for (Role entity : this.ownedRoles) {
-      entity.setOwner(null);
-    }
+    resetRelationships(createdRoles, modifiedRoles, ownedRoles);
 
     // Set to null references to this user
-    for (Permission entity : this.createdPermissions) {
-      entity.setCreatedBy(null);
-    }
-    for (Permission entity : this.modifiedPermissions) {
-      entity.setModifiedBy(null);
-    }
-    for (Permission entity : this.ownedPermissions) {
-      entity.setOwner(null);
-    }
+    resetRelationships(createdPermissions, modifiedPermissions, ownedPermissions);
 
     // Set to null references to this user
-    for (Parameter entity : this.createdParameters) {
-      entity.setCreatedBy(null);
-    }
-    for (Parameter entity : this.modifiedParameters) {
-      entity.setModifiedBy(null);
-    }
-    for (Parameter entity : this.ownedParameters) {
-      entity.setOwner(null);
-    }
+    resetRelationships(createdParameters, modifiedParameters, ownedParameters);
 
     // Set to null references to this user
-    for (PasswordResetToken entity : this.createdPasswordResetTokens) {
-      entity.setCreatedBy(null);
-    }
-    for (PasswordResetToken entity : this.modifiedPasswordResetTokens) {
-      entity.setModifiedBy(null);
-    }
-    for (PasswordResetToken entity : this.ownedPasswordResetTokens) {
-      entity.setOwner(null);
-    }
-    // associated tokens should be removed as well
+    resetRelationships(createdPasswordResetTokens, modifiedPasswordResetTokens,
+        ownedPasswordResetTokens);
+    // associated tokens should be removed as well but through cascading
 
     // Set to null references to this user
-    for (VerificationToken entity : this.createdVerificationTokens) {
+    resetRelationships(createdVerificationTokens, modifiedVerificationTokens,
+        ownedVerificationTokens);
+    // associated tokens should be removed as well but through cascading
+
+  }
+
+  /**
+   * Set usual relationships to {@code null}.
+   * 
+   * @see #preRemove()
+   * 
+   * @param created entities whose <em>"created by"</em> relation must be set to {@code null}
+   * @param modified entities whose <em>"modified by"</em> relation must be set to {@code null}
+   * @param owned entities whose <em>"owned by"</em> relation must be set to {@code null}
+   * 
+   * @throws NullPointerException if any of the collection is {@code null} or contains {@code null}
+   *         values
+   */
+  protected static void resetRelationships(Collection<? extends AbstractGenericEntity> created,
+      Collection<? extends AbstractGenericEntity> modified,
+      Collection<? extends AbstractGenericEntity> owned) {
+    for (final AbstractGenericEntity entity : created) {
       entity.setCreatedBy(null);
     }
-    for (VerificationToken entity : this.modifiedVerificationTokens) {
+    for (final AbstractGenericEntity entity : modified) {
       entity.setModifiedBy(null);
     }
-    for (VerificationToken entity : this.ownedVerificationTokens) {
+    for (final AbstractGenericEntity entity : owned) {
       entity.setOwner(null);
     }
-    // associated tokens should be removed as well
-
   }
 
   /**
