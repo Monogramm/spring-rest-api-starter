@@ -7,6 +7,7 @@ package com.monogramm.starter.persistence.parameter.entity;
 import static org.junit.Assert.assertNotNull;
 
 import com.monogramm.starter.persistence.AbstractParameterTest;
+import com.monogramm.starter.persistence.ParameterType;
 
 import org.junit.Test;
 
@@ -31,6 +32,19 @@ public class ParameterTest extends AbstractParameterTest<Parameter> {
   @Test
   public void testBuilderStringString() {
     assertNotNull(Parameter.builder("test", "42"));
+  }
+
+  /**
+   * Test method for {@link Parameter#builder(String, ParameterType, Object)}.
+   */
+  @Test
+  public void testBuilderStringParameterTypeString() {
+    assertNotNull(Parameter.builder("test", ParameterType.INTEGER, "42"));
+  }
+
+  @Override
+  protected Parameter buildTestEntity(String name, ParameterType type, Object value) {
+    return new Parameter(name, type, value);
   }
 
   @Override

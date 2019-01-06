@@ -5,6 +5,7 @@
 package com.monogramm.starter.persistence.parameter.entity;
 
 import com.monogramm.starter.persistence.AbstractParameter;
+import com.monogramm.starter.persistence.ParameterType;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -45,6 +46,20 @@ public class Parameter extends AbstractParameter {
   }
 
   /**
+   * Get a new {@link ParameterBuilder}.
+   * 
+   * @param name the name of your record being built.
+   * @param type the type of your record being built.
+   * @param value the value of your record being built.
+   *
+   * @return a new {@link ParameterBuilder}.
+   */
+  public static ParameterBuilder builder(final String name, final ParameterType type,
+      final Object value) {
+    return new ParameterBuilder(name, type, value);
+  }
+
+  /**
    * Create a {@link Parameter}.
    * 
    */
@@ -74,6 +89,17 @@ public class Parameter extends AbstractParameter {
   }
 
   /**
+   * Create a {@link Parameter}.
+   * 
+   * @param name the parameter name.
+   * @param type the parameter type.
+   * @param value the parameter value.
+   */
+  public Parameter(String name, ParameterType type, Object value) {
+    super(name, type, value);
+  }
+
+  /**
    * A functional programming {@link Parameter} builder.
    * 
    * @author madmath03
@@ -97,6 +123,17 @@ public class Parameter extends AbstractParameter {
      */
     public ParameterBuilder(String name, Object value) {
       super(name, value);
+    }
+
+    /**
+     * Create a {@link ParameterBuilder}.
+     * 
+     * @param name the name of your record being built.
+     * @param type the type of your record being built.
+     * @param value the value of your record being built.
+     */
+    public ParameterBuilder(String name, ParameterType type, Object value) {
+      super(name, type, value);
     }
 
     @Override

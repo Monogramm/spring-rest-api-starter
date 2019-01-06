@@ -124,7 +124,25 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
     super();
 
     this.setName(name);
-    this.setValue(value);
+    this.writeValue(value);
+  }
+
+  /**
+   * Create a {@link AbstractParameter}.
+   * 
+   * @param name the parameter name.
+   * @param type the parameter type.
+   * @param value the parameter value.
+   */
+  public AbstractParameter(String name, ParameterType type, Object value) {
+    super();
+    if (type == null) {
+      throw new IllegalArgumentException("Parameter type cannot be null");
+    }
+
+    this.setName(name);
+    this.setType(type);
+    this.setValue(type.write(value));
   }
 
   /**
@@ -202,17 +220,6 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
   }
 
   /**
-   * Write the {@link #value} using the {@link #type} writer.
-   * 
-   * @see ParameterType#write(Object)
-   * 
-   * @param value value to write in the type's format.
-   */
-  public void writeValue(String value) {
-    this.value = type.write(value);
-  }
-
-  /**
    * Set the {@link #value}.
    * 
    * <p>
@@ -240,14 +247,10 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    * 
    * @param value the {@link #value} to set.
    */
-  public void setValue(Object value) {
-    if (value != null) {
-      final ParameterType typeOfValue = ParameterType.typeOf(value);
-      this.setType(typeOfValue);
-      this.setValue(typeOfValue.write(value));
-    } else {
-      this.setValue((String) null);
-    }
+  public void writeValue(Object value) {
+    final ParameterType typeOfValue = ParameterType.typeOf(value);
+    this.setType(typeOfValue);
+    this.setValue(typeOfValue.write(value));
   }
 
   @Override
@@ -338,6 +341,19 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
     }
 
     /**
+     * Create a {@link AbstractParameterBuilder}.
+     * 
+     * @param name the name of your record being built.
+     * @param type the type of your record being built.
+     * @param value the value of your record being built.
+     */
+    protected AbstractParameterBuilder(final String name, final ParameterType type,
+        final Object value) {
+      this();
+      this.name(name).type(type).value(value);
+    }
+
+    /**
      * Set the name and return the builder.
      * 
      * @see AbstractParameter#setName(String)
@@ -382,14 +398,14 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
     /**
      * Set the value and return the builder.
      * 
-     * @see AbstractParameter#setValue(Object)
+     * @see AbstractParameter#writeValue(Object)
      * 
      * @param value the value of your record being built.
      * 
      * @return the builder.
      */
     public AbstractParameterBuilder<T> value(final Object value) {
-      this.getEntity().setValue(value);
+      this.getEntity().writeValue(value);
       return this;
     }
   }

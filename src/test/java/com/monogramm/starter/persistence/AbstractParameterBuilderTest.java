@@ -5,6 +5,7 @@
 package com.monogramm.starter.persistence;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import com.monogramm.starter.persistence.AbstractParameter.AbstractParameterBuilder;
 
@@ -59,16 +60,28 @@ public abstract class AbstractParameterBuilderTest<
   }
 
   /**
+   * Test method for {@link AbstractParameterBuilder#value(Object)}.
    */
   @Test
   public void testValue() {
     T builder = this.buildTestEntityBuilder();
 
     assertEquals(builder, builder.value(null));
+  }
 
-    final Object value = true;
-    assertEquals(value.toString(), builder.value(value).build().getValue());
-    assertEquals(ParameterType.BOOLEAN, builder.build().getType());
+  /**
+   * Test method for {@link AbstractParameterBuilder#value(Object)}.
+   */
+  @Test
+  public void testValueNull() {
+    T builder = this.buildTestEntityBuilder();
+
+    assertEquals(builder, builder.value(null));
+
+    for (final ParameterType type : ParameterType.values()) {
+      builder.type(type);
+      assertNull(builder.value(null).build().getValue());
+    }
   }
 
 }
