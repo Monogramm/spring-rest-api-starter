@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "spring.security.debug",
+    "type": "java.lang.Boolean",
+    "description": "Enable Spring Security debug mode"
+  },
+  {
+    "name": "application.name",
+    "type": "java.lang.String",
+    "description": "Name of the application. Defaults to Maven project artifact id"
+  },
+  {
+    "name": "build.version",
+    "type": "java.lang.String",
+    "description": "Application version. Defaults to Maven project version"
+  },
+  {
+    "name": "build.timestamp",
+    "type": "java.lang.String",
+    "description": "Application build timestamp. Defaults to Maven project build timestamp"
+  },
+  {
+    "name": "application.email.no_reply",
+    "type": "java.lang.String",
+    "description": "Application 'reply to' email used for emails sent"
+  },
+  {
+    "name": "application.data.demo",
+    "type": "java.lang.Boolean",
+    "description": "Enable initialization of database with some demonstration data"
+  },
+  {
+    "name": "application.welcome.ascii_art",
+    "type": "java.lang.String",
+    "description": "A welcome ASCII art to display on application startup"
+  }
+]}

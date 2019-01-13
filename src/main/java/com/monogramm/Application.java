@@ -95,12 +95,10 @@ public class Application {
     final StringBuilder builder = new StringBuilder("");
 
     // Display a custom ASCII art to describe the project
-    builder.append("  __  __    ____    _   _    ____     _____   _____               __  __   __  __  \n");
-    builder.append(" |  \\/  |  / __ \\  | \\ | |  / __ \\   / ____| |  __ \\      /\\     |  \\/  | |  \\/  | \n");
-    builder.append(" | \\  / | | |  | | |  \\| | | |  | | | |  __  | |__) |    /  \\    | \\  / | | \\  / | \n");
-    builder.append(" | |\\/| | | |  | | | . ` | | |  | | | | |_ | |  _  /    / /\\ \\   | |\\/| | | |\\/| | \n");
-    builder.append(" | |  | | | |__| | | |\\  | | |__| | | |__| | | | \\ \\   / ____ \\  | |  | | | |  | | \n");
-    builder.append(" |_|  |_|  \\____/  |_| \\_|  \\____/   \\_____| |_|  \\_\\ /_/    \\_\\ |_|  |_| |_|  |_| \n");
+    final String asciiArt = this.env.getProperty("application.welcome.ascii_art");
+    if (asciiArt != null && !asciiArt.isEmpty()) {
+      builder.append(asciiArt);
+    }
 
     // Display application name
     final String name = this.env.getProperty("application.name");
