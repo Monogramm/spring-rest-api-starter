@@ -1,7 +1,6 @@
 package com.monogramm.starter.api.type.controller;
 
 import com.monogramm.starter.api.AbstractGenericController;
-import com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.type.TypeDto;
@@ -116,12 +115,6 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
         new String[] {Type.class.getSimpleName(), id}, locale);
 
     return new TypeNotFoundException(msg);
-  }
-
-  @Override
-  protected PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
-      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size) {
-    return new PaginatedResultsRetrievedEvent(response, builder, page, nbPages, size);
   }
 
   @Override

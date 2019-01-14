@@ -374,8 +374,10 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    * @return a <em>paginated results retrieved</em> event
    */
-  protected abstract PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
-      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size);
+  protected PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
+      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size) {
+    return new PaginatedResultsRetrievedEvent(response, builder, page, nbPages, size);
+  }
 
 
 

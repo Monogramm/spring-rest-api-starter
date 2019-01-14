@@ -1,7 +1,6 @@
 package com.monogramm.starter.api.user.controller;
 
 import com.monogramm.starter.api.AbstractGenericController;
-import com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent;
 import com.monogramm.starter.api.user.event.OnPasswordResetEvent;
 import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
@@ -170,12 +169,6 @@ public class UserController extends AbstractGenericController<User, UserDto> {
         new String[] {User.class.getSimpleName(), id}, locale);
 
     return new UserNotFoundException(msg);
-  }
-
-  @Override
-  protected PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
-      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size) {
-    return new PaginatedResultsRetrievedEvent(response, builder, page, nbPages, size);
   }
 
   @Override
