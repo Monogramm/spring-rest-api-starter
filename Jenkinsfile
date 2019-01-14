@@ -25,7 +25,7 @@ stages {
 
         stage ('Test') {
             steps {
-                sh 'mvn test' 
+                sh 'mvn test verify -P all-tests' 
             }
             post {
                 success {
