@@ -251,6 +251,49 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
   /**
    * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllUsersPaginated() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<UserDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto[].class);
+
+    final UserDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DUMMY_USERNAME.equals(a.getUsername())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllUsersPaginatedNoAuthorization() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders();
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Object> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for
    * {@link UserController#addData(com.monogramm.starter.persistence.user.entity.User, org.springframework.web.util.UriComponentsBuilder)}.
    * 
    * @throws UserNotFoundException if the user added is not found at the end of the test.

@@ -69,7 +69,7 @@ public class PermissionControllerTest
 
   @Override
   protected AbstractGenericController<Permission, PermissionDto> buildTestController() {
-    return new PermissionController(getMockService());
+    return new PermissionController(getMessageSource(), getEventPublisher(), getMockService());
   }
 
   @Override

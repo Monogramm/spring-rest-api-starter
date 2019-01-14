@@ -1,6 +1,7 @@
 package com.monogramm.starter.api.user.controller;
 
 import com.monogramm.starter.api.AbstractGenericController;
+import com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent;
 import com.monogramm.starter.api.user.event.OnPasswordResetEvent;
 import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
@@ -24,14 +25,17 @@ import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -136,8 +140,6 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    */
   protected static final String[] ADMIN_AUTH = {AUTH_LIST};
 
-  private ApplicationEventPublisher eventPublisher;
-
   private IVerificationTokenService verificationTokenService;
 
   private IPasswordResetTokenService passwordResetTokenService;
@@ -145,20 +147,35 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * Create a {@link UserController}.
    * 
-   * @param userService the users service.
+   * @param messageSource the i18n message source.
    * @param eventPublisher the event publisher.
+   * @param userService the users service.
    * @param verificationTokenService the verification token service.
    * @param passwordResetTokenService the password reset token service.
    */
   @Autowired
-  public UserController(IUserService userService, ApplicationEventPublisher eventPublisher,
-      IVerificationTokenService verificationTokenService,
+  public UserController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
+      IUserService userService, IVerificationTokenService verificationTokenService,
       IPasswordResetTokenService passwordResetTokenService) {
-    super(userService);
+    super(messageSource, eventPublisher, userService);
 
-    this.eventPublisher = eventPublisher;
     this.verificationTokenService = verificationTokenService;
     this.passwordResetTokenService = passwordResetTokenService;
+  }
+
+  @Override
+  protected UserNotFoundException buildEntityNotFoundException(String id, WebRequest request) {
+    final Locale locale = request.getLocale();
+    final String msg = getMessageSource().getMessage("controller.entity_not_found",
+        new String[] {User.class.getSimpleName(), id}, locale);
+
+    return new UserNotFoundException(msg);
+  }
+
+  @Override
+  protected PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
+      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size) {
+    return new PaginatedResultsRetrievedEvent(response, builder, page, nbPages, size);
   }
 
   @Override
@@ -180,23 +197,33 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   @GetMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
   @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
-  public ResponseEntity<UserDto> getDataById(@PathVariable @ValidUuid String id) {
-    return super.getDataById(id);
+  public UserDto getDataById(@PathVariable @ValidUuid String id, WebRequest request,
+      HttpServletResponse response) {
+    return super.getDataById(id, request, response);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public ResponseEntity<List<UserDto>> getAllData() {
+  public List<UserDto> getAllData() {
     return super.getAllData();
+  }
+
+  @Override
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE, SIZE})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  public List<UserDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.getAllDataPaginated(page, size, request, builder, response);
   }
 
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
   public ResponseEntity<UserDto> addData(Authentication authentication, @RequestBody UserDto dto,
-      UriComponentsBuilder builder) {
-    return super.addData(authentication, dto, builder);
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.addData(authentication, dto, builder, response);
   }
 
   @Override
@@ -451,7 +478,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Requesting to send password reset email for user: " + user);
     }
-    eventPublisher.publishEvent(
+    this.getEventPublisher().publishEvent(
         new OnPasswordResetEvent(user, request.getLocale(), request.getContextPath()));
   }
 
@@ -901,7 +928,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
     if (LOG.isDebugEnabled()) {
       LOG.debug("Requesting to send verification email for user: " + user);
     }
-    eventPublisher.publishEvent(
+    this.getEventPublisher().publishEvent(
         new OnRegistrationCompleteEvent(user, request.getLocale(), request.getContextPath()));
   }
 
@@ -1034,4 +1061,5 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
     return new ResponseEntity<>(status);
   }
+
 }

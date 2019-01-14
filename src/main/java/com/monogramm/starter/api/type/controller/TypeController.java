@@ -1,16 +1,23 @@
 package com.monogramm.starter.api.type.controller;
 
 import com.monogramm.starter.api.AbstractGenericController;
+import com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.type.entity.Type;
+import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
 import com.monogramm.starter.persistence.type.service.ITypeService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
+import java.util.Locale;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +28,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -90,11 +99,29 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   /**
    * Create a {@link TypeController}.
    * 
+   * @param messageSource the i18n message source.
+   * @param eventPublisher the event publisher.
    * @param typeService the type service.
    */
   @Autowired
-  public TypeController(ITypeService typeService) {
-    super(typeService);
+  public TypeController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
+      ITypeService typeService) {
+    super(messageSource, eventPublisher, typeService);
+  }
+
+  @Override
+  protected TypeNotFoundException buildEntityNotFoundException(String id, WebRequest request) {
+    final Locale locale = request.getLocale();
+    final String msg = getMessageSource().getMessage("controller.entity_not_found",
+        new String[] {Type.class.getSimpleName(), id}, locale);
+
+    return new TypeNotFoundException(msg);
+  }
+
+  @Override
+  protected PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
+      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size) {
+    return new PaginatedResultsRetrievedEvent(response, builder, page, nbPages, size);
   }
 
   @Override
@@ -116,23 +143,33 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   @GetMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
   @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
-  public ResponseEntity<TypeDto> getDataById(@PathVariable @ValidUuid String id) {
-    return super.getDataById(id);
+  public TypeDto getDataById(@PathVariable @ValidUuid String id, WebRequest request,
+      HttpServletResponse response) {
+    return super.getDataById(id, request, response);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public ResponseEntity<List<TypeDto>> getAllData() {
+  public List<TypeDto> getAllData() {
     return super.getAllData();
+  }
+
+  @Override
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE, SIZE})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  public List<TypeDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.getAllDataPaginated(page, size, request, builder, response);
   }
 
   @Override
   @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
   public ResponseEntity<TypeDto> addData(Authentication authentication, @RequestBody TypeDto dto,
-      UriComponentsBuilder builder) {
-    return super.addData(authentication, dto, builder);
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.addData(authentication, dto, builder, response);
   }
 
   @Override

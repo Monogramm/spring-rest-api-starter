@@ -59,7 +59,7 @@ public class ParameterControllerTest
 
   @Override
   protected ParameterController buildTestController() {
-    return new ParameterController(getMockService());
+    return new ParameterController(getMessageSource(), getEventPublisher(), getMockService());
   }
 
   @Override

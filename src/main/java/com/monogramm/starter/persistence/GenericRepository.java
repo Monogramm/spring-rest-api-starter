@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,27 @@ public interface GenericRepository<T extends AbstractGenericEntity> extends JpaR
    */
   @Transactional(readOnly = true)
   List<T> findAll();
+
+  /**
+   * Returns all entities sorted by the given options.
+   * 
+   * @param sort sort conditions
+   * 
+   * @return all entities sorted by the given options
+   */
+  @Transactional(readOnly = true)
+  List<T> findAll(Sort sort);
+
+  /**
+   * Returns a {@link Page} of entities meeting the paging restriction provided in the
+   * {@code Pageable} object.
+   * 
+   * @param pageable paging conditions
+   * 
+   * @return a page of entities
+   */
+  @Transactional(readOnly = true)
+  Page<T> findAll(Pageable pageable);
 
   /**
    * Find an entity through its primary key.

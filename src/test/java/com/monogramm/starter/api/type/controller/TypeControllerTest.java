@@ -68,7 +68,7 @@ public class TypeControllerTest extends AbstractGenericControllerTest<Type, Type
 
   @Override
   protected AbstractGenericController<Type, TypeDto> buildTestController() {
-    return new TypeController(getMockService());
+    return new TypeController(getMessageSource(), getEventPublisher(), getMockService());
   }
 
   @Override

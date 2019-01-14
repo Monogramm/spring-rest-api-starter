@@ -68,7 +68,7 @@ public class RoleControllerTest extends AbstractGenericControllerTest<Role, Role
 
   @Override
   protected AbstractGenericController<Role, RoleDto> buildTestController() {
-    return new RoleController(getMockService());
+    return new RoleController(getMessageSource(), getEventPublisher(), getMockService());
   }
 
   @Override

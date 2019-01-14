@@ -12,6 +12,9 @@ import com.monogramm.starter.persistence.user.entity.User;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -126,6 +129,16 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
   @Override
   public List<T> findAll() {
     return repository.findAll();
+  }
+
+  @Override
+  public List<T> findAll(Sort sort) {
+    return repository.findAll(sort);
+  }
+
+  @Override
+  public Page<T> findAll(Pageable pageable) {
+    return repository.findAll(pageable);
   }
 
   @Override

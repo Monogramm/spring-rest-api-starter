@@ -85,7 +85,7 @@ public class PasswordResetListenerTest {
    */
   @Test
   public void testPasswordResetListener() {
-    assertNotNull(new PasswordResetListener(passwordResetTokenService, messages, mailSender, env));
+    assertNotNull(this.listener);
   }
 
   /**

@@ -67,7 +67,6 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   private char[] password;
 
-  private ApplicationEventPublisher eventPublisher;
   private IVerificationTokenService verificationService;
   private IPasswordResetTokenService passwordResetTokenService;
 
@@ -82,8 +81,6 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void setUp() throws Exception {
     password = PASSWORD.clone();
 
-    eventPublisher = mock(ApplicationEventPublisher.class);
-    assertNotNull(eventPublisher);
     verificationService = mock(IVerificationTokenService.class);
     assertNotNull(verificationService);
     passwordResetTokenService = mock(IPasswordResetTokenService.class);
@@ -107,7 +104,6 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
     this.password = null;
 
-    Mockito.reset(eventPublisher);
     Mockito.reset(verificationService);
     Mockito.reset(passwordResetTokenService);
 
@@ -138,8 +134,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   @Override
   protected AbstractGenericController<User, UserDto> buildTestController() {
-    return new UserController(getMockService(), eventPublisher, verificationService,
-        passwordResetTokenService);
+    return new UserController(getMessageSource(), getEventPublisher(), getMockService(),
+        verificationService, passwordResetTokenService);
   }
 
   @Override

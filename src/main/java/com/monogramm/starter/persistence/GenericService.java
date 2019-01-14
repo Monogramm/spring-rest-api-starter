@@ -11,6 +11,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 /**
  * Generic Service interface.
  * 
@@ -100,12 +105,49 @@ public interface GenericService<T extends AbstractGenericEntity, D extends Abstr
     return this.getBridge().toDto(entities);
   }
 
+
+
   /**
    * Find all entities.
    * 
    * @return the list of all the entities available through the service.
    */
   List<T> findAll();
+
+  /**
+   * Returns all entities sorted by the given options.
+   * 
+   * @param sort sort conditions
+   * @return all entities sorted by the given options
+   */
+  List<T> findAll(Sort sort);
+
+  /**
+   * Returns a {@link Page} of entities meeting the paging restriction provided in the
+   * {@code Pageable} object.
+   * 
+   * @param pageable paging conditions
+   * 
+   * @return a page of entities
+   */
+  Page<T> findAll(Pageable pageable);
+
+  /**
+   * Returns a {@link Page} of entities meeting the paging restriction. Pages are zero indexed, thus
+   * providing 0 for {@code page} will return the first page.
+   * 
+   * @param page zero-based page index.
+   * @param size the size of the page to be returned.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAll(int page, int size) {
+    final Pageable pageable = new PageRequest(page, size);
+
+    return this.findAll(pageable);
+  }
+
+
 
   /**
    * Find an entity through its primary key.

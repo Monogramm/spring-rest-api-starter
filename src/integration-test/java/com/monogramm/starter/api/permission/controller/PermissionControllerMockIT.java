@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,6 +40,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
 
 
 /**
@@ -128,16 +130,30 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
   }
 
   /**
-   * Test method for {@link PermissionController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link PermissionController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetPermissionByIdRandomId() throws Exception {
+    // No permission returned
+    MvcResult result = getMockMvc()
+        .perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
+        .andExpect(status().isNotFound()).andReturn();
+
+    assertNotNull(result.getResponse());
+    assertNotNull(result.getResponse().getContentAsString());
+  }
+
+  /**
+   * Test method for
+   * {@link PermissionController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
    * 
    * @throws Exception if the test crashes.
    */
   @Test
   public void testGetPermissionById() throws Exception {
-    // No permission returned
-    getMockMvc().perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
-        .andExpect(status().isNotFound()).andExpect(content().bytes(new byte[] {}));
-
     // Permission previously created should be returned
     getMockMvc()
         .perform(get(CONTROLLER_PATH + '/' + this.testEntity.getId())
@@ -169,6 +185,24 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
     }
 
     getMockMvc().perform(get(CONTROLLER_PATH).headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link PermissionController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllPermissionsPaginated() throws Exception {
+    int expectedSize = 1;
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
+            .headers(getHeaders(getMockToken())))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));

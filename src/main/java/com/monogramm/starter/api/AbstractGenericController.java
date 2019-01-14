@@ -4,6 +4,10 @@
 
 package com.monogramm.starter.api;
 
+import com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent;
+import com.monogramm.starter.api.discoverability.event.ResourceCreatedEvent;
+import com.monogramm.starter.api.discoverability.event.SingleResourceRetrievedEvent;
+import com.monogramm.starter.api.discoverability.exception.PageNotFoundException;
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
@@ -13,17 +17,24 @@ import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -52,18 +63,60 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    */
   public static final char SEP = '/';
 
+  /**
+   * Page number query parameter name.
+   */
+  public static final String PAGE = "page";
+  /**
+   * Page size query parameter name.
+   */
+  public static final String SIZE = "size";
+
+  /**
+   * Default page size.
+   */
+  public static final String DEFAULT_SIZE = "10";
+
+
+  private final MessageSource messageSource;
+
+  private final ApplicationEventPublisher eventPublisher;
+
   private final GenericService<T, D> service;
 
   /**
    * Create a {@link AbstractGenericController}.
    * 
+   * @param messageSource the i18n message source.
+   * @param eventPublisher the event publisher.
    * @param service the entity service.
    */
-  public AbstractGenericController(final GenericService<T, D> service) {
+  public AbstractGenericController(final MessageSource messageSource,
+      final ApplicationEventPublisher eventPublisher, final GenericService<T, D> service) {
     super();
+    this.messageSource = messageSource;
+    this.eventPublisher = eventPublisher;
     this.service = service;
   }
 
+
+  /**
+   * Get the {@link #messageSource}.
+   * 
+   * @return the {@link #messageSource}.
+   */
+  protected final MessageSource getMessageSource() {
+    return messageSource;
+  }
+
+  /**
+   * Get the {@link #eventPublisher}.
+   * 
+   * @return the {@link #eventPublisher}.
+   */
+  protected final ApplicationEventPublisher getEventPublisher() {
+    return eventPublisher;
+  }
 
   /**
    * Get the {@link #service}.
@@ -108,6 +161,8 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
     return User.builder().id(principalId).build();
   }
 
+
+
   /**
    * Get a {@link T} entity by its unique identifier.
    * 
@@ -116,6 +171,8 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * </p>
    * 
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
+   * @param request the Web Request.
+   * @param response the HTTP response.
    * 
    * @return
    *         <ul>
@@ -157,28 +214,42 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    *         </li>
    * 
    *         </ul>
+   * 
+   * @throws IllegalArgumentException if the specified is unique ID is not valid
+   * @throws EntityNotFoundException if no entity matches the specified unique ID
    */
-  public ResponseEntity<D> getDataById(@PathVariable @ValidUuid String id) {
-    D dto = null;
-    HttpStatus status;
+  public D getDataById(@PathVariable @ValidUuid String id, WebRequest request,
+      HttpServletResponse response) {
+    // Convert ID
+    final UUID uniqueId = UUID.fromString(id);
 
-    T entity;
-    try {
-      entity = this.service.findById(UUID.fromString(id));
-    } catch (IllegalArgumentException e) {
-      LOG.debug("getDataById(id=" + id + ")", e);
-      entity = null;
-    }
-
+    // Search entity
+    final T entity = this.service.findById(uniqueId);
     if (entity == null) {
-      status = HttpStatus.NOT_FOUND;
-    } else {
-      dto = this.service.toDto(entity);
-      status = HttpStatus.OK;
+      throw this.buildEntityNotFoundException(id, request);
     }
 
-    return new ResponseEntity<>(dto, status);
+    // Convert entity to DTO
+    final D dto = this.service.toDto(entity);
+    // Publish HATEOAS event
+    eventPublisher.publishEvent(new SingleResourceRetrievedEvent(entity, response));
+
+    return dto;
   }
+
+  /**
+   * Build an <em>entity not found</em> exception, ideally with an appropriate and translated error
+   * message.
+   * 
+   * @param id entity unique ID which could not be found.
+   * @param request the Web Request.
+   * 
+   * @return an <em>entity not found</em> exception.
+   */
+  protected abstract EntityNotFoundException buildEntityNotFoundException(String id,
+      WebRequest request);
+
+
 
   /**
    * Get all available {@link T} entities.
@@ -210,11 +281,103 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public ResponseEntity<List<D>> getAllData() {
-    final List<D> result = service.toDto(service.findAll());
+  public List<D> getAllData() {
+    final List<T> result = service.findAll();
 
-    return new ResponseEntity<>(result, HttpStatus.OK);
+    return service.toDto(result);
   }
+
+
+
+  /**
+   * Get all available {@link T} entities paginated.
+   * 
+   * <p>
+   * Returns a {@link D} JSON representation about a data array.
+   * </p>
+   * 
+   * @param page <em>Required Request parameter:</em> zero-based page index.
+   * @param size <em>Required Request parameter:</em> the size of the page to be returned.
+   * @param request the Web Request.
+   * @param builder an URI builder to build the URI to the created {@link T} in the response.
+   * @param response HTTP response.
+   * 
+   * @return
+   *         <ul>
+   * 
+   *         <li>
+   *         <p>
+   *         <strong>Success Response:</strong>
+   *         </p>
+   * 
+   *         <ul>
+   *         <li>
+   *         <p>
+   *         <strong>Code:</strong> <code>HttpStatus.OK</code>
+   *         </p>
+   *         <p>
+   *         <strong>Content:</strong> a {@link D} JSON representation of a {@link T} Array
+   *         </p>
+   *         </li>
+   *         </ul>
+   * 
+   *         </li>
+   * 
+   *         </ul>
+   */
+  public List<D> getAllDataPaginated(int page, int size, WebRequest request,
+      UriComponentsBuilder builder, HttpServletResponse response) {
+
+    Page<T> resultPage = service.findAll(page, size);
+    if (resultPage == null) {
+      throw this.buildPageNotFoundException(page, 0, request);
+    } else if (page > resultPage.getTotalPages()) {
+      throw this.buildPageNotFoundException(page, resultPage.getTotalPages(), request);
+    }
+
+    // Publish HATEOAS event
+    this.eventPublisher.publishEvent(this.buildPaginatedResultsRetrievedEvent(builder, response,
+        page, resultPage.getTotalPages(), size));
+
+    final List<T> result = resultPage.getContent();
+
+    return service.toDto(result);
+  }
+
+  /**
+   * Build a <em>page not found</em> exception, ideally with an appropriate and translated error
+   * message.
+   * 
+   * @param page zero-based page index.
+   * @param totalPages total number of available pages.
+   * @param request the Web Request.
+   * 
+   * @return an <em>entity not found</em> exception.
+   */
+  protected PageNotFoundException buildPageNotFoundException(int page, int totalPages,
+      WebRequest request) {
+    final Locale locale = request.getLocale();
+    final String msg = messageSource.getMessage("controller.page_not_found",
+        new String[] {"" + page, "" + totalPages}, locale);
+
+    return new PageNotFoundException(msg);
+  }
+
+  /**
+   * Build a <em>paginated results retrieved</em> event for this controller data type.
+   * 
+   * @param builder an URI builder to build the URI to the created {@link T} in the response.
+   * @param response HTTP response.
+   * @param page zero-based page index.
+   * @param nbPages number of pages.
+   * @param size the size of the page to be returned.
+   * 
+   * @return a <em>paginated results retrieved</em> event
+   */
+  protected abstract PaginatedResultsRetrievedEvent buildPaginatedResultsRetrievedEvent(
+      UriComponentsBuilder builder, HttpServletResponse response, int page, int nbPages, int size);
+
+
 
   /**
    * Add a {@link T}.
@@ -270,7 +433,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    *         </ul>
    */
   public ResponseEntity<D> addData(Authentication authentication, @RequestBody D dto,
-      UriComponentsBuilder builder) {
+      UriComponentsBuilder builder, HttpServletResponse response) {
     final T entity = this.service.toEntity(dto);
 
     // Set creator and owner
@@ -280,18 +443,22 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
 
     final boolean added = service.add(entity);
 
-    final ResponseEntity<D> response;
+    final ResponseEntity<D> responseEntity;
     if (added) {
+      // Publish HATEOAS event
+      eventPublisher.publishEvent(new ResourceCreatedEvent(entity, response));
+
       final HttpHeaders headers = new HttpHeaders();
       headers.setLocation(
           builder.path(this.getControllerPath() + "/{id}").buildAndExpand(dto.getId()).toUri());
 
-      response = new ResponseEntity<>(this.service.toDto(entity), headers, HttpStatus.CREATED);
+      responseEntity =
+          new ResponseEntity<>(this.service.toDto(entity), headers, HttpStatus.CREATED);
     } else {
-      response = new ResponseEntity<>(HttpStatus.CONFLICT);
+      responseEntity = new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
-    return response;
+    return responseEntity;
   }
 
   /**

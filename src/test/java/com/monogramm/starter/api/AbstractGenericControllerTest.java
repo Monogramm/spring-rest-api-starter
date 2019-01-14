@@ -8,12 +8,15 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.monogramm.starter.api.discoverability.exception.PageNotFoundException;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
@@ -26,17 +29,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -52,10 +63,16 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   private static final UUID RANDOM_ID = UUID.randomUUID();
 
+  private MessageSource messageSource;
+  private ApplicationEventPublisher eventPublisher;
   private GenericService<T, D> mockService;
   private AbstractGenericController<T, D> controller;
   private AbstractGenericBridge<T, D> bridge;
   private Authentication mockAuthentication;
+
+  private WebRequest mockRequest;
+  private UriComponentsBuilder uriBuilder;
+  private HttpServletResponse mockResponse;
 
   /**
    * @throws java.lang.Exception
@@ -74,13 +91,31 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
    */
   @Before
   public void setUp() throws Exception {
+    this.messageSource = this.buildMessageSource();
+    assertNotNull(this.messageSource);
+
+    this.eventPublisher = this.buildApplicationEventPublisher();
+    assertNotNull(this.eventPublisher);
+
     this.mockService = this.buildTestService();
+    assertNotNull(this.mockService);
 
     this.bridge = this.buildTestBridge();
+    assertNotNull(this.bridge);
 
     this.mockAuthentication = this.buildMockAuthentication();
+    assertNotNull(this.mockAuthentication);
 
     this.controller = this.buildTestController();
+    assertNotNull(this.controller);
+
+    this.mockRequest = this.buildWebRequest();
+    assertNotNull(this.mockRequest);
+
+    this.uriBuilder = new UriComponentsBuilder() {};
+
+    this.mockResponse = this.buildHttpServletResponse();
+    assertNotNull(this.mockResponse);
   }
 
   /**
@@ -88,7 +123,28 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
    */
   @After
   public void tearDown() throws Exception {
+    Mockito.reset(messageSource);
+    Mockito.reset(eventPublisher);
     this.controller = null;
+    Mockito.reset(mockRequest);
+    this.uriBuilder = null;
+    Mockito.reset(mockResponse);
+  }
+
+  protected MessageSource buildMessageSource() {
+    return mock(MessageSource.class);
+  }
+
+  protected ApplicationEventPublisher buildApplicationEventPublisher() {
+    return mock(ApplicationEventPublisher.class);
+  }
+
+  protected WebRequest buildWebRequest() {
+    return mock(WebRequest.class);
+  }
+
+  protected HttpServletResponse buildHttpServletResponse() {
+    return mock(HttpServletResponse.class);
   }
 
   protected abstract GenericService<T, D> buildTestService();
@@ -114,6 +170,33 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
    */
   protected AbstractGenericController<T, D> getController() {
     return controller;
+  }
+
+  /**
+   * Get the {@link #messageSource}.
+   * 
+   * @return the {@link #messageSource}.
+   */
+  protected final MessageSource getMessageSource() {
+    return messageSource;
+  }
+
+  /**
+   * Set the {@link #messageSource}.
+   * 
+   * @param messageSource the {@link #messageSource} to set.
+   */
+  protected final void setMessageSource(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
+
+  /**
+   * Get the {@link #eventPublisher}.
+   * 
+   * @return the {@link #eventPublisher}.
+   */
+  protected final ApplicationEventPublisher getEventPublisher() {
+    return eventPublisher;
   }
 
   /**
@@ -185,60 +268,85 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     assertNotNull(this.controller.getControllerPath());
   }
 
+
+
   /**
-   * Test method for {@link AbstractGenericController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link AbstractGenericController#buildEntityNotFoundException(String, WebRequest)}.
+   */
+  @Test
+  public void testBuildEntityNotFoundException() {
+    assertNotNull(this.controller.buildEntityNotFoundException("dummy_uuid", mockRequest));
+  }
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#buildPageNotFoundException(int, int, WebRequest)}.
+   */
+  @Test
+  public void testBuildPageNotFoundException() {
+    assertNotNull(this.controller.buildPageNotFoundException(0, 42, mockRequest));
+  }
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#buildPaginatedResultsRetrievedEvent(UriComponentsBuilder, HttpServletResponse, int, int, int)}.
+   */
+  @Test
+  public void testBuildPaginatedResultsRetrievedEvent() {
+    assertNotNull(
+        this.controller.buildPaginatedResultsRetrievedEvent(uriBuilder, mockResponse, 0, 42, 1337));
+  }
+
+
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#getDataById(String, WebRequest, HttpServletResponse)}.
    */
   @Test
   public void testGetDataByIdString() {
     final T model = this.buildTestEntity();
     final D dto = bridge.toDto(model);
-    final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.OK);
+    final D expectedResponse = dto;
 
     when(mockService.findById(model.getId())).thenReturn(model);
     when(mockService.toDto(model)).thenReturn(dto);
 
-    final ResponseEntity<D> actual = controller.getDataById(model.getId().toString());
+    final D actual = controller.getDataById(model.getId().toString(), mockRequest, mockResponse);
 
     verify(mockService, times(1)).findById(model.getId());
     verify(mockService, times(1)).toDto(model);
     verifyNoMoreInteractions(mockService);
+    verify(eventPublisher, times(1)).publishEvent(any());
+    verifyNoMoreInteractions(eventPublisher);
 
     assertThat(actual, is(expectedResponse));
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link AbstractGenericController#getDataById(String, WebRequest, HttpServletResponse)}.
    */
-  @Test
+  @Test(expected = EntityNotFoundException.class)
   public void testGetDataByIdStringNotFound() {
     final T model = null;
-    final D dto = null;
-    final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.NOT_FOUND);
 
     when(mockService.findById(RANDOM_ID)).thenReturn(model);
 
-    final ResponseEntity<D> actual = controller.getDataById(RANDOM_ID.toString());
-
-    verify(mockService, times(1)).findById(RANDOM_ID);
-    verifyNoMoreInteractions(mockService);
-
-    assertThat(actual, is(expectedResponse));
+    controller.getDataById(RANDOM_ID.toString(), mockRequest, mockResponse);
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link AbstractGenericController#getDataById(String, WebRequest, HttpServletResponse)}.
    */
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testGetDataByIdStringIllegal() {
-    final D dto = null;
-    final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.NOT_FOUND);
-
-    final ResponseEntity<D> actual = controller.getDataById("this_is_not_a_UUID");
-
-    verifyNoMoreInteractions(mockService);
-
-    assertThat(actual, is(expectedResponse));
+    controller.getDataById("this_is_not_a_UUID", mockRequest, mockResponse);
   }
+
+
 
   /**
    * Test method for {@link AbstractGenericController#getAllData()}.
@@ -253,16 +361,17 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final List<D> results = new ArrayList<>();
     results.add(dto);
 
-    final ResponseEntity<List<D>> expectedResponse = new ResponseEntity<>(results, HttpStatus.OK);
+    final List<D> expectedResponse = results;
 
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final ResponseEntity<List<D>> actual = controller.getAllData();
+    final List<D> actual = controller.getAllData();
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
     verifyNoMoreInteractions(mockService);
+    verifyNoMoreInteractions(eventPublisher);
 
     assertThat(actual, is(expectedResponse));
   }
@@ -274,16 +383,17 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testGetAllDataEmpty() {
     final List<T> models = new ArrayList<>();
     final List<D> results = new ArrayList<>();
-    final ResponseEntity<List<D>> expectedResponse = new ResponseEntity<>(results, HttpStatus.OK);
+    final List<D> expectedResponse = results;
 
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final ResponseEntity<List<D>> actual = controller.getAllData();
+    final List<D> actual = controller.getAllData();
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
     verifyNoMoreInteractions(mockService);
+    verifyNoMoreInteractions(eventPublisher);
 
     assertThat(actual, is(expectedResponse));
   }
@@ -295,23 +405,90 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testGetAllDataNull() {
     final List<T> models = null;
     final List<D> results = new ArrayList<>();
-    final ResponseEntity<List<D>> expectedResponse = new ResponseEntity<>(results, HttpStatus.OK);
+    final List<D> expectedResponse = results;
 
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final ResponseEntity<List<D>> actual = controller.getAllData();
+    final List<D> actual = controller.getAllData();
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
     verifyNoMoreInteractions(mockService);
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#getAllDataPaginated(int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   */
+  @Test
+  public void testGetAllPaginatedData() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+    int page = 0;
+    int size = 2;
+
+    final Page<T> models = new PageImpl<T>(Collections.singletonList(model));
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+
+    final List<D> expectedResponse = results;
+
+    when(mockService.findAll(page, size)).thenReturn(models);
+    when(mockService.toDto(models.getContent())).thenReturn(results);
+
+    final List<D> actual =
+        controller.getAllDataPaginated(page, size, mockRequest, uriBuilder, mockResponse);
+
+    verify(mockService, times(1)).findAll(page, size);
+    verify(mockService, times(1)).toDto(models.getContent());
+    verifyNoMoreInteractions(mockService);
+    verify(eventPublisher, times(1)).publishEvent(any());
+    verifyNoMoreInteractions(eventPublisher);
 
     assertThat(actual, is(expectedResponse));
   }
 
   /**
    * Test method for
-   * {@link AbstractGenericController#addData(AbstractGenericDto, UriComponentsBuilder)}.
+   * {@link AbstractGenericController#getAllDataPaginated(int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   */
+  @Test(expected = PageNotFoundException.class)
+  public void testGetAllDataPaginatedEmpty() {
+    final Page<T> models = new PageImpl<T>(Collections.emptyList());
+    int page = 42;
+    int size = 2;
+
+    when(mockService.findAll(page, size)).thenReturn(models);
+
+    controller.getAllDataPaginated(page, size, mockRequest, uriBuilder, mockResponse);
+  }
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#getAllDataPaginated(int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   */
+  @Test(expected = PageNotFoundException.class)
+  public void testGetAllDataPaginatedNull() {
+    final Page<T> models = null;
+    int page = 42;
+    int size = 2;
+
+    when(mockService.findAll(page, size)).thenReturn(models);
+
+    controller.getAllDataPaginated(page, size, mockRequest, uriBuilder, mockResponse);
+  }
+
+
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#addData(Authentication, AbstractGenericDto, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test
   public void testAddData() {
@@ -324,7 +501,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.toDto(model)).thenReturn(dto);
 
     final ResponseEntity<D> actualResponse =
-        controller.addData(getMockAuthentication(), dto, new UriComponentsBuilder() {});
+        controller.addData(getMockAuthentication(), dto, uriBuilder, mockResponse);
 
     assertThat(actualResponse.getStatusCode(), is(expectedResponse.getStatusCode()));
     assertThat(actualResponse.getBody(), is(expectedResponse.getBody()));
@@ -343,7 +520,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   /**
    * Test method for
-   * {@link AbstractGenericController#addData(AbstractGenericDto, UriComponentsBuilder)}.
+   * {@link AbstractGenericController#addData(Authentication, AbstractGenericDto, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test
   public void testAddDataAlreadyExists() {
@@ -355,7 +532,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.add(model)).thenReturn(false);
 
     final ResponseEntity<D> actualResponse =
-        controller.addData(getMockAuthentication(), dto, new UriComponentsBuilder() {});
+        controller.addData(getMockAuthentication(), dto, uriBuilder, mockResponse);
 
     assertThat(actualResponse, is(expectedResponse));
 
