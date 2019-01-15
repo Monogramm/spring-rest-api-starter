@@ -149,7 +149,7 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   }
 
   @Override
-  @GetMapping(value = CONTROLLER_PATH, params = {PAGE, SIZE})
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public List<RoleDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,

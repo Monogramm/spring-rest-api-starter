@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.monogramm.Application;
 import com.monogramm.starter.api.AbstractControllerIT;
 import com.monogramm.starter.api.AbstractControllerMockIT;
+import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.role.RoleDto;
@@ -188,7 +189,6 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
    */
   @Test
   public void testGetAllRolesPaginated() throws Exception {
-    // There should at least be the test entity...
     int expectedSize = 1;
 
     // There should at least be the test entities...
@@ -206,6 +206,29 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
             "<http://localhost/spring-rest-api-starter-it/api/roles?page=1&size=1>; rel=\"next\", "
                 + "<http://localhost/spring-rest-api-starter-it/api/roles?page=" + maxSize
                 + "&size=1>; rel=\"last\""))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link RoleController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllRolesPaginatedDefaultSize() throws Exception {
+    // There should at least be the test entity...
+    int expectedSize = 2;
+    // ...plus the roles created at application initialization
+    if (initialDataLoader.getRoles() != null) {
+      expectedSize += initialDataLoader.getRoles().size();
+    }
+    expectedSize = Math.min(expectedSize, AbstractGenericController.DEFAULT_SIZE_INT);
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));
   }

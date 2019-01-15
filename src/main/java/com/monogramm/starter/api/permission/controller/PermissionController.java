@@ -150,7 +150,7 @@ public class PermissionController extends AbstractGenericController<Permission, 
   }
 
   @Override
-  @GetMapping(value = CONTROLLER_PATH, params = {PAGE, SIZE})
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public List<PermissionDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,

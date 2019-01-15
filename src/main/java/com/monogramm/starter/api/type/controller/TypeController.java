@@ -149,7 +149,7 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   }
 
   @Override
-  @GetMapping(value = CONTROLLER_PATH, params = {PAGE, SIZE})
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public List<TypeDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,

@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,6 +22,7 @@ import com.monogramm.Application;
 import com.monogramm.starter.SmtpServerRule;
 import com.monogramm.starter.api.AbstractControllerIT;
 import com.monogramm.starter.api.AbstractControllerMockIT;
+import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.user.PasswordResetDto;
@@ -237,7 +237,6 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
    */
   @Test
   public void testGetAllUsersPaginated() throws Exception {
-    // There should at least be the test entity...
     int expectedSize = 1;
 
     // There should at least be the test entities...
@@ -255,6 +254,29 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
             "<http://localhost/spring-rest-api-starter-it/api/users?page=1&size=1>; rel=\"next\", "
                 + "<http://localhost/spring-rest-api-starter-it/api/users?page=" + maxSize
                 + "&size=1>; rel=\"last\""))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllUsersPaginatedDefaultSize() throws Exception {
+    // There should at least be the test entity...
+    int expectedSize = 4;
+    // ...plus the users created at application initialization
+    if (initialDataLoader.getUsers() != null) {
+      expectedSize += initialDataLoader.getUsers().size();
+    }
+    expectedSize = Math.min(expectedSize, AbstractGenericController.DEFAULT_SIZE_INT);
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));
   }

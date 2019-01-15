@@ -153,7 +153,7 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   }
 
   @Override
-  @GetMapping(value = CONTROLLER_PATH, params = {PAGE, SIZE})
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public List<ParameterDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,

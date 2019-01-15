@@ -229,9 +229,8 @@ public class PermissionControllerFullIT extends AbstractControllerFullIT {
     final PermissionDto[] dtos = responseEntity.getBody();
 
     assertNotNull(dtos);
-    assertTrue(Arrays.stream(dtos).anyMatch(a -> DISPLAYNAME.equals(a.getName())));
-    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
-    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+    assertTrue(dtos.length > 0);
+    // No default sort on pagination means we cannot be sure of the content returned in first page
   }
 
   /**

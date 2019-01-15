@@ -75,7 +75,11 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   /**
    * Default page size.
    */
-  public static final String DEFAULT_SIZE = "10";
+  public static final int DEFAULT_SIZE_INT = 10;
+  /**
+   * Default page size.
+   */
+  public static final String DEFAULT_SIZE = "" + DEFAULT_SIZE_INT;
 
 
   private final MessageSource messageSource;
