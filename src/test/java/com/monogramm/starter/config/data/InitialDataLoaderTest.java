@@ -165,7 +165,7 @@ public class InitialDataLoaderTest {
 
     this.loader.onApplicationEvent(null);
 
-    verify(env, times(1)).getProperty("application.data.demo");
+    verify(env, times(2)).getProperty("application.data.demo");
     verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());
@@ -185,7 +185,7 @@ public class InitialDataLoaderTest {
 
     this.loader.onApplicationEvent(null);
 
-    verify(env, times(1)).getProperty("application.data.demo");
+    verify(env, times(2)).getProperty("application.data.demo");
     verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());

@@ -509,6 +509,22 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    */
   protected User createUser(final String username, final String email, final char[] password,
       final Role userRole) {
+    return this.createUser(username, email, password, userRole, true);
+  }
+
+  /**
+   * Create the user with given details.
+   * 
+   * @param username the username.
+   * @param email the email.
+   * @param password the password.
+   * @param userRole the user's role.
+   * @param logPassword enable the log (info) of the password.
+   * 
+   * @return the user created.
+   */
+  protected User createUser(final String username, final String email, final char[] password,
+      final Role userRole, final boolean logPassword) {
     final Object[] logParam = new String[] {username, email};
 
     User user;
@@ -524,11 +540,30 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     }
 
     if (user == null) {
-      LOG.info(" ");
-      LOG.info("User name: " + username);
-      LOG.info("User email: " + email);
-      LOG.info("User password: " + Arrays.toString(password));
-      LOG.info(" ");
+      // Log in console default user created on startup
+      if (LOG.isInfoEnabled()) {
+        LOG.info("####################################");
+        LOG.info(" ");
+
+        final String userNameMsg = messageSource.getMessage(
+            "config.data.initialization.user_created_username", new String[] {username}, locale);
+        LOG.info(userNameMsg);
+
+        final String userEmailMsg = messageSource.getMessage(
+            "config.data.initialization.user_created_email", new String[] {email}, locale);
+        LOG.info(userEmailMsg);
+
+        if (logPassword) {
+          final String userPasswordMsg =
+              messageSource.getMessage("config.data.initialization.user_created_password",
+                  new String[] {Arrays.toString(password)}, locale);
+          LOG.info(userPasswordMsg);
+        }
+
+        LOG.info(" ");
+        LOG.info("####################################");
+      }
+
       user = User.builder(username, email).password(password).role(userRole).build();
 
       userService.add(user);

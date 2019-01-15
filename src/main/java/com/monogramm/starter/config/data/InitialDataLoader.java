@@ -69,6 +69,7 @@ public class InitialDataLoader extends AbstractDataLoader {
   private Role supportRole;
   private Role userRole;
 
+  private User adminUser;
 
   private final Map<Type, Map<GenericOperation, Set<Role>>> typePermissions = new HashMap<>();
 
@@ -152,15 +153,31 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.createAllPermissions(type);
     }
 
+    // Create admin user
+    final char[] adminPassword;
+    final boolean logPassword;
+
+    final String defaultAdminPassword = this.getEnv().getProperty("application.data.demo");
+    if (defaultAdminPassword != null && !defaultAdminPassword.isEmpty()) {
+      // Use default admin password if any defined in application properties
+      adminPassword = defaultAdminPassword.toCharArray();
+      logPassword = false;
+    } else {
+      // or generate a random password and log it
+      adminPassword = Passwords.generateRandomPassword();
+      logPassword = true;
+    }
+
+    this.adminUser = this.createUser(SAMPLE_ADMIN_NAME, SAMPLE_ADMIN_EMAIL, adminPassword,
+        adminRole, logPassword);
+
+    this.updateOwner(adminUser, adminUser, this.getUserService());
+
     return true;
   }
 
   @Override
   public boolean initDemoData() {
-    final char[] adminPassword = Passwords.generateRandomPassword();
-    final User adminUser =
-        this.createUser(SAMPLE_ADMIN_NAME, SAMPLE_ADMIN_EMAIL, adminPassword, adminRole);
-
     final char[] supportPassword = Passwords.generateRandomPassword();
     final User supportUser =
         this.createUser(SAMPLE_SUPPORT_NAME, SAMPLE_SUPPORT_EMAIL, supportPassword, supportRole);
@@ -184,7 +201,7 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.updateOwner(role, adminUser, this.getRoleService());
     }
 
-    this.updateOwner(adminUser, adminUser, this.getUserService());
+    // Make users owner of their own account
     this.updateOwner(supportUser, supportUser, this.getUserService());
     this.updateOwner(demoUser, demoUser, this.getUserService());
 
