@@ -95,8 +95,27 @@ public class InitialDataLoader extends AbstractDataLoader {
 
   @Override
   public boolean initDefaultData() {
+    boolean initDone = true;
+
+    // Setup the initial types
+    initDone &= this.initDefaultTypes();
 
     // Setup the initial roles
+    initDone &= this.initDefaultRoles();
+
+    // Setup permissions by role and type
+    initDone &= this.initDefaultPermissions();
+
+    // Setup the initial parameters
+    initDone &= this.initDefaultParameters();
+
+    // Setup the initial users
+    initDone &= this.initDefaultUsers();
+
+    return initDone;
+  }
+
+  private boolean initDefaultTypes() {
     if (this.userType == null) {
       this.userType = this.createType(UserController.TYPE);
     }
@@ -117,9 +136,10 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.parameterType = this.createType(ParameterController.TYPE);
     }
 
+    return true;
+  }
 
-
-    // Setup the initial roles
+  private boolean initDefaultRoles() {
     if (this.adminRole == null) {
       this.adminRole = this.createRole(ADMIN_ROLE);
       this.addAllPermissions(userType, adminRole);
@@ -146,13 +166,25 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.addPermission(userType, GenericOperation.UPDATE, userRole);
     }
 
+    return true;
+  }
 
-
-    // Setup permissions by role and type
+  private boolean initDefaultPermissions() {
     for (final Type type : this.getTypes()) {
       this.createAllPermissions(type);
     }
 
+    return true;
+  }
+
+  private boolean initDefaultParameters() {
+    // XXX Create a parameter containing the application version
+    // TODO Create a parameter to disable user registration at will
+
+    return true;
+  }
+
+  private boolean initDefaultUsers() {
     // Create admin user
     final char[] adminPassword;
     final boolean logPassword;
@@ -178,6 +210,14 @@ public class InitialDataLoader extends AbstractDataLoader {
 
   @Override
   public boolean initDemoData() {
+    boolean initDone = true;
+
+    initDone &= this.initDemoUsers();
+
+    return initDone;
+  }
+
+  private boolean initDemoUsers() {
     final char[] supportPassword = Passwords.generateRandomPassword();
     final User supportUser =
         this.createUser(SAMPLE_SUPPORT_NAME, SAMPLE_SUPPORT_EMAIL, supportPassword, supportRole);
@@ -185,21 +225,6 @@ public class InitialDataLoader extends AbstractDataLoader {
     final char[] demoPassword = SAMPLE_USER_PASSWORD.clone();
     final User demoUser =
         this.createUser(SAMPLE_USER_NAME, SAMPLE_USER_EMAIL, demoPassword, userRole);
-
-
-
-    // Update data owner
-    for (final Type type : this.getTypes()) {
-      this.updateOwner(type, adminUser, this.getTypeService());
-    }
-
-    for (final Permission permission : this.getPermissions()) {
-      this.updateOwner(permission, adminUser, this.getPermissionService());
-    }
-
-    for (final Role role : this.getRoles()) {
-      this.updateOwner(role, adminUser, this.getRoleService());
-    }
 
     // Make users owner of their own account
     this.updateOwner(supportUser, supportUser, this.getUserService());
