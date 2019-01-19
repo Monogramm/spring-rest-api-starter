@@ -17,11 +17,11 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link AbstractGenericEntity} Unit Test.
@@ -33,7 +33,7 @@ public abstract class AbstractGenericEntityTest<T extends AbstractGenericEntity>
   /**
    * Logger for {@link AbstractGenericEntityTest}.
    */
-  protected static final Logger LOG = LogManager.getLogger(AbstractGenericEntityTest.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(AbstractGenericEntityTest.class);
 
   /**
    * The tested entity.

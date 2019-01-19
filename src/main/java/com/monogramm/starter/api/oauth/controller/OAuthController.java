@@ -6,8 +6,8 @@ import java.util.Locale;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
@@ -28,7 +28,7 @@ public final class OAuthController {
   /**
    * The end point logger.
    */
-  private static final Logger LOG = LogManager.getLogger(OAuthController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OAuthController.class);
 
   /**
    * The main data type handled by this controller.

@@ -31,12 +31,12 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,7 +72,7 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
   /**
    * Logger for {@link TypeControllerMockIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(TypeControllerMockIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TypeControllerMockIT.class);
 
   /**
    * The managed type of this tested controller.

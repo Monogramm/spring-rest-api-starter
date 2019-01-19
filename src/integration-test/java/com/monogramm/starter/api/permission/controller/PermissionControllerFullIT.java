@@ -17,12 +17,12 @@ import com.monogramm.starter.persistence.user.entity.User;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -57,7 +57,7 @@ public class PermissionControllerFullIT extends AbstractControllerFullIT {
   /**
    * Logger for {@link PermissionControllerFullIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(PermissionControllerFullIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PermissionControllerFullIT.class);
 
   /**
    * The managed type of this tested controller.

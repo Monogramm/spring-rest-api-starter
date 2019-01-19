@@ -22,12 +22,12 @@ import com.monogramm.starter.persistence.user.entity.User;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
@@ -62,7 +62,7 @@ public class ParameterControllerFullIT extends AbstractControllerFullIT {
   /**
    * Logger for {@link ParameterControllerFullIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(ParameterControllerFullIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ParameterControllerFullIT.class);
 
   /**
    * The managed parameter of this tested controller.

@@ -23,8 +23,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -56,7 +56,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   /**
    * Logger for {@link AbstractGenericController}.
    */
-  private static final Logger LOG = LogManager.getLogger(AbstractGenericController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractGenericController.class);
 
   /**
    * Default separator used for controller path.

@@ -35,12 +35,12 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -76,7 +76,7 @@ public class ParameterControllerMockIT extends AbstractControllerMockIT {
   /**
    * Logger for {@link ParameterControllerMockIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(ParameterControllerMockIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ParameterControllerMockIT.class);
 
   /**
    * The managed parameter of this tested controller.

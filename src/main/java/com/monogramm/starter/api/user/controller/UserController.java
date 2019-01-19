@@ -30,8 +30,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -62,7 +62,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * Logger for {@link UserController}.
    */
-  private static final Logger LOG = LogManager.getLogger(UserController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
 
   /**
    * The main data type handled by this controller.

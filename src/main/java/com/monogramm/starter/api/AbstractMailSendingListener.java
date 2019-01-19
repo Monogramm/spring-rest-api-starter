@@ -9,8 +9,8 @@ import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.Locale;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
@@ -28,7 +28,7 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
   /**
    * Logger for {@link AbstractMailSendingListener}.
    */
-  private static final Logger LOG = LogManager.getLogger(AbstractMailSendingListener.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractMailSendingListener.class);
 
   private final MessageSource messages;
 

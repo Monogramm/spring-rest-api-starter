@@ -3,8 +3,8 @@ package com.monogramm;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +18,7 @@ public class Application {
   /**
    * Logger for {@link Application}.
    */
-  private static final Logger LOG = LogManager.getLogger(Application.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
   /**
    * Spring application starter.
@@ -42,7 +42,7 @@ public class Application {
     try {
       applicationContext = SpringApplication.run(Application.class, args);
     } catch (Exception e) {
-      LOG.error(e);
+      LOG.error("Exception catched during application startup", e);
     } finally {
       if (applicationContext == null) {
         LOG.debug("Something went wrong during startup! Check the logs for more details.");

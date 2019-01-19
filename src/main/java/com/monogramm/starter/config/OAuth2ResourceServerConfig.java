@@ -8,8 +8,8 @@ import com.monogramm.starter.api.oauth.controller.OAuthController;
 import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 import com.monogramm.starter.utils.JwtUtils;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
   /**
    * Logger for {@link OAuth2ResourceServerConfig}.
    */
-  private static final Logger LOG = LogManager.getLogger(OAuth2ResourceServerConfig.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2ResourceServerConfig.class);
 
   @Autowired
   private Environment env;

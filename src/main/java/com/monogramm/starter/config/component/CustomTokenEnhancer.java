@@ -15,8 +15,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -39,7 +39,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
   /**
    * Logger for {@link CustomTokenEnhancer}.
    */
-  private static final Logger LOG = LogManager.getLogger(CustomTokenEnhancer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CustomTokenEnhancer.class);
 
 
   /**

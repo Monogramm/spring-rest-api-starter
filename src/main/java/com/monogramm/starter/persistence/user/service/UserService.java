@@ -15,8 +15,8 @@ import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
   /**
    * Logger for {@link UserService}.
    */
-  private static final Logger LOG = LogManager.getLogger(UserService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
   public static final String DEFAULT_ROLE = InitialDataLoader.USER_ROLE;
 
@@ -128,7 +128,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
     try {
       user = getRepository().findByUsernameOrEmailIgnoreCase(username, email);
     } catch (UserNotFoundException e) {
-      LOG.debug(e);
+      LOG.debug("No user found for specified username and email", e);
       user = null;
     }
     return user;
@@ -213,7 +213,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
     try {
       defaultRole = roleRepository.findByNameIgnoreCase(DEFAULT_ROLE);
     } catch (RoleNotFoundException e) {
-      LOG.error(e);
+      LOG.error("Default role not found", e);
       throw e;
     }
     user.setRole(defaultRole);
