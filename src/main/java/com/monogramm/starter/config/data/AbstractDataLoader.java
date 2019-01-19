@@ -49,6 +49,16 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    */
   private static final Logger LOG = LogManager.getLogger(AbstractDataLoader.class);
 
+  private static final String MSG_KEY_ENTITY_NOT_EXISTS =
+      "config.data.initialization.entity_not_exists";
+  private static final String MSG_KEY_ENTITY_ALREADY_EXISTS =
+      "config.data.initialization.entity_already_exists";
+  private static final String MSG_KEY_ENTITY_CREATED = "config.data.initialization.entity_created";
+  private static final String MSG_KEY_ENTITY_NOT_CREATED =
+      "config.data.initialization.entity_not_created";
+  private static final String MSG_KEY_ENTITY_UPDATED = "config.data.initialization.entity_updated";
+  private static final String MSG_KEY_ENTITY_NOT_UPDATED =
+      "config.data.initialization.entity_not_updated";
 
   private static final Object[] EMPTY_PARAMS = new Object[] {};
 
@@ -122,13 +132,15 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     this.alreadySetup = this.initData();
 
     if (LOG.isInfoEnabled()) {
-      final String msg;
       if (this.alreadySetup) {
-        msg = messageSource.getMessage("config.data.initialization.end", EMPTY_PARAMS, locale);
+        final String msg =
+            messageSource.getMessage("config.data.initialization.end", EMPTY_PARAMS, locale);
+        LOG.info(msg);
       } else {
-        msg = messageSource.getMessage("config.data.initialization.failure", EMPTY_PARAMS, locale);
+        final String msg =
+            messageSource.getMessage("config.data.initialization.failure", EMPTY_PARAMS, locale);
+        LOG.error(msg);
       }
-      LOG.info(msg);
     }
 
   }
@@ -309,15 +321,14 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * @return the parameter created.
    */
   protected Parameter createParameter(final String name, final Object value) {
-    final Object[] logParam = new String[] {name};
+    final Object[] logParam = new String[] {name, Parameter.class.getSimpleName()};
 
     Parameter parameter;
     try {
       parameter = parameterService.findByName(name);
     } catch (ParameterNotFoundException e) {
       if (LOG.isDebugEnabled()) {
-        final String msg = messageSource
-            .getMessage("config.data.initialization.parameter_not_exists", logParam, locale);
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_EXISTS, logParam, locale);
         LOG.debug(msg);
       }
       parameter = null;
@@ -326,17 +337,18 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     if (parameter == null) {
       parameter = Parameter.builder(name, value).build();
 
-      parameterService.add(parameter);
-
-      if (LOG.isDebugEnabled()) {
-        final String msg = messageSource.getMessage("config.data.initialization.parameter_created",
-            logParam, locale);
-        LOG.debug(msg);
+      if (parameterService.add(parameter)) {
+        if (LOG.isInfoEnabled()) {
+          final String msg = messageSource.getMessage(MSG_KEY_ENTITY_CREATED, logParam, locale);
+          LOG.info(msg);
+        }
+      } else if (LOG.isWarnEnabled()) {
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_CREATED, logParam, locale);
+        LOG.warn(msg);
       }
 
     } else if (LOG.isDebugEnabled()) {
-      final String msg = messageSource
-          .getMessage("config.data.initialization.parameter_already_exists", logParam, locale);
+      final String msg = messageSource.getMessage(MSG_KEY_ENTITY_ALREADY_EXISTS, logParam, locale);
       LOG.debug(msg);
     }
 
@@ -354,15 +366,14 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * @return the type created.
    */
   protected Type createType(final String name) {
-    final Object[] logParam = new String[] {name};
+    final Object[] logParam = new String[] {name, Type.class.getSimpleName()};
 
     Type type;
     try {
       type = typeService.findByName(name);
     } catch (TypeNotFoundException e) {
       if (LOG.isDebugEnabled()) {
-        final String msg = messageSource.getMessage("config.data.initialization.type_not_exists",
-            logParam, locale);
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_EXISTS, logParam, locale);
         LOG.debug(msg);
       }
       type = null;
@@ -371,17 +382,18 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     if (type == null) {
       type = Type.builder(name).build();
 
-      typeService.add(type);
-
-      if (LOG.isDebugEnabled()) {
-        final String msg =
-            messageSource.getMessage("config.data.initialization.type_created", logParam, locale);
-        LOG.debug(msg);
+      if (typeService.add(type)) {
+        if (LOG.isInfoEnabled()) {
+          final String msg = messageSource.getMessage(MSG_KEY_ENTITY_CREATED, logParam, locale);
+          LOG.info(msg);
+        }
+      } else if (LOG.isWarnEnabled()) {
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_CREATED, logParam, locale);
+        LOG.warn(msg);
       }
 
     } else if (LOG.isDebugEnabled()) {
-      final String msg = messageSource.getMessage("config.data.initialization.type_already_exists",
-          logParam, locale);
+      final String msg = messageSource.getMessage(MSG_KEY_ENTITY_ALREADY_EXISTS, logParam, locale);
       LOG.debug(msg);
     }
 
@@ -411,15 +423,14 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * @return the role created.
    */
   protected Role createRole(final String name, final Collection<User> users) {
-    final Object[] logParam = new String[] {name};
+    final Object[] logParam = new String[] {name, Role.class.getSimpleName()};
 
     Role role;
     try {
       role = roleService.findByName(name);
     } catch (RoleNotFoundException e) {
       if (LOG.isDebugEnabled()) {
-        final String msg = messageSource.getMessage("config.data.initialization.role_not_exists",
-            logParam, locale);
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_EXISTS, logParam, locale);
         LOG.debug(msg);
       }
       role = null;
@@ -429,17 +440,18 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
       role = Role.builder(name).build();
       role.addUsers(users);
 
-      roleService.add(role);
-
-      if (LOG.isDebugEnabled()) {
-        final String msg =
-            messageSource.getMessage("config.data.initialization.role_created", logParam, locale);
-        LOG.debug(msg);
+      if (roleService.add(role)) {
+        if (LOG.isInfoEnabled()) {
+          final String msg = messageSource.getMessage(MSG_KEY_ENTITY_CREATED, logParam, locale);
+          LOG.info(msg);
+        }
+      } else if (LOG.isWarnEnabled()) {
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_CREATED, logParam, locale);
+        LOG.warn(msg);
       }
 
     } else if (LOG.isDebugEnabled()) {
-      final String msg = messageSource.getMessage("config.data.initialization.role_already_exists",
-          logParam, locale);
+      final String msg = messageSource.getMessage(MSG_KEY_ENTITY_ALREADY_EXISTS, logParam, locale);
       LOG.debug(msg);
     }
 
@@ -447,6 +459,30 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     this.roles.add(role);
 
     return role;
+  }
+
+  /**
+   * Update the given roles.
+   * 
+   * @param roles the roles to update.
+   * 
+   * @return the role created.
+   */
+  private void updateRoles(final Collection<Role> roles) {
+    for (final Role role : roles) {
+      final Object[] roleLogParam = new String[] {role.getName(), Role.class.getSimpleName()};
+
+      if (roleService.update(role) != null) {
+        if (LOG.isInfoEnabled()) {
+          final String msg = messageSource.getMessage(MSG_KEY_ENTITY_UPDATED, roleLogParam, locale);
+          LOG.info(msg);
+        }
+      } else if (LOG.isWarnEnabled()) {
+        final String msg =
+            messageSource.getMessage(MSG_KEY_ENTITY_NOT_UPDATED, roleLogParam, locale);
+        LOG.warn(msg);
+      }
+    }
   }
 
   /**
@@ -458,15 +494,14 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * @return the permission created.
    */
   protected Permission createPermission(final String name, final Collection<Role> roles) {
-    final Object[] logParam = new String[] {name};
+    final Object[] logParam = new String[] {name, Permission.class.getSimpleName()};
 
     Permission permission;
     try {
       permission = permissionService.findByName(name);
     } catch (PermissionNotFoundException e) {
       if (LOG.isDebugEnabled()) {
-        final String msg = messageSource
-            .getMessage("config.data.initialization.permission_not_exists", logParam, locale);
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_EXISTS, logParam, locale);
         LOG.debug(msg);
       }
       permission = null;
@@ -477,17 +512,21 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
 
       permission.addRoles(roles);
 
-      permissionService.add(permission);
-
-      if (LOG.isDebugEnabled()) {
-        final String msg = messageSource.getMessage("config.data.initialization.permission_created",
-            logParam, locale);
-        LOG.debug(msg);
+      if (permissionService.add(permission)) {
+        if (LOG.isDebugEnabled()) {
+          final String msg = messageSource.getMessage(MSG_KEY_ENTITY_CREATED, logParam, locale);
+          LOG.debug(msg);
+        }
+      } else if (LOG.isWarnEnabled()) {
+        final String msg = messageSource.getMessage(MSG_KEY_ENTITY_NOT_CREATED, logParam, locale);
+        LOG.warn(msg);
       }
 
+      // Since the roles are owning the relationship to permissions, need to update the roles
+      this.updateRoles(roles);
+
     } else if (LOG.isDebugEnabled()) {
-      final String msg = messageSource
-          .getMessage("config.data.initialization.permission_already_exists", logParam, locale);
+      final String msg = messageSource.getMessage(MSG_KEY_ENTITY_ALREADY_EXISTS, logParam, locale);
       LOG.debug(msg);
     }
 
@@ -566,12 +605,16 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
 
       user = User.builder(username, email).password(password).role(userRole).build();
 
-      userService.add(user);
-
-      if (LOG.isDebugEnabled()) {
-        final String msg =
-            messageSource.getMessage("config.data.initialization.user_created", logParam, locale);
-        LOG.debug(msg);
+      if (userService.add(user)) {
+        if (LOG.isInfoEnabled()) {
+          final String msg =
+              messageSource.getMessage("config.data.initialization.user_created", logParam, locale);
+          LOG.info(msg);
+        }
+      } else if (LOG.isWarnEnabled()) {
+        final String msg = messageSource.getMessage("config.data.initialization.user_not_created",
+            logParam, locale);
+        LOG.warn(msg);
       }
 
       this.enableUser(user, logParam);

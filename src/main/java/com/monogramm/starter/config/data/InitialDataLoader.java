@@ -49,15 +49,15 @@ public class InitialDataLoader extends AbstractDataLoader {
   public static final String SUPPORT_ROLE = "Support";
   public static final String ADMIN_ROLE = "Admin";
 
-  public static final String SAMPLE_USER_NAME = "demo";
-  public static final String SAMPLE_USER_EMAIL = "demo@monogramm.io";
-  public static final char[] SAMPLE_USER_PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+  public static final String SAMPLE_DEMO_NAME = "demo";
+  public static final String SAMPLE_DEMO_EMAIL = "demo@monogramm.io";
+  public static final char[] SAMPLE_DEMO_PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
 
   public static final String SAMPLE_SUPPORT_NAME = "support";
   public static final String SAMPLE_SUPPORT_EMAIL = "support@monogramm.io";
 
-  public static final String SAMPLE_ADMIN_NAME = "admin";
-  public static final String SAMPLE_ADMIN_EMAIL = "admin@monogramm.io";
+  public static final String DEFAULT_ADMIN_NAME = "admin";
+  public static final String DEFAULT_ADMIN_EMAIL = "admin@monogramm.io";
 
   private Type userType;
   private Type roleType;
@@ -136,7 +136,8 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.parameterType = this.createType(ParameterController.TYPE);
     }
 
-    return true;
+    return this.userType != null && this.roleType != null && this.typeType != null
+        && this.permissionType != null && this.parameterType != null;
   }
 
   private boolean initDefaultRoles() {
@@ -166,15 +167,18 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.addPermission(userType, GenericOperation.UPDATE, userRole);
     }
 
-    return true;
+    return this.adminRole != null && this.supportRole != null && this.userRole != null;
   }
 
   private boolean initDefaultPermissions() {
+    boolean permissionsCreated = true;
+
     for (final Type type : this.getTypes()) {
-      this.createAllPermissions(type);
+      final Collection<Permission> permissions = this.createAllPermissions(type);
+      permissionsCreated &= permissions != null && !permissions.isEmpty();
     }
 
-    return true;
+    return permissionsCreated;
   }
 
   private boolean initDefaultParameters() {
@@ -189,7 +193,8 @@ public class InitialDataLoader extends AbstractDataLoader {
     final char[] adminPassword;
     final boolean logPassword;
 
-    final String defaultAdminPassword = this.getEnv().getProperty("application.data.demo");
+    final String defaultAdminPassword =
+        this.getEnv().getProperty("application.data.admin_password");
     if (defaultAdminPassword != null && !defaultAdminPassword.isEmpty()) {
       // Use default admin password if any defined in application properties
       adminPassword = defaultAdminPassword.toCharArray();
@@ -200,12 +205,12 @@ public class InitialDataLoader extends AbstractDataLoader {
       logPassword = true;
     }
 
-    this.adminUser = this.createUser(SAMPLE_ADMIN_NAME, SAMPLE_ADMIN_EMAIL, adminPassword,
+    this.adminUser = this.createUser(DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_EMAIL, adminPassword,
         adminRole, logPassword);
 
     this.updateOwner(adminUser, adminUser, this.getUserService());
 
-    return true;
+    return this.adminUser != null;
   }
 
   @Override
@@ -222,9 +227,9 @@ public class InitialDataLoader extends AbstractDataLoader {
     final User supportUser =
         this.createUser(SAMPLE_SUPPORT_NAME, SAMPLE_SUPPORT_EMAIL, supportPassword, supportRole);
 
-    final char[] demoPassword = SAMPLE_USER_PASSWORD.clone();
+    final char[] demoPassword = SAMPLE_DEMO_PASSWORD.clone();
     final User demoUser =
-        this.createUser(SAMPLE_USER_NAME, SAMPLE_USER_EMAIL, demoPassword, userRole);
+        this.createUser(SAMPLE_DEMO_NAME, SAMPLE_DEMO_EMAIL, demoPassword, userRole);
 
     // Make users owner of their own account
     this.updateOwner(supportUser, supportUser, this.getUserService());
