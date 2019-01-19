@@ -8,11 +8,14 @@ import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 import com.monogramm.starter.config.component.CustomPasswordEncoder;
 import com.monogramm.starter.config.component.CustomTokenEnhancer;
 import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.utils.JwtUtils;
 
 import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +41,21 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 /**
  * OAuth2AuthorizationServerConfig.
  * 
+ * <p>
+ * Note that, unless this is split to into a different server, this class will not used and only the
+ * {@link OAuth2ResourceServerConfig} will actually loaded.
+ * </p>
+ * 
  * @author madmath03
  */
 @Configuration
 @EnableAuthorizationServer
 public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+
+  /**
+   * Logger for {@link OAuth2AuthorizationServerConfig}.
+   */
+  private static final Logger LOG = LogManager.getLogger(OAuth2AuthorizationServerConfig.class);
 
   @Autowired
   private Environment env;
@@ -99,14 +112,25 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
   /**
    * Access token converter.
    * 
+   * @see <a href="http://www.baeldung.com/spring-security-oauth-jwt">Using JWT with Spring Security
+   *      OAuth</a>
+   * 
    * @return access token converter.
    */
   @Bean
   public JwtAccessTokenConverter accessTokenConverter() {
     final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
 
-    // TODO Use an asymmetric key: http://www.baeldung.com/spring-security-oauth-jwt#asymmetric
-    converter.setSigningKey("123");
+    // Use an asymmetric key
+    boolean asymetricKeySet = JwtUtils.setPrivateKey(env, converter);
+
+    // Use symmetric key as fallback
+    if (!asymetricKeySet) {
+      LOG.warn("No asymetric key set. Using symmetric key for signing JWT tokens");
+
+      JwtUtils.setSigningKey(env, converter);
+    }
+
     converter.setAccessTokenConverter(new JwtConverter());
 
     return converter;
