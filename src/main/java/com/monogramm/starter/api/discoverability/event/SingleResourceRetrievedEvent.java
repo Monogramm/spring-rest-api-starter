@@ -18,7 +18,9 @@ import javax.servlet.http.HttpServletResponse;
  * This event object contains all the information needed to create the URL for the created result.
  * </p>
  * 
- * @see AbstractGenericController#getDataById(String)
+ * @see AbstractGenericController#getDataById(String,
+ *      org.springframework.web.context.request.WebRequest, HttpServletResponse)
+ * 
  * @see <a href="https://www.baeldung.com/rest-api-discoverability-with-spring">HATEOAS for a Spring
  *      REST Service</a>
  * 

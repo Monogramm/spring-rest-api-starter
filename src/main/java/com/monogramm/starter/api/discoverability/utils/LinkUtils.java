@@ -8,7 +8,7 @@ import com.monogramm.starter.api.discoverability.listener.PaginatedResultsRetrie
 
 /**
  * Provides some constants and utility methods to build a Link Header to be stored in the
- * {@link HttpServletResponse} object.
+ * {@code HttpServletResponse} object.
  * 
  * @see <a href="https://www.baeldung.com/rest-api-discoverability-with-spring">HATEOAS for a Spring
  *      REST Service</a>
@@ -82,7 +82,7 @@ public final class LinkUtils {
 
 
   /**
-   * Creates a Link Header to be stored in the {@link HttpServletResponse} to provide
+   * Creates a Link Header to be stored in the {@code HttpServletResponse} to provide
    * Discoverability features to the user.
    * 
    * @param uri the base URI

@@ -78,7 +78,7 @@ public class PaginatedResultsRetrievedDiscoverabilityListener
   /**
    * Add link to response headers.
    * 
-   * @param uriBuilder an URI builder to build the URI to the created {@link T} in the response.
+   * @param uriBuilder an URI builder to build the URI to the createddata in the response.
    * @param response HTTP response.
    * @param page zero-based page index.
    * @param totalPages total number of pages.
@@ -99,7 +99,7 @@ public class PaginatedResultsRetrievedDiscoverabilityListener
    * Add link to response headers for specified base request URL.
    * 
    * @param urlPath request URL.
-   * @param uriBuilder an URI builder to build the URI to the created {@link T} in the response.
+   * @param uriBuilder an URI builder to build the URI to the created data in the response.
    * @param response HTTP response.
    * @param page zero-based page index.
    * @param totalPages total number of pages.

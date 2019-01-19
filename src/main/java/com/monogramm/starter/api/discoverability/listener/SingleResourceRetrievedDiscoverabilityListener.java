@@ -22,7 +22,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 /**
  * Listener that is triggered when a single result event is fired.
  * 
- * @see AbstractGenericController#getDataById(String)
+ * @see AbstractGenericController#getDataById(String,
+ *      org.springframework.web.context.request.WebRequest, HttpServletResponse)
+ * 
  * @see <a href="https://www.baeldung.com/rest-api-discoverability-with-spring">HATEOAS for a Spring
  *      REST Service</a>
  * 

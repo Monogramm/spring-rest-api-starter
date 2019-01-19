@@ -23,7 +23,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
  * 
  * @see AbstractGenericController#addData(org.springframework.security.core.Authentication,
  *      com.monogramm.starter.dto.AbstractGenericDto,
- *      org.springframework.web.util.UriComponentsBuilder)
+ *      org.springframework.web.util.UriComponentsBuilder, HttpServletResponse)
+ * 
  * @see <a href="https://www.baeldung.com/rest-api-discoverability-with-spring">HATEOAS for a Spring
  *      REST Service</a>
  * 

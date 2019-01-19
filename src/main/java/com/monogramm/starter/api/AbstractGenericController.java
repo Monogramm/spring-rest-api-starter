@@ -396,6 +396,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * @param dto <em>Required Body Content:</em> a {@link D} JSON representation about the {@link T}
    *        to create.
    * @param builder an URI builder to build the URI to the created {@link T} in the response.
+   * @param response HTTP response.
    * 
    * @return
    *         <ul>

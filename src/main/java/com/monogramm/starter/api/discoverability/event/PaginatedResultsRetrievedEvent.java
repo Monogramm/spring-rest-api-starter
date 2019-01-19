@@ -20,7 +20,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * </p>
  * 
  * @see AbstractGenericController#getAllDataPaginated(int, int,
- *      org.springframework.web.util.UriComponentsBuilder, HttpServletResponse)
+ *      org.springframework.web.context.request.WebRequest, UriComponentsBuilder,
+ *      HttpServletResponse)
+ * 
  * @see <a href="https://www.baeldung.com/rest-api-pagination-in-spring">REST Pagination in
  *      Spring</a>
  * 
@@ -43,13 +45,13 @@ public class PaginatedResultsRetrievedEvent
    * Create a {@link ResourceCreatedEvent}.
    * 
    * @param response HTTP response.
-   * @param builder an URI builder to build the URI to the created {@link T} in the response.
+   * @param builder an URI builder to build the URI to the created data in the response.
    * @param page zero-based page index.
    * @param nbPages total number of pages.
    * @param size the size of the page to be returned.
    */
-  public PaginatedResultsRetrievedEvent(
-      HttpServletResponse response, UriComponentsBuilder builder, int page, int nbPages, int size) {
+  public PaginatedResultsRetrievedEvent(HttpServletResponse response, UriComponentsBuilder builder,
+      int page, int nbPages, int size) {
     super(AbstractGenericEntity.class, response);
 
     this.uriBuilder = builder;
