@@ -38,6 +38,16 @@ ENV MAIL_USER USERNAME@company.com
 ENV MAIL_PASSWORD PASSWORD
 ENV MAIL_STARTTLS true
 
+# Copy application
+RUN set -ex; \
+	mkdir -p /srv/app; \
+	chmod 755 /srv/app; \
+	mkdir -p /srv/app/data; \
+	mkdir -p /srv/app/logs; \
+	mkdir -p /srv/app/keys; \
+	mkdir -p /srv/app/config;
+COPY target/spring-rest-api-starter-$VERSION.jar /srv/app/spring-rest-api-starter.jar
+
 
 EXPOSE 8080 8443
 
@@ -47,16 +57,6 @@ VOLUME /srv/app/logs
 VOLUME /srv/app/data
 
 WORKDIR /srv/app/
-
-# Copy application
-RUN set -ex; \
-	mkdir -p /srv/app; \
-	chmod 755 /srv/app; \
-	mkdir /srv/app/data; \
-	mkdir /srv/app/logs; \
-	mkdir /srv/app/keys; \
-	mkdir /srv/app/config;
-COPY target/spring-rest-api-starter-$VERSION.jar /srv/app/spring-rest-api-starter.jar
 
 
 # Copy entrypoint
