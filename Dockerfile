@@ -2,7 +2,7 @@ FROM openjdk:8-jre-alpine
 
 
 # Application configuration
-ENV VERSION {{ VERSION }}
+ENV VERSION 0.5.0-SNAPSHOT
 ENV APP_CONFIG /srv/app/config/application.properties
 ENV APP_SERVER_CONTEXT_PATH /spring-rest-api-starter/api
 ENV APP_SERVER_PORT 8080

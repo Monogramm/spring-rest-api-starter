@@ -9,7 +9,7 @@ Status](https://secure.travis-ci.org/Monogramm/spring-rest-api-starter.png)](htt
 
 A "simple" starter project custom RESTful API.
 
-The project uses Spring Boot and a MySQL database.
+The project uses Spring Boot, a connection to a database and a connection to a mail server.
 
 ## Prerequisites
 0. Globally installed [Git](https://git-scm.com/), [JDK](https://www.java.com/download/) (8 at least) and [Maven](https://maven.apache.org/).
@@ -60,6 +60,20 @@ It is possible to generate documentation using JavaDoc
 
 Also, the application uses Swagger to document the API.
 When running the backend API, go to  `http://localhost:8080/spring-rest-api-starter/api/v2/api-docs`
+
+### Docker
+
+A Dockerfile and docker-compose template are available at the root of this project.
+After building the project, the docker image can be created:
+```
+mvn clean install
+docker build -t "monogramm/docker-spring-rest-api-starter" "."
+```
+
+### Tools
+
+A helper script is available at the root of this project: `tools.sh`
+It can be used for common operations
 
 ### Contribution guidelines ###
 

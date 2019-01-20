@@ -12,6 +12,13 @@ before_install:
   - image="monogramm/docker-spring-rest-api-starter"
   - dir="."
 
+after_install:
+  - docker images
+  - docker run --name "$name" -d "$image" "$dir"
+  - docker ps
+  - docker logs "$name"
+  - docker stop "$name"
+
 install:
   - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   - travis_retry docker build -t "$image" "$dir"
