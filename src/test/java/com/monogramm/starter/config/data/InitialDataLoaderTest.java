@@ -167,6 +167,7 @@ public class InitialDataLoaderTest {
 
     verify(env, times(1)).getProperty("application.data.demo");
     verify(env, times(1)).getProperty("application.data.admin_password");
+    verify(env, times(1)).getProperty("application.data.domain_name", "monogramm.io");
     verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());
@@ -188,6 +189,7 @@ public class InitialDataLoaderTest {
 
     verify(env, times(1)).getProperty("application.data.demo");
     verify(env, times(1)).getProperty("application.data.admin_password");
+    verify(env, times(1)).getProperty("application.data.domain_name", "monogramm.io");
     verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());
