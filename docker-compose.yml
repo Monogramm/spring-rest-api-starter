@@ -25,11 +25,12 @@ services:
       # Application configuration
       - APP_SERVER_CONTEXT_PATH=/api
       - APP_DOMAIN_NAME=company.com
-      - APP_ADMIN_PASSWORD=false
+      - APP_ADMIN_PASSWORD=youshouldoverwritethiswithsomethingelse
       - APP_SIGNING_KEY=youshouldoverwritethiswithsomethingelse
       - APP_VERIFIER_KEY_PASS=youshouldoverwritethiswithsomethingelse
       - APP_DEMO_DATA=false
       # Database configuration
+      - DB_PLATFORM=postgres
       - DB_HOST=backend_db
       - DB_NAME=spring_rest_api_starter
       - DB_USER=spring_rest_api_starter

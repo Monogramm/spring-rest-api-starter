@@ -19,15 +19,15 @@ ENV APP_DEMO_DATA false
 
 
 # Database configuration
-ENV DB_DIALECT 'org.hibernate.dialect.PostgreSQLDialect'
+ENV DB_DIALECT ''
 ENV DB_STORAGE ''
-ENV DB_DRIVER 'org.postgresql.Driver'
-ENV DB_PLATFORM postgresql
-ENV DB_HOST localhost
-ENV DB_PORT 5432
+ENV DB_DRIVER ''
+ENV DB_PLATFORM 'h2'
+ENV DB_HOST ''
+ENV DB_PORT ''
 ENV DB_NAME 'spring_rest_api_starter'
-ENV DB_USER 'postgres'
-ENV DB_PASSWORD 'postgres'
+ENV DB_USER 'spring_rest_api_starter'
+ENV DB_PASSWORD 'spring_rest_api_starter_password'
 
 
 # Mail configuration
@@ -41,14 +41,21 @@ ENV MAIL_STARTTLS true
 
 EXPOSE 8080 8443
 
-VOLUME /srv/app/keys
 VOLUME /srv/app/config
+VOLUME /srv/app/keys
 VOLUME /srv/app/logs
+VOLUME /srv/app/data
 
+WORKDIR /srv/app/
 
 # Copy application
 RUN set -ex; \
-	mkdir -p /srv/app/
+	mkdir -p /srv/app; \
+	chmod 755 /srv/app; \
+	mkdir /srv/app/data; \
+	mkdir /srv/app/logs; \
+	mkdir /srv/app/keys; \
+	mkdir /srv/app/config;
 COPY target/spring-rest-api-starter-$VERSION.jar /srv/app/spring-rest-api-starter.jar
 
 
@@ -58,7 +65,7 @@ RUN set -ex; \
 	chmod 755 /entrypoint.sh;
 
 # Healthcheck
-HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT/$APP_SERVER_CONTEXT_PATH/health 2>&1 | grep UP
+HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT$APP_SERVER_CONTEXT_PATH/health 2>&1 | grep UP
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["java -jar spring-rest-api-starter.jar"]
