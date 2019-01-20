@@ -56,6 +56,11 @@
 			"description": "Enable initialization of database with some demonstration data"
 		},
 		{
+			"name": "application.data.domain_name",
+			"type": "java.lang.String",
+			"description": "The domain name used to generate default (and demo) user email addresses"
+		},
+		{
 			"name": "application.data.admin_password",
 			"type": "java.lang.String",
 			"description": "The password for the default admin user. Leave empty for automatic password generation"

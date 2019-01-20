@@ -50,14 +50,14 @@ public class InitialDataLoader extends AbstractDataLoader {
   public static final String ADMIN_ROLE = "Admin";
 
   public static final String SAMPLE_DEMO_NAME = "demo";
-  public static final String SAMPLE_DEMO_EMAIL = "demo@monogramm.io";
+  public static final String SAMPLE_DEMO_EMAIL = "demo@";
   public static final char[] SAMPLE_DEMO_PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
 
   public static final String SAMPLE_SUPPORT_NAME = "support";
-  public static final String SAMPLE_SUPPORT_EMAIL = "support@monogramm.io";
+  public static final String SAMPLE_SUPPORT_EMAIL = "support@";
 
   public static final String DEFAULT_ADMIN_NAME = "admin";
-  public static final String DEFAULT_ADMIN_EMAIL = "admin@monogramm.io";
+  public static final String DEFAULT_ADMIN_EMAIL = "admin@";
 
   private Type userType;
   private Type roleType;
@@ -70,6 +70,8 @@ public class InitialDataLoader extends AbstractDataLoader {
   private Role userRole;
 
   private User adminUser;
+
+  private String defaultDomainName;
 
   private final Map<Type, Map<GenericOperation, Set<Role>>> typePermissions = new HashMap<>();
 
@@ -96,6 +98,9 @@ public class InitialDataLoader extends AbstractDataLoader {
   @Override
   public boolean initDefaultData() {
     boolean initDone = true;
+
+    this.defaultDomainName =
+        this.getEnv().getProperty("application.data.domain_name", "monogramm.io");
 
     // Setup the initial types
     initDone &= this.initDefaultTypes();
@@ -205,8 +210,9 @@ public class InitialDataLoader extends AbstractDataLoader {
       logPassword = true;
     }
 
-    this.adminUser = this.createUser(DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_EMAIL, adminPassword,
-        adminRole, logPassword);
+    final String adminEmail = DEFAULT_ADMIN_EMAIL + this.defaultDomainName;
+    this.adminUser =
+        this.createUser(DEFAULT_ADMIN_NAME, adminEmail, adminPassword, adminRole, logPassword);
 
     this.updateOwner(adminUser, adminUser, this.getUserService());
 
@@ -224,12 +230,13 @@ public class InitialDataLoader extends AbstractDataLoader {
 
   private boolean initDemoUsers() {
     final char[] supportPassword = Passwords.generateRandomPassword();
+    final String supportEmail = SAMPLE_SUPPORT_EMAIL + this.defaultDomainName;
     final User supportUser =
-        this.createUser(SAMPLE_SUPPORT_NAME, SAMPLE_SUPPORT_EMAIL, supportPassword, supportRole);
+        this.createUser(SAMPLE_SUPPORT_NAME, supportEmail, supportPassword, supportRole);
 
     final char[] demoPassword = SAMPLE_DEMO_PASSWORD.clone();
-    final User demoUser =
-        this.createUser(SAMPLE_DEMO_NAME, SAMPLE_DEMO_EMAIL, demoPassword, userRole);
+    final String demoEmail = SAMPLE_DEMO_EMAIL + this.defaultDomainName;
+    final User demoUser = this.createUser(SAMPLE_DEMO_NAME, demoEmail, demoPassword, userRole);
 
     // Make users owner of their own account
     this.updateOwner(supportUser, supportUser, this.getUserService());
