@@ -1,11 +1,43 @@
-mysql:
-  image: mysql
-  ports:
-    - "3306:3306"
-  environment:
-    - MYSQL_USER=myapp_rw
-    - MYSQL_PASSWORD=myapp_rw
-    - MYSQL_DATABASE=myapp
-    - MYSQL_RANDOM_ROOT_PASSWORD=true
-  volumes:
-    - "./conf.d:/etc/mysql/conf.d:ro"
+version: '2'
+
+services:
+  backend_db:
+    image: postgres:10-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - /srv/spring_rest_api_starter/db/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=spring_rest_api_starter
+      - POSTGRES_USER=spring_rest_api_starter
+      - POSTGRES_PASSWORD=spring_rest_api_starter_password
+
+  backend_api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend_db
+    volumes:
+      - /srv/spring_rest_api_starter/back/logs:/srv/app/logs
+      - /srv/spring_rest_api_starter/back/config:/srv/app/config
+    environment:
+      # Application configuration
+      - APP_SERVER_CONTEXT_PATH=/api
+      - APP_DOMAIN_NAME=company.com
+      - APP_ADMIN_PASSWORD=false
+      - APP_SIGNING_KEY=youshouldoverwritethiswithsomethingelse
+      - APP_VERIFIER_KEY_PASS=youshouldoverwritethiswithsomethingelse
+      - APP_DEMO_DATA=false
+      # Database configuration
+      - DB_HOST=backend_db
+      - DB_NAME=spring_rest_api_starter
+      - DB_USER=spring_rest_api_starter
+      - DB_PASSWORD=spring_rest_api_starter_password
+      # Mail configuration
+      - MAIL_HOST=smtp.company.com
+      - MAIL_PORT=465
+      - MAIL_PROTOCOL=smtps
+      - MAIL_USER=spring_rest_api_starter@company.com
+      - MAIL_PASSWORD=spring_rest_api_starter_password
+      - MAIL_STARTTLS=true

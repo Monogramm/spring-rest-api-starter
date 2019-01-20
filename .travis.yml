@@ -1,11 +1,20 @@
 language: java
 sudo: false # faster builds
 
+services: docker
+
 jdk:
   - oraclejdk8
 
+before_install:
+  - env | sort
+  - name="spring-rest-api-starter"
+  - image="monogramm/docker-spring-rest-api-starter"
+  - dir="."
+
 install:
   - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - travis_retry docker build -t "$image" "$dir"
 
 script: 
   - mvn test verify -P all-tests
