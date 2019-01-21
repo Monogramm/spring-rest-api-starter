@@ -16,7 +16,7 @@ install:
   - mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   # If you provide access to repository
   #- mvn dockerfile:build
-  - docker build --build-args=target/*.jar -t "$image" "$dir"
+  - docker build --build-arg=target/*.jar -t "$image" "$dir"
   - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2
   - docker logs "$name" | grep "Launching application..."
   - docker stop "$name"
