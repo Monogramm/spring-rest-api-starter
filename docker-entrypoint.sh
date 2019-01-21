@@ -6,7 +6,7 @@ echo "Application Docker entrypoint initialization..."
 # If no config provided in volume, setup a default config from environment variables
 if [ ! -f $APP_CONFIG ]; then
 	echo "Setting up initial application configuration..."
-	echo "# Initial configuration generated at $(date --iso-8601=seconds)" > $APP_CONFIG
+	echo "# Initial configuration generated at $(date +%Y-%m-%dT%H:%M:%S%z)" > $APP_CONFIG
 
 	echo "# ~~~~~" >>  $APP_CONFIG
 	echo "# Application Configuration" >>  $APP_CONFIG

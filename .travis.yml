@@ -19,6 +19,7 @@ install:
   - docker build --build-arg=target/*.jar -t "$image" "$dir"
   - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2
   - docker logs "$name"
+  - docker logs "$name" | grep "Launching application..."
   - docker stop "$name"
 
 script: 
