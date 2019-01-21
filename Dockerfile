@@ -72,9 +72,9 @@ HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT$APP_SERVER_CO
 
 
 # Copy entrypoint
-COPY docker-entrypoint.sh /srv/app/entrypoint.sh
+COPY docker-entrypoint.sh entrypoint.sh
 RUN set -ex; \
-	chmod 755 /srv/app/entrypoint.sh
+	chmod 755 entrypoint.sh
 
-ENTRYPOINT ["sh", "/srv/app/entrypoint.sh"]
+ENTRYPOINT ["sh", "entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
