@@ -29,6 +29,7 @@ public class ApplicationMessage {
 
     messageSource.setBasename(MESSAGE_SOURCE_BASE_NAME);
     messageSource.setUseCodeAsDefaultMessage(true);
+    messageSource.setAlwaysUseMessageFormat(true);
 
     return messageSource;
   }

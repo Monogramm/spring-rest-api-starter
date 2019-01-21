@@ -12,6 +12,11 @@ import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFou
 
 import java.util.UUID;
 
+/**
+ * {@link PasswordResetToken} service interface.
+ * 
+ * @author madmath03
+ */
 public interface IPasswordResetTokenService
     extends GenericService<PasswordResetToken, PasswordResetTokenDto> {
 

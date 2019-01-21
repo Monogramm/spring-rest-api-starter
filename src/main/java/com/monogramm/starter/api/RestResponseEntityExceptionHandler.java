@@ -9,8 +9,8 @@ import com.monogramm.starter.persistence.EntityNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -111,7 +111,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
   }
 
-  private static final Logger LOG = LogManager.getLogger(RestResponseEntityExceptionHandler.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
 
   /**
    * Catch all for any other exceptions.

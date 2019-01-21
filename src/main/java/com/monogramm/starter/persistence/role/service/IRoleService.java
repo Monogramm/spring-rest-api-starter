@@ -7,6 +7,11 @@ import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
 
 import java.util.List;
 
+/**
+ * {@link Role} service interface.
+ * 
+ * @author madmath03
+ */
 public interface IRoleService extends GenericService<Role, RoleDto> {
 
   @Override

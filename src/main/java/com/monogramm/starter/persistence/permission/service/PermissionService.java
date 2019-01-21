@@ -1,5 +1,6 @@
 package com.monogramm.starter.persistence.permission.service;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.permission.PermissionDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
 import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
@@ -14,6 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link Permission} service.
+ * 
+ * @author madmath03
+ */
 @Service
 public class PermissionService extends AbstractGenericService<Permission, PermissionDto>
     implements IPermissionService {
@@ -23,11 +29,12 @@ public class PermissionService extends AbstractGenericService<Permission, Permis
    * 
    * @param permissionDao the permission repository.
    * @param userDao the user repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    */
   @Autowired
-  public PermissionService(final IPermissionRepository permissionDao,
-      final IUserRepository userDao) {
-    super(permissionDao, userDao, new PermissionBridge(userDao));
+  public PermissionService(final IPermissionRepository permissionDao, final IUserRepository userDao,
+      IAuthenticationFacade authenticationFacade) {
+    super(permissionDao, userDao, new PermissionBridge(userDao), authenticationFacade);
   }
 
   @Override

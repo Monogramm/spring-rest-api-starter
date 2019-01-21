@@ -1,5 +1,7 @@
 package com.monogramm.starter.persistence.user.service;
 
+import com.monogramm.starter.config.data.InitialDataLoader;
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
@@ -13,21 +15,26 @@ import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link User} service.
+ * 
+ * @author madmath03
+ */
 @Service
 public class UserService extends AbstractGenericService<User, UserDto> implements IUserService {
 
   /**
    * Logger for {@link UserService}.
    */
-  private static final Logger LOG = LogManager.getLogger(UserService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
-  public static final String DEFAULT_ROLE = "User";
+  public static final String DEFAULT_ROLE = InitialDataLoader.USER_ROLE;
 
   private final IRoleRepository roleRepository;
 
@@ -36,12 +43,14 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
    * 
    * @param userDao the user repository.
    * @param roleDao the role repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    * 
    * @throws IllegalArgumentException if {@code roleDao} is {@code null}.
    */
   @Autowired
-  public UserService(final IUserRepository userDao, final IRoleRepository roleDao) {
-    super(userDao, userDao, new UserBridge(userDao, roleDao));
+  public UserService(final IUserRepository userDao, final IRoleRepository roleDao,
+      IAuthenticationFacade authenticationFacade) {
+    super(userDao, userDao, new UserBridge(userDao, roleDao), authenticationFacade);
     if (roleDao == null) {
       throw new IllegalArgumentException("Role repository cannot be null.");
     }
@@ -119,7 +128,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
     try {
       user = getRepository().findByUsernameOrEmailIgnoreCase(username, email);
     } catch (UserNotFoundException e) {
-      LOG.debug(e);
+      LOG.debug("No user found for specified username and email", e);
       user = null;
     }
     return user;
@@ -128,6 +137,17 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
   @Override
   public User setPassword(final UUID userId, char[] password) {
     final User updatedEntity = getRepository().setPassword(userId, password);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(userId);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
+  public User setPasswordByOwner(UUID userId, char[] password, User owner) {
+    final User updatedEntity = getRepository().setPasswordByOwner(userId, password, owner);
 
     if (updatedEntity == null) {
       throw this.createEntityNotFoundException(userId);
@@ -148,8 +168,30 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
   }
 
   @Override
+  public User setEnabledByOwner(UUID userId, boolean enabled, User owner) {
+    final User updatedEntity = getRepository().setEnabledByOwner(userId, enabled, owner);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(userId);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
   public User setVerified(final UUID userId, boolean verified) {
     final User updatedEntity = getRepository().setVerified(userId, true);
+
+    if (updatedEntity == null) {
+      throw this.createEntityNotFoundException(userId);
+    }
+
+    return updatedEntity;
+  }
+
+  @Override
+  public User setVerifiedByOwner(UUID userId, boolean verified, User owner) {
+    final User updatedEntity = getRepository().setVerifiedByOwner(userId, true, owner);
 
     if (updatedEntity == null) {
       throw this.createEntityNotFoundException(userId);
@@ -171,7 +213,7 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
     try {
       defaultRole = roleRepository.findByNameIgnoreCase(DEFAULT_ROLE);
     } catch (RoleNotFoundException e) {
-      LOG.error(e);
+      LOG.error("Default role not found", e);
       throw e;
     }
     user.setRole(defaultRole);

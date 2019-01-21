@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The Permissions Data Access Object (DAO) interface.
+ * The {@link Permission} Data Access Object (DAO) interface.
  * 
  * @author madmath03
  */
@@ -35,10 +35,8 @@ public interface IPermissionRepository extends GenericRepository<Permission> {
    * @return the list of all the permissions matching the search through the repository.
    */
   @Transactional(readOnly = true)
-  @Query("FROM Permission AS p "
-      + "WHERE LOWER(p.name) LIKE concat('%', LOWER(:name), '%')")
-  List<Permission> findAllContainingNameIgnoreCase(
-      @Param("name") final String name);
+  @Query("FROM Permission AS p " + "WHERE LOWER(p.name) LIKE concat('%', LOWER(:name), '%')")
+  List<Permission> findAllContainingNameIgnoreCase(@Param("name") final String name);
 
   /**
    * Find an permission through its name while ignoring case.
@@ -47,11 +45,9 @@ public interface IPermissionRepository extends GenericRepository<Permission> {
    * 
    * @return the permission matching the name.
    * 
-   * @throws PermissionNotFoundException if no permission matches the name in the
-   *         repository.
+   * @throws PermissionNotFoundException if no permission matches the name in the repository.
    * @throws NoResultException if no permission matches the name in the repository.
-   * @throws NonUniqueResultException if several permissions match the name in the
-   *         repository.
+   * @throws NonUniqueResultException if several permissions match the name in the repository.
    */
   @Transactional(readOnly = true)
   Permission findByNameIgnoreCase(final String name);
@@ -67,6 +63,5 @@ public interface IPermissionRepository extends GenericRepository<Permission> {
   @Transactional(readOnly = true)
   @Query("SELECT count(p) > 0 FROM Permission AS p "
       + "WHERE p.id = :permissionId OR LOWER(p.name) = LOWER(:name)")
-  boolean exists(@Param("permissionId") final UUID permissionId,
-      @Param("name") final String name);
+  boolean exists(@Param("permissionId") final UUID permissionId, @Param("name") final String name);
 }

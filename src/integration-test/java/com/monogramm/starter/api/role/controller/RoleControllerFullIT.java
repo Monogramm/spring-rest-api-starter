@@ -55,13 +55,13 @@ public class RoleControllerFullIT extends AbstractControllerFullIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Roles";
+  public static final String TYPE = RoleController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = RoleController.CONTROLLER_PATH;
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = RoleControllerFullIT.class.getSimpleName();
 
   private User testCreatedBy;
   private User testOwner;
@@ -188,6 +188,49 @@ public class RoleControllerFullIT extends AbstractControllerFullIT {
     final HttpHeaders headers = getHeaders();
 
     final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Object> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for
+   * {@link RoleController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllRolesPaginated() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<RoleDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, RoleDto[].class);
+
+    final RoleDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DISPLAYNAME.equals(a.getName())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link RoleController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllRolesPaginatedNoAuthorization() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders();
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<Object> responseEntity =

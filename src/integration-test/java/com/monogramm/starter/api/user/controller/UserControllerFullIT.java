@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.github.madmath03.password.Passwords;
 import com.monogramm.Application;
+import com.monogramm.starter.SmtpServerRule;
 import com.monogramm.starter.api.AbstractControllerFullIT;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
@@ -24,13 +25,18 @@ import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService
 import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,11 +74,32 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Users";
+  public static final String TYPE = UserController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = UserController.CONTROLLER_PATH;
+  /**
+   * The request path for registration.
+   */
+  public static final String REGISTER_PATH = UserController.REGISTER_PATH;
+  /**
+   * The request path for resetting password.
+   */
+  public static final String RESET_PWD_PATH = UserController.RESET_PWD_PATH;
+  /**
+   * The request path for verification request.
+   */
+  public static final String SEND_VERIFICATION_PATH = UserController.SEND_VERIFICATION_PATH;
+  /**
+   * The request path for user verification.
+   */
+  public static final String VERIFY_PATH = UserController.VERIFY_PATH;
+  /**
+   * The request path for changing password.
+   */
+  public static final String CHANGE_PWD_PATH = UserController.CHANGE_PWD_PATH;
+
 
   private static final String DUMMY_USERNAME = "Foo";
   private static final String DUMMY_EMAIL = "foo@email.com";
@@ -91,6 +118,9 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
   @Autowired
   private IPasswordResetTokenService passwordResetTokenService;
+
+  @Rule
+  public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
   @Before
   public void setUp() throws URISyntaxException {
@@ -211,6 +241,49 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     final HttpHeaders headers = getHeaders();
 
     final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Object> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllUsersPaginated() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<UserDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto[].class);
+
+    final UserDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DUMMY_USERNAME.equals(a.getUsername())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllUsersPaginatedNoAuthorization() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders();
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<Object> responseEntity =
@@ -435,7 +508,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testResetPassword() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/reset_password");
+    final String url = this.getUrl(RESET_PWD_PATH);
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(this.testEntity.getEmail(), headers);
 
@@ -443,7 +516,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
         getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, Void.class);
 
     // Password reset is only possible for anonymous user
-    assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
 
   /**
@@ -452,14 +525,17 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
    * and {@link UserController#resetPassword(com.monogramm.starter.dto.user.PasswordResetDto)}.
    * 
    * @throws URISyntaxException if the test crashes.
+   * @throws MessagingException for other mail related failures
+   * @throws IOException this is typically thrown by the DataHandler. Refer to the documentation for
+   *         javax.activation.DataHandler for more details.
    * @throws PasswordResetTokenNotFoundException if the password reset token is not found.
    */
   @Test
   public void testResetPasswordNoAuthorization()
-      throws URISyntaxException, PasswordResetTokenNotFoundException {
+      throws URISyntaxException, IOException, MessagingException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/reset_password");
+    final String url = this.getUrl(RESET_PWD_PATH);
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(this.testEntity.getEmail(), headers);
 
@@ -478,7 +554,14 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     assertEquals(1, tokens.size());
     assertNotNull(tokens.get(0));
     assertNotNull(tokens.get(0).getCode());
-    final String tokenCode = tokens.get(0).getCode();
+    final PasswordResetToken token = tokens.get(0);
+    final String tokenCode = token.getCode();
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(tokenCode));
 
     final char[] password = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
     final PasswordResetDto dto =
@@ -491,9 +574,9 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     assertEquals(HttpStatus.NO_CONTENT, resetResponseEntity.getStatusCode());
 
     // FIXME This test should be rollbacked
-    for (final PasswordResetToken token : tokens) {
-      if (this.testEntity.getEmail().equals(token.getUser().getEmail())) {
-        passwordResetTokenService.deleteById(token.getId());
+    for (final PasswordResetToken tmpToken : tokens) {
+      if (this.testEntity.getEmail().equals(tmpToken.getUser().getEmail())) {
+        passwordResetTokenService.deleteById(tmpToken.getId());
       }
     }
   }
@@ -510,7 +593,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/change_password/", this.testEntity.getId());
+    final String url = this.getUrl(CHANGE_PWD_PATH, "/", this.testEntity.getId());
 
     final HttpEntity<PasswordConfirmationDto> requestEntity = new HttpEntity<>(dto, headers);
 
@@ -536,7 +619,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/change_password/", this.testEntity.getId());
+    final String url = this.getUrl(CHANGE_PWD_PATH, "/", this.testEntity.getId());
 
     final HttpEntity<PasswordConfirmationDto> requestEntity = new HttpEntity<>(dto, headers);
 
@@ -604,7 +687,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/register");
+    final String url = this.getUrl(REGISTER_PATH);
 
     final HttpEntity<RegistrationDto> requestEntity = new HttpEntity<>(model, headers);
 
@@ -612,7 +695,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
         getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, Void.class);
 
     // Registration is only possible for anonymous user
-    assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
 
   /**
@@ -623,8 +706,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
    * @throws UserNotFoundException if a user cannot be found.
    */
   @Test
-  public void testRegisterNoAuthorization()
-      throws URISyntaxException, VerificationTokenNotFoundException, UserNotFoundException {
+  public void testRegisterNoAuthorization() throws URISyntaxException {
     final String username = "Bar";
     final String email = "bar@monogramm.io";
     final RegistrationDto model = new RegistrationDto();
@@ -635,7 +717,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/register");
+    final String url = this.getUrl(REGISTER_PATH);
 
     final HttpEntity<RegistrationDto> requestEntity = new HttpEntity<>(model, headers);
 
@@ -645,6 +727,10 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     final Void responseBody = responseEntity.getBody();
     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
     assertNull(responseBody);
+
+    // Check email received
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
 
     final User registeredUser = getUserService().findByUsernameOrEmail(username, email);
     assertNotNull(registeredUser);
@@ -669,7 +755,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testSendVerification() throws URISyntaxException, VerificationTokenNotFoundException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/send_verification");
+    final String url = this.getUrl(SEND_VERIFICATION_PATH);
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(this.testEntity.getEmail(), headers);
 
@@ -708,7 +794,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     token.setUser(this.testEntity);
     verificationService.add(token);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/verify/", this.testEntity.getId());
+    final String url = this.getUrl(VERIFY_PATH, "/", this.testEntity.getId());
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(token.getCode(), headers);
 
@@ -733,7 +819,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testVerifyNotFound() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/verify/", this.testEntity.getId());
+    final String url = this.getUrl(VERIFY_PATH, "/", this.testEntity.getId());
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(DUMMY_TOKEN, headers);
 
@@ -752,7 +838,7 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testVerifyNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/verify/", this.testEntity.getId());
+    final String url = this.getUrl(VERIFY_PATH, "/", this.testEntity.getId());
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(DUMMY_TOKEN, headers);
 

@@ -45,8 +45,8 @@ public class UserTest extends AbstractGenericEntityTest<User> {
   }
 
   @Override
-  public void testToJSON() throws JsonProcessingException {
-    super.testToJSON();
+  public void testToJson() throws JsonProcessingException {
+    super.testToJson();
 
     final Role testRole = Role.builder(this.getClass().toString()).id(UUID.randomUUID()).build();
     this.getEntity().setRole(testRole);

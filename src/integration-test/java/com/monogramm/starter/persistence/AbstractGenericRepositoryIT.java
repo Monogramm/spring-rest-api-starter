@@ -12,6 +12,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.jayway.awaitility.Awaitility;
+import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +41,9 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 /**
  * Abstract {@link GenericRepository} Integration Test.
  * 
+ * @param <T> Entity type.
+ * @param <R> Repository type.
+ * 
  * @author madmath03
  */
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -51,11 +58,30 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
 
   protected static final UUID RANDOM_ID = UUID.randomUUID();
 
+  protected static final String OWNER_USERNAME = "owner";
+  protected static final String OWNER_EMAIL = "owner@email.com";
+
+  protected User owner;
+
+  @Autowired
+  private IUserRepository userRepository;
+
   @Autowired
   private R repository;
 
   @PersistenceContext
   private EntityManager entityManager;
+
+  @Before
+  public void setUp() {
+    this.owner = User.builder(OWNER_USERNAME, OWNER_EMAIL).build();
+    userRepository.add(this.owner);
+  }
+
+  @After
+  public void tearDown() {
+    userRepository.delete(this.owner);
+  }
 
   /**
    * Get the {@link #repository}.
@@ -144,8 +170,8 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
     // FIXME why is there a gap ??
     assertTrue(Math.abs(model.getCreatedAt().getTime() - actual.getCreatedAt().getTime()) < 1_000L);
     // FIXME How to properly test this behavior?!
-//    assertNotNull(actual.getModifiedAt());
-//    assertTrue(actual.getCreatedAt().before(actual.getModifiedAt()));
+    // assertNotNull(actual.getModifiedAt());
+    // assertTrue(actual.getCreatedAt().before(actual.getModifiedAt()));
   }
 
   /**
@@ -159,6 +185,62 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
 
     assertNull(updatedModel);
   }
+
+  /**
+   * Test method for
+   * {@link GenericRepository#updateByOwner(AbstractGenericEntity, com.monogramm.starter.persistence.user.entity.User)}.
+   */
+  @Test
+  public void testUpdateByOwner() {
+    final T model = this.buildTestEntity();
+    model.setOwner(owner);
+    repository.add(model);
+
+    assertNotNull(model.getId());
+    assertNotNull(model.getCreatedAt());
+    assertNull(model.getModifiedAt());
+    assertEquals(owner, model.getOwner());
+
+
+
+    // FIXME How to properly test PreUpdate behavior?!
+    // Wait...
+    Awaitility.await().atMost(2, TimeUnit.SECONDS);
+
+    // Detach models forcefully
+    this.entityManager.clear();
+
+    // Wait...
+    Awaitility.await().atMost(2, TimeUnit.SECONDS);
+
+
+
+    final T actual = repository.updateByOwner(model, owner);
+
+    assertNotNull(actual);
+    assertNotNull(actual.getId());
+    assertEquals(model.getId(), actual.getId());
+    assertNotNull(actual.getCreatedAt());
+    // FIXME why is there a gap ??
+    assertTrue(Math.abs(model.getCreatedAt().getTime() - actual.getCreatedAt().getTime()) < 1_000L);
+    // FIXME How to properly test this behavior?!
+    // assertNotNull(actual.getModifiedAt());
+    // assertTrue(actual.getCreatedAt().before(actual.getModifiedAt()));
+  }
+
+  /**
+   * Test method for {@link GenericRepository#updateByOwner(AbstractGenericEntity, User)}.
+   */
+  @Test
+  public void testUpdateByOwnerNotFound() {
+    final T model = this.buildTestEntity();
+
+    final T updatedModel = repository.updateByOwner(model, null);
+
+    assertNull(updatedModel);
+  }
+  
+  
 
   /**
    * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
@@ -181,11 +263,36 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
     assertEquals(Integer.valueOf(0), repository.deleteById(RANDOM_ID));
   }
 
+  
+  /**
+   * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
+   */
+  @Test
+  public void testDeleteByIdAndOwner() {
+    final T model = this.buildTestEntity();
+    model.setOwner(owner);
+    repository.add(model);
+
+    final Integer deleted = repository.deleteByIdAndOwner(model.getId(), owner);
+
+    assertEquals(Integer.valueOf(1), deleted);
+  }
+
+  /**
+   * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
+   */
+  @Test
+  public void testDeleteByIdAndOwnerNotFound() {
+    assertEquals(Integer.valueOf(0), repository.deleteByIdAndOwner(RANDOM_ID, null));
+  }
+  
+  
+
   /**
    * Test method for {@link GenericRepository#exists(java.util.UUID)}.
    */
   @Test
-  public void testExistsUUID() {
+  public void testExistsUuid() {
     final boolean expected = true;
     final T model = this.buildTestEntity();
     final List<T> models = new ArrayList<>(1);
@@ -201,7 +308,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
    * Test method for {@link GenericRepository#exists(java.util.UUID)}.
    */
   @Test
-  public void testExistsUUIDNotFound() {
+  public void testExistsUuidNotFound() {
     final boolean expected = false;
 
     final boolean actual = repository.exists(RANDOM_ID);

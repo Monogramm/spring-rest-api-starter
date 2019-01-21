@@ -45,6 +45,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class InitialDataLoader extends AbstractDataLoader {
 
+  public static final String USER_ROLE = "User";
+  public static final String SUPPORT_ROLE = "Support";
+  public static final String ADMIN_ROLE = "Admin";
+
+  public static final String SAMPLE_DEMO_NAME = "demo";
+  public static final String SAMPLE_DEMO_EMAIL = "demo@";
+  public static final char[] SAMPLE_DEMO_PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+
+  public static final String SAMPLE_SUPPORT_NAME = "support";
+  public static final String SAMPLE_SUPPORT_EMAIL = "support@";
+
+  public static final String DEFAULT_ADMIN_NAME = "admin";
+  public static final String DEFAULT_ADMIN_EMAIL = "admin@";
+
   private Type userType;
   private Type roleType;
   private Type typeType;
@@ -55,6 +69,9 @@ public class InitialDataLoader extends AbstractDataLoader {
   private Role supportRole;
   private Role userRole;
 
+  private User adminUser;
+
+  private String defaultDomainName;
 
   private final Map<Type, Map<GenericOperation, Set<Role>>> typePermissions = new HashMap<>();
 
@@ -80,8 +97,30 @@ public class InitialDataLoader extends AbstractDataLoader {
 
   @Override
   public boolean initDefaultData() {
+    boolean initDone = true;
+
+    this.defaultDomainName =
+        this.getEnv().getProperty("application.data.domain_name", "monogramm.io");
+
+    // Setup the initial types
+    initDone &= this.initDefaultTypes();
 
     // Setup the initial roles
+    initDone &= this.initDefaultRoles();
+
+    // Setup permissions by role and type
+    initDone &= this.initDefaultPermissions();
+
+    // Setup the initial parameters
+    initDone &= this.initDefaultParameters();
+
+    // Setup the initial users
+    initDone &= this.initDefaultUsers();
+
+    return initDone;
+  }
+
+  private boolean initDefaultTypes() {
     if (this.userType == null) {
       this.userType = this.createType(UserController.TYPE);
     }
@@ -102,11 +141,13 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.parameterType = this.createType(ParameterController.TYPE);
     }
 
+    return this.userType != null && this.roleType != null && this.typeType != null
+        && this.permissionType != null && this.parameterType != null;
+  }
 
-
-    // Setup the initial roles
+  private boolean initDefaultRoles() {
     if (this.adminRole == null) {
-      this.adminRole = this.createRole("Admin");
+      this.adminRole = this.createRole(ADMIN_ROLE);
       this.addAllPermissions(userType, adminRole);
       this.addAllPermissions(roleType, adminRole);
       this.addAllPermissions(typeType, adminRole);
@@ -115,7 +156,7 @@ public class InitialDataLoader extends AbstractDataLoader {
     }
 
     if (this.supportRole == null) {
-      this.supportRole = this.createRole("Support");
+      this.supportRole = this.createRole(SUPPORT_ROLE);
       this.addAllPermissions(userType, supportRole);
       // Construct regular operations arrays
       final GenericOperation[] supportOperations = {GenericOperation.READ, GenericOperation.LIST};
@@ -126,49 +167,78 @@ public class InitialDataLoader extends AbstractDataLoader {
     }
 
     if (this.userRole == null) {
-      this.userRole = this.createRole("User");
+      this.userRole = this.createRole(USER_ROLE);
       this.addPermission(userType, GenericOperation.READ, userRole);
       this.addPermission(userType, GenericOperation.UPDATE, userRole);
     }
 
+    return this.adminRole != null && this.supportRole != null && this.userRole != null;
+  }
 
+  private boolean initDefaultPermissions() {
+    boolean permissionsCreated = true;
 
-    // Setup permissions by role and type
     for (final Type type : this.getTypes()) {
-      this.createAllPermissions(type);
+      final Collection<Permission> permissions = this.createAllPermissions(type);
+      permissionsCreated &= permissions != null && !permissions.isEmpty();
     }
+
+    return permissionsCreated;
+  }
+
+  private boolean initDefaultParameters() {
+    // XXX Create a parameter containing the application version
+    // TODO Create a parameter to disable user registration at will
 
     return true;
   }
 
-  @Override
-  public boolean initDemoData() {
-    final char[] adminPassword = Passwords.generateRandomPassword();
-    final User adminUser = this.createUser("admin", "admin@monogramm.io", adminPassword, adminRole);
+  private boolean initDefaultUsers() {
+    // Create admin user
+    final char[] adminPassword;
+    final boolean logPassword;
 
-    final char[] supportPassword = Passwords.generateRandomPassword();
-    final User supportUser =
-        this.createUser("support", "support@monogramm.io", supportPassword, supportRole);
-
-    final char[] demoPassword = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
-    final User demoUser = this.createUser("demo", "demo@monogramm.io", demoPassword, userRole);
-
-
-
-    // Update data owner
-    for (final Type type : this.getTypes()) {
-      this.updateOwner(type, adminUser, this.getTypeService());
+    final String defaultAdminPassword =
+        this.getEnv().getProperty("application.data.admin_password");
+    if (defaultAdminPassword != null && !defaultAdminPassword.isEmpty()) {
+      // Use default admin password if any defined in application properties
+      adminPassword = defaultAdminPassword.toCharArray();
+      logPassword = false;
+    } else {
+      // or generate a random password and log it
+      adminPassword = Passwords.generateRandomPassword();
+      logPassword = true;
     }
 
-    for (final Permission permission : this.getPermissions()) {
-      this.updateOwner(permission, adminUser, this.getPermissionService());
-    }
-
-    for (final Role role : this.getRoles()) {
-      this.updateOwner(role, adminUser, this.getRoleService());
-    }
+    final String adminEmail = DEFAULT_ADMIN_EMAIL + this.defaultDomainName;
+    this.adminUser =
+        this.createUser(DEFAULT_ADMIN_NAME, adminEmail, adminPassword, adminRole, logPassword);
 
     this.updateOwner(adminUser, adminUser, this.getUserService());
+
+    return this.adminUser != null;
+  }
+
+  @Override
+  public boolean initDemoData() {
+    boolean initDone = true;
+
+    initDone &= this.initDemoUsers();
+
+    return initDone;
+  }
+
+  private boolean initDemoUsers() {
+    final char[] supportPassword = Passwords.generateRandomPassword();
+    final String supportEmail = SAMPLE_SUPPORT_EMAIL + this.defaultDomainName;
+    final User supportUser =
+        this.createUser(SAMPLE_SUPPORT_NAME, supportEmail, supportPassword, supportRole);
+
+    final char[] demoPassword = SAMPLE_DEMO_PASSWORD.clone();
+    final String demoEmail = SAMPLE_DEMO_EMAIL + this.defaultDomainName;
+    final User demoUser = this.createUser(SAMPLE_DEMO_NAME, demoEmail, demoPassword, userRole);
+
+    // Make users owner of their own account
     this.updateOwner(supportUser, supportUser, this.getUserService());
     this.updateOwner(demoUser, demoUser, this.getUserService());
 

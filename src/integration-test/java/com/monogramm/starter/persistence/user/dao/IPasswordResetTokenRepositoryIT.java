@@ -10,7 +10,6 @@ import static org.junit.Assert.assertThat;
 
 import com.monogramm.starter.persistence.AbstractGenericRepositoryIT;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
-import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
 
 import java.util.ArrayList;
@@ -18,9 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * {@link IPasswordResetTokenRepository} Integration Test.
@@ -33,24 +30,9 @@ public class IPasswordResetTokenRepositoryIT
   private static final String TOKEN = "Foo";
   private static final Date DUMMY_EXPIRY_DATE = new Date();
 
-  private static final String USERNAME = "Foo";
-  private static final String EMAIL = "foo@email.com";
-  private static final char[] PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
-
-  private User testUser;
-
-  @Autowired
-  private IUserRepository userRepository;
-
-  @Before
-  public void setUp() {
-    this.testUser = User.builder(USERNAME, EMAIL).password(PASSWORD.clone()).build();
-    this.userRepository.add(testUser);
-  }
-
   @Override
   protected PasswordResetToken buildTestEntity() {
-    return PasswordResetToken.builder(TOKEN, DUMMY_EXPIRY_DATE).user(testUser).build();
+    return PasswordResetToken.builder(TOKEN, DUMMY_EXPIRY_DATE).user(owner).build();
   }
 
   /**
@@ -77,7 +59,7 @@ public class IPasswordResetTokenRepositoryIT
     getRepository().add(model);
 
     final PasswordResetToken actual =
-        getRepository().findByUserAndCode(testUser.getId(), model.getCode());
+        getRepository().findByUserAndCode(owner.getId(), model.getCode());
 
     assertThat(actual, is(model));
   }
@@ -90,7 +72,7 @@ public class IPasswordResetTokenRepositoryIT
    */
   @Test
   public void testFindByUserAndTokenNoResult() {
-    assertNull(getRepository().findByUserAndCode(testUser.getId(), TOKEN));
+    assertNull(getRepository().findByUserAndCode(owner.getId(), TOKEN));
   }
 
   /**
@@ -102,11 +84,11 @@ public class IPasswordResetTokenRepositoryIT
   @Test
   public void testFindByUserAndTokenNonUnique() {
     getRepository()
-        .add(PasswordResetToken.builder(TOKEN + "1", DUMMY_EXPIRY_DATE).user(testUser).build());
+        .add(PasswordResetToken.builder(TOKEN + "1", DUMMY_EXPIRY_DATE).user(owner).build());
     getRepository()
-        .add(PasswordResetToken.builder(TOKEN + "2", DUMMY_EXPIRY_DATE).user(testUser).build());
+        .add(PasswordResetToken.builder(TOKEN + "2", DUMMY_EXPIRY_DATE).user(owner).build());
 
-    assertNull(getRepository().findByUserAndCode(testUser.getId(), TOKEN));
+    assertNull(getRepository().findByUserAndCode(owner.getId(), TOKEN));
   }
 
   /**
@@ -116,14 +98,14 @@ public class IPasswordResetTokenRepositoryIT
    */
   @Test
   public void testFindByUserAndTokenNotFound() {
-    assertNull(getRepository().findByUserAndCode(testUser, null));
+    assertNull(getRepository().findByUserAndCode(owner, null));
   }
 
   /**
    * Test method for {@link IPasswordResetTokenRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDString() {
+  public void testExistsUuidString() {
     final boolean expected = true;
     final List<PasswordResetToken> models = new ArrayList<>(1);
     final PasswordResetToken model = this.buildTestEntity();
@@ -139,7 +121,7 @@ public class IPasswordResetTokenRepositoryIT
    * Test method for {@link IPasswordResetTokenRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDStringNotFound() {
+  public void testExistsUuidStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, TOKEN);

@@ -107,7 +107,7 @@ public class ZipUtilsTest {
    * @throws IOException if an I/O error occurs.
    */
   @Test
-  public void testZipStringURIArray() throws IOException {
+  public void testZipStringUriArray() throws IOException {
     ZipUtils.zip(zipFile.toString(), tempFile.toUri(), tempFolder.toUri());
 
     assertTrue(zipFile.toFile().exists());
@@ -155,7 +155,7 @@ public class ZipUtilsTest {
    * @throws IOException if an I/O error occurs.
    */
   @Test
-  public void testUnzipStringURIArray() throws IOException {
+  public void testUnzipStringUriArray() throws IOException {
     ZipUtils.zip(zipFile.toFile(), Collections.singleton(tempFile.toFile()));
 
     ZipUtils.unzip(unzipDirectory.toString(), zipFile.toUri());

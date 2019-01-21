@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ITypeRepositoryIT extends AbstractGenericRepositoryIT<Type, ITypeRepository> {
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = ITypeRepositoryIT.class.getSimpleName();
 
   @Autowired
   private InitialDataLoader initialDataLoader;
@@ -122,7 +122,7 @@ public class ITypeRepositoryIT extends AbstractGenericRepositoryIT<Type, ITypeRe
    * Test method for {@link ITypeRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDString() {
+  public void testExistsUuidString() {
     final boolean expected = true;
     final Type model = this.buildTestEntity();
     final List<Type> models = new ArrayList<>(1);
@@ -138,7 +138,7 @@ public class ITypeRepositoryIT extends AbstractGenericRepositoryIT<Type, ITypeRe
    * Test method for {@link ITypeRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDStringNotFound() {
+  public void testExistsUuidStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, DISPLAYNAME);

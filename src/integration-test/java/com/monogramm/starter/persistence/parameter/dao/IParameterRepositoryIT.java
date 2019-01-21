@@ -70,7 +70,7 @@ public class IParameterRepositoryIT
    * Test method for {@link IParameterRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDString() {
+  public void testExistsUuidString() {
     final boolean expected = true;
     final Parameter model = this.buildTestEntity();
     final List<Parameter> models = new ArrayList<>(1);
@@ -86,7 +86,7 @@ public class IParameterRepositoryIT
    * Test method for {@link IParameterRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDStringNotFound() {
+  public void testExistsUuidStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, DUMMY_NAME);

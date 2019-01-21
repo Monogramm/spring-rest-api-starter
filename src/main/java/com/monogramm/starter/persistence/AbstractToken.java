@@ -38,9 +38,27 @@ public abstract class AbstractToken extends AbstractGenericEntity {
   private static final long MIN_TO_MS = 60_000;
 
   /**
+   * Token property.
+   */
+  public static final String TOKEN_PROPERTY = "code";
+  /**
    * Token maximum length.
    */
-  public static final int MAX_LENGTH_TOKEN = 16;
+  public static final int TOKEN_MAX_LENGTH = 16;
+
+  /**
+   * Expiry date property.
+   */
+  public static final String EXPIRY_PROPERTY = "expiry_date";
+
+  /**
+   * User id property.
+   */
+  public static final String USER_PROPERTY = "user_id";
+  /**
+   * User id field.
+   */
+  public static final String USER_FIELD = "user";
 
   /**
    * Token default length.
@@ -105,20 +123,20 @@ public abstract class AbstractToken extends AbstractGenericEntity {
   /**
    * The verification token.
    */
-  @Column(name = "code", nullable = false, length = MAX_LENGTH_TOKEN)
+  @Column(name = TOKEN_PROPERTY, nullable = false, length = TOKEN_MAX_LENGTH)
   private String code;
 
   /**
    * The verification token expiry date.
    */
-  @Column(name = "expiry_date", nullable = false)
+  @Column(name = EXPIRY_PROPERTY, nullable = false)
   private Date expiryDate;
 
   /**
    * Foreign key (relation) to the user\'s account.
    */
   @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-  @JoinColumn(nullable = false, name = "user_id")
+  @JoinColumn(nullable = false, name = USER_PROPERTY)
   private User user;
 
   /**

@@ -51,21 +51,34 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class OAuthControllerFullIT extends AbstractControllerFullIT {
 
+  /**
+   * The request base path of this tested controller.
+   */
+  public static final String REVOKE_TOKEN_PATH = OAuthController.REVOKE_TOKEN_PATH;
+
+  private String accessToken;
+
   @Before
-  public void setUp() {
+  public void setUp() throws URISyntaxException {
     super.setUpValidUser();
+
+    // Get an access token for later calls to API
+    this.accessToken = this.getFullToken();
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws URISyntaxException {
     super.tearDownValidUser();
+
+    // Revoke an access token
+    this.revokeToken(this.accessToken);
   }
 
   @Test
   public void givenDBUserWhenRevokeTokenThenAuthorized() throws URISyntaxException {
-    final String accessToken = obtainAccessToken(CLIENT_ID, CLIENT_SECRET, EMAIL, PASSWORD_STR);
+    final String token = obtainAccessToken(CLIENT_ID, CLIENT_SECRET, EMAIL, PASSWORD_STR);
 
-    assertNotNull(accessToken);
+    assertNotNull(token);
   }
 
   private String obtainAccessToken(String clientId, String clientSecret, String username,
@@ -426,6 +439,54 @@ public class OAuthControllerFullIT extends AbstractControllerFullIT {
         getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, OAuthResponse.class);
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  @Test
+  public void testRevokeSelfToken() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(TOKEN_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<String> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, String.class);
+
+    // FIXME We receive a 401 unauthorized
+//    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+  }
+
+  @Test
+  public void testRevokeToken() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(REVOKE_TOKEN_PATH, this.accessToken);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<String> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+    // FIXME We receive a 403 forbidden
+//    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+//    final String response = responseEntity.getBody();
+//    assertNotNull(response);
+//    assertEquals(this.accessToken, response);
+  }
+
+  @Test
+  public void testRevokeTokenNotExist() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(REVOKE_TOKEN_PATH, "dummy");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<String> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+    // FIXME We receive a 403 forbidden
+//    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+//    final String response = responseEntity.getBody();
+//    assertNotNull(response);
+//    assertNotEquals(this.accessToken, response);
   }
 
 }

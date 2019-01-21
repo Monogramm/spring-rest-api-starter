@@ -17,12 +17,12 @@ import com.monogramm.starter.persistence.user.entity.User;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -57,16 +57,16 @@ public class PermissionControllerFullIT extends AbstractControllerFullIT {
   /**
    * Logger for {@link PermissionControllerFullIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(PermissionControllerFullIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PermissionControllerFullIT.class);
 
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Permissions";
+  public static final String TYPE = PermissionController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = PermissionController.CONTROLLER_PATH;
 
   private static final String DISPLAYNAME = "Foo";
 
@@ -202,6 +202,48 @@ public class PermissionControllerFullIT extends AbstractControllerFullIT {
     final HttpHeaders headers = getHeaders();
 
     final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Object> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for
+   * {@link PermissionController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllPermissionsPaginated() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<PermissionDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, PermissionDto[].class);
+
+    final PermissionDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(dtos.length > 0);
+    // No default sort on pagination means we cannot be sure of the content returned in first page
+  }
+
+  /**
+   * Test method for
+   * {@link PermissionController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllPermissionsPaginatedNoAuthorization() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders();
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<Object> responseEntity =

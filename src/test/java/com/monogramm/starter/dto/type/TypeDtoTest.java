@@ -91,7 +91,7 @@ public class TypeDtoTest extends AbstractGenericDtoTest<TypeDto> {
    * Test method for {@link TypeDto#TypeDTO()}.
    */
   @Test
-  public void testTypeDTO() {
+  public void testTypeDto() {
     assertNull(getDto().getName());
   }
 
@@ -99,7 +99,7 @@ public class TypeDtoTest extends AbstractGenericDtoTest<TypeDto> {
    * Test method for {@link TypeDto#TypeDTO(TypeDto)}.
    */
   @Test
-  public void testTypeDTOTypeDTO() {
+  public void testTypeDtoTypeDto() {
     final TypeDto dto = this.buildCopyTestDto();
 
     assertEquals(getDto().getName(), dto.getName());

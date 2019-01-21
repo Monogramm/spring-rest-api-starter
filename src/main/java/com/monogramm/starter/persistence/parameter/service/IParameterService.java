@@ -10,7 +10,7 @@ import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
 
 /**
- * IParameterService.
+ * {@link Parameter} service interface.
  * 
  * @author madmath03
  */

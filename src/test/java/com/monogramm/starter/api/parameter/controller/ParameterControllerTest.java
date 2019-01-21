@@ -19,6 +19,7 @@ import java.util.UUID;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 /**
  * {@link ParameterController} Unit Test.
@@ -52,8 +53,13 @@ public class ParameterControllerTest
   }
 
   @Override
+  protected Authentication buildMockAuthentication() {
+    return mock(Authentication.class);
+  }
+
+  @Override
   protected ParameterController buildTestController() {
-    return new ParameterController(getMockService());
+    return new ParameterController(getMessageSource(), getEventPublisher(), getMockService());
   }
 
   @Override

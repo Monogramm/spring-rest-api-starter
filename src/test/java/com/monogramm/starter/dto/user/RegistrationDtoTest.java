@@ -29,10 +29,10 @@ public class RegistrationDtoTest extends PasswordConfirmationDtoTest {
   }
 
   /**
-   * Test method for {@link RegistrationDto#RegistrationDTO()}.
+   * Test method for {@link RegistrationDto#RegistrationDto()}.
    */
   @Test
-  public void testRegistrationDTO() {
+  public void testRegistrationDto() {
     final RegistrationDto registrationDto = this.buildTestDto();
 
     assertNull(registrationDto.getUsername());
@@ -45,10 +45,10 @@ public class RegistrationDtoTest extends PasswordConfirmationDtoTest {
 
   /**
    * Test method for
-   * {@link RegistrationDto#RegistrationDTO(java.lang.String, java.lang.String, char[], char[])}.
+   * {@link RegistrationDto#RegistrationDto(java.lang.String, java.lang.String, char[], char[])}.
    */
   @Test
-  public void testRegistrationDTOStringStringCharArrayCharArray() {
+  public void testRegistrationDtoStringStringCharArrayCharArray() {
     final RegistrationDto registrationDto =
         new RegistrationDto(USERNAME, EMAIL, PASSWORD, DROWSSAP);
 
@@ -65,28 +65,28 @@ public class RegistrationDtoTest extends PasswordConfirmationDtoTest {
 
   /**
    * Test method for
-   * {@link RegistrationDto#RegistrationDTO(java.lang.String, java.lang.String, char[], char[])}.
+   * {@link RegistrationDto#RegistrationDto(java.lang.String, java.lang.String, char[], char[])}.
    */
   @Test(expected = NullPointerException.class)
-  public void testRegistrationDTOStringStringNullCharArray() {
+  public void testRegistrationDtoStringStringNullCharArray() {
     new RegistrationDto(USERNAME, EMAIL, null, DROWSSAP);
   }
 
   /**
    * Test method for
-   * {@link RegistrationDto#RegistrationDTO(java.lang.String, java.lang.String, char[], char[])}.
+   * {@link RegistrationDto#RegistrationDto(java.lang.String, java.lang.String, char[], char[])}.
    */
   @Test(expected = NullPointerException.class)
-  public void testRegistrationDTOStringStringCharArrayNull() {
+  public void testRegistrationDtoStringStringCharArrayNull() {
     new RegistrationDto(USERNAME, EMAIL, PASSWORD, null);
   }
 
   /**
    * Test method for
-   * {@link RegistrationDto#RegistrationDTO(java.lang.String, java.lang.String, char[], char[])}.
+   * {@link RegistrationDto#RegistrationDto(java.lang.String, java.lang.String, char[], char[])}.
    */
   @Test(expected = NullPointerException.class)
-  public void testRegistrationDTOStringStringNullNull() {
+  public void testRegistrationDtoStringStringNullNull() {
     new RegistrationDto(USERNAME, EMAIL, null, null);
   }
 

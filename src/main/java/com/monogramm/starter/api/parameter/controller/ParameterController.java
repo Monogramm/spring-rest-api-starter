@@ -9,23 +9,35 @@ import com.monogramm.starter.config.OAuth2WebSecurityConfig;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
 import com.monogramm.starter.persistence.parameter.service.IParameterService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
+import java.util.Locale;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The Parameter API Controller.
+ * The {@link Parameter} API Controller.
  * 
  * @author madmath03
  */
@@ -38,7 +50,7 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = SEP + "parameters";
 
   /**
    * The Authority data type of this controller.
@@ -81,15 +93,37 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   public static final String AUTH_DELETE = OAuth2WebSecurityConfig.AUTH_PREFIX + AUTH_TYPE
       + GenericOperation.PERM_SEP + GenericOperation.PERM_DELETE;
 
+  /**
+   * The Authorities describing Administration permissions of this controller.
+   */
+  protected static final String[] ADMIN_AUTH = {AUTH_LIST};
+
 
   /**
    * Create a {@link ParameterController}.
    * 
+   * @param messageSource the i18n message source.
+   * @param eventPublisher the event publisher.
    * @param parameterService the parameter service.
    */
   @Autowired
-  public ParameterController(IParameterService parameterService) {
-    super(parameterService);
+  public ParameterController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
+      IParameterService parameterService) {
+    super(messageSource, eventPublisher, parameterService);
+  }
+
+  @Override
+  protected ParameterNotFoundException buildEntityNotFoundException(String id, WebRequest request) {
+    final Locale locale = request.getLocale();
+    final String msg = getMessageSource().getMessage("controller.entity_not_found",
+        new String[] {Parameter.class.getSimpleName(), id}, locale);
+
+    return new ParameterNotFoundException(msg);
+  }
+
+  @Override
+  protected String[] getAdminAuthorities() {
+    return ADMIN_AUTH;
   }
 
   @Override
@@ -103,41 +137,51 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
-  public ResponseEntity<ParameterDto> getDataById(@PathVariable @ValidUuid String id) {
-    return super.getDataById(id);
+  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
+  public ParameterDto getDataById(@PathVariable @ValidUuid String id, WebRequest request,
+      HttpServletResponse response) {
+    return super.getDataById(id, request, response);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public ResponseEntity<List<ParameterDto>> getAllData() {
+  public List<ParameterDto> getAllData() {
     return super.getAllData();
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.POST,
-      consumes = "application/json")
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  public List<ParameterDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.getAllDataPaginated(page, size, request, builder, response);
+  }
+
+  @Override
+  @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<ParameterDto> addData(@RequestBody ParameterDto dto,
-      UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<ParameterDto> addData(Authentication authentication,
+      @RequestBody ParameterDto dto, UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.addData(authentication, dto, builder, response);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CONTROLLER_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<ParameterDto> updateData(@PathVariable @ValidUuid String id,
-      @RequestBody ParameterDto dto) {
-    return super.updateData(id, dto);
+  public ResponseEntity<ParameterDto> updateData(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody ParameterDto dto) {
+    return super.updateData(authentication, id, dto);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.DELETE)
+  @DeleteMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
-  public ResponseEntity<Void> deleteData(@PathVariable @ValidUuid String id) {
-    return super.deleteData(id);
+  public ResponseEntity<Void> deleteData(Authentication authentication,
+      @PathVariable @ValidUuid String id) {
+    return super.deleteData(authentication, id);
   }
 }

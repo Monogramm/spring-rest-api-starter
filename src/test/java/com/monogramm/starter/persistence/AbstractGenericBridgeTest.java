@@ -270,7 +270,7 @@ public abstract class AbstractGenericBridgeTest<E extends AbstractGenericEntity,
    * Test method for {@link AbstractGenericBridge#toDto(AbstractGenericEntity)}.
    */
   @Test
-  public void testToDTO() {
+  public void testToDto() {
     final E entity = this.bridge.buildEntity();
     D dto = this.bridge.toDto(entity);
 

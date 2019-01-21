@@ -6,7 +6,9 @@ package com.monogramm.starter.config.component;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -131,7 +133,7 @@ public class CustomTokenEnhancerTest {
 
     when(oauthAuthentication.getName()).thenReturn(DUMMY_NAME);
 
-    when(userService.findByEmail(DUMMY_NAME)).thenReturn(user);
+    when(userService.findByUsernameOrEmail(DUMMY_NAME, DUMMY_NAME)).thenReturn(user);
 
     when(oauthAuthentication.getAuthorities()).thenReturn(DUMMY_AUTHORITIES);
 
@@ -141,7 +143,7 @@ public class CustomTokenEnhancerTest {
     verify(oauthAuthentication, times(1)).getAuthorities();
     verifyNoMoreInteractions(oauthAuthentication);
 
-    verify(userService, times(1)).findByEmail(DUMMY_NAME);
+    verify(userService, times(1)).findByUsernameOrEmail(DUMMY_NAME, DUMMY_NAME);
     verifyNoMoreInteractions(userService);
 
     assertNotNull(enhancedToken);
@@ -149,13 +151,17 @@ public class CustomTokenEnhancerTest {
 
     final Map<String, Object> additionalInformation = enhancedToken.getAdditionalInformation();
     assertNotNull(additionalInformation);
-    assertNotNull(additionalInformation.get("timestamp"));
-    assertEquals(user.getId(), additionalInformation.get("principal_id"));
-    assertEquals(user.getUsername(), additionalInformation.get("principal_name"));
-    assertEquals(user.getEmail(), additionalInformation.get("principal_email"));
+    assertNotNull(additionalInformation.get(CustomTokenEnhancer.TIMESTAMP));
+
+    assertEquals(user.getId(), additionalInformation.get(CustomTokenEnhancer.UUID));
+    assertEquals(user.getUsername(), additionalInformation.get(CustomTokenEnhancer.USERNAME));
+    assertEquals(user.getEmail(), additionalInformation.get(CustomTokenEnhancer.EMAIL));
+    assertTrue(additionalInformation.containsKey(CustomTokenEnhancer.VERIFIED));
+
     assertArrayEquals(new String[] {DUMMY_AUTH},
-        (String[]) additionalInformation.get("authorities"));
-    assertArrayEquals(new String[] {DUMMY_ROLE}, (String[]) additionalInformation.get("roles"));
+        (String[]) additionalInformation.get(CustomTokenEnhancer.PERMISSIONS));
+    assertArrayEquals(new String[] {DUMMY_ROLE},
+        (String[]) additionalInformation.get(CustomTokenEnhancer.ROLES));
   }
 
   /**
@@ -168,7 +174,7 @@ public class CustomTokenEnhancerTest {
     when(oauthAuthentication.getName()).thenReturn(DUMMY_NAME);
     when(oauthAuthentication.getAuthorities()).thenReturn(DUMMY_AUTHORITIES);
 
-    when(userService.findByEmail(DUMMY_NAME)).thenReturn(null);
+    when(userService.findByUsernameOrEmail(DUMMY_NAME, DUMMY_NAME)).thenReturn(null);
 
     final OAuth2AccessToken enhancedToken = this.enhancer.enhance(token, oauthAuthentication);
 
@@ -176,7 +182,7 @@ public class CustomTokenEnhancerTest {
     verify(oauthAuthentication, times(1)).getAuthorities();
     verifyNoMoreInteractions(oauthAuthentication);
 
-    verify(userService, times(1)).findByEmail(DUMMY_NAME);
+    verify(userService, times(1)).findByUsernameOrEmail(DUMMY_NAME, DUMMY_NAME);
     verifyNoMoreInteractions(userService);
 
     assertNotNull(enhancedToken);
@@ -184,11 +190,17 @@ public class CustomTokenEnhancerTest {
 
     final Map<String, Object> additionalInformation = enhancedToken.getAdditionalInformation();
     assertNotNull(additionalInformation);
-    assertNotNull(additionalInformation.get("timestamp"));
-    assertEquals(DUMMY_NAME, additionalInformation.get("principal_email"));
+    assertNotNull(additionalInformation.get(CustomTokenEnhancer.TIMESTAMP));
+
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.UUID));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.USERNAME));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.EMAIL));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.VERIFIED));
+
     assertArrayEquals(new String[] {DUMMY_AUTH},
-        (String[]) additionalInformation.get("authorities"));
-    assertArrayEquals(new String[] {DUMMY_ROLE}, (String[]) additionalInformation.get("roles"));
+        (String[]) additionalInformation.get(CustomTokenEnhancer.PERMISSIONS));
+    assertArrayEquals(new String[] {DUMMY_ROLE},
+        (String[]) additionalInformation.get(CustomTokenEnhancer.ROLES));
   }
 
   /**
@@ -212,10 +224,17 @@ public class CustomTokenEnhancerTest {
 
     final Map<String, Object> additionalInformation = enhancedToken.getAdditionalInformation();
     assertNotNull(additionalInformation);
-    assertNotNull(additionalInformation.get("timestamp"));
-    assertEquals("", additionalInformation.get("principal_email"));
-    assertArrayEquals(new String[] {}, (String[]) additionalInformation.get("authorities"));
-    assertArrayEquals(new String[] {}, (String[]) additionalInformation.get("roles"));
+    assertNotNull(additionalInformation.get(CustomTokenEnhancer.TIMESTAMP));
+
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.UUID));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.USERNAME));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.EMAIL));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.VERIFIED));
+
+    assertArrayEquals(new String[] {},
+        (String[]) additionalInformation.get(CustomTokenEnhancer.PERMISSIONS));
+    assertArrayEquals(new String[] {},
+        (String[]) additionalInformation.get(CustomTokenEnhancer.ROLES));
   }
 
   /**
@@ -239,10 +258,17 @@ public class CustomTokenEnhancerTest {
 
     final Map<String, Object> additionalInformation = enhancedToken.getAdditionalInformation();
     assertNotNull(additionalInformation);
-    assertNotNull(additionalInformation.get("timestamp"));
-    assertEquals(null, additionalInformation.get("principal_email"));
-    assertArrayEquals(new String[] {}, (String[]) additionalInformation.get("authorities"));
-    assertArrayEquals(new String[] {}, (String[]) additionalInformation.get("roles"));
+    assertNotNull(additionalInformation.get(CustomTokenEnhancer.TIMESTAMP));
+
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.UUID));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.USERNAME));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.EMAIL));
+    assertFalse(additionalInformation.containsKey(CustomTokenEnhancer.VERIFIED));
+
+    assertArrayEquals(new String[] {},
+        (String[]) additionalInformation.get(CustomTokenEnhancer.PERMISSIONS));
+    assertArrayEquals(new String[] {},
+        (String[]) additionalInformation.get(CustomTokenEnhancer.ROLES));
   }
 
 }

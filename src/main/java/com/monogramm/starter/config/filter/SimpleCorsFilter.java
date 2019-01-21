@@ -58,7 +58,8 @@ public class SimpleCorsFilter implements Filter {
       httpResponse.setHeader("Access-Control-Max-Age", "3600");
       httpResponse.setHeader("Access-Control-Allow-Headers",
           "Content-Type, x-requested-with, Authorization, "
-              + "X-Monogramm-Filter, X-Monogramm-Sort, X-Monogramm-Start-At, X-Monogramm-End-At");
+              + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
+              + "X-Custom-Start-At, X-Custom-End-At");
 
       if (request instanceof HttpServletRequest) {
         final HttpServletRequest httpRequest = (HttpServletRequest) request;

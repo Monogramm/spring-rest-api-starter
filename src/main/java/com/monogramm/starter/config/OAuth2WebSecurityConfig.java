@@ -25,7 +25,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 
 /**
- * WebSecurityConfig.
+ * Web Security Config.
  * 
  * @author madmath03
  */
@@ -59,17 +59,21 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
    */
   @Autowired
   public void globalUserDetails(final AuthenticationManagerBuilder auth) throws Exception {
+    // TODO Add a LDAP authentication if configuration provided
+    // https://spring.io/guides/gs/authenticating-ldap/
+
     final StringBuilder usersByUsernameQuery = new StringBuilder("select email, password, enabled ")
-        .append("from user ").append("where email = ?");
+        .append("from user_account ").append("where email = ?");
 
     final StringBuilder authoritiesByUsernameQuery = new StringBuilder();
     authoritiesByUsernameQuery.append("select u.email, CONCAT('").append(ROLE_PREFIX)
-        .append("', UPPER(r.name)) ").append("from user u, role r ")
+        .append("', UPPER(r.name)) ").append("from user_account u, role r ")
         .append("where u.email = ? ").append("and u.role = r.id");
 
     final StringBuilder groupAuthoritiesByUsername = new StringBuilder();
-    groupAuthoritiesByUsername.append("select r.id, r.name, p.name ")
-        .append("from role r, user u, permission p, role_permission rp ")
+    groupAuthoritiesByUsername.append("select r.id, r.name, CONCAT('").append(AUTH_PREFIX)
+        .append("', UPPER(p.name)) ")
+        .append("from role r, user_account u, permission p, role_permission rp ")
         .append("where u.email = ? ")
         .append("and p.id = rp.permission_id and r.id = rp.role_id and u.role = r.id");
 
@@ -89,19 +93,14 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(final HttpSecurity http) throws Exception {
     http.addFilterBefore(jsonFilter, ChannelProcessingFilter.class).csrf().and().httpBasic()
-        .disable().authorizeRequests().anyRequest().authenticated().and().formLogin()
-        .permitAll();
+        .disable().authorizeRequests().anyRequest().authenticated().and().formLogin().permitAll();
   }
 
   @Override
   public void configure(final WebSecurity web) throws Exception {
     final String securityDebug = env.getProperty("spring.security.debug");
 
-    if ("true".equalsIgnoreCase(securityDebug)) {
-      web.debug(true);
-    } else {
-      web.debug(false);
-    }
+    web.debug("true".equalsIgnoreCase(securityDebug));
   }
 
   // JDBC configuration

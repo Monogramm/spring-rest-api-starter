@@ -25,7 +25,7 @@ stages {
 
         stage ('Test') {
             steps {
-                sh 'mvn test' 
+                sh 'mvn test verify -P all-tests' 
             }
             post {
                 success {
@@ -39,7 +39,9 @@ stages {
                 sh 'mvn package -Dmaven.test.skip=true' 
             }
             post {
-                archiveArtifacts '*target/*.jar'
+                success {
+                    archiveArtifacts '*target/*.jar'
+                }
             }
         }
 

@@ -153,7 +153,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
    * Test method for {@link UserBridge#toEntity(com.monogramm.starter.dto.user.UserDto)}.
    */
   @Test
-  public void testToEntityUserDTO() {
+  public void testToEntityUserDto() {
     final UserDto dto = this.getBridge().buildDto();
     User entity = this.getBridge().toEntity(dto);
 
@@ -192,7 +192,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
    * Test method for {@link UserBridge#toEntity(com.monogramm.starter.dto.user.UserDto)}.
    */
   @Test
-  public void testToEntityUserDTONoRoleRepository() {
+  public void testToEntityUserDtoNoRoleRepository() {
     final UserDto dto = this.getBridge().buildDto();
     this.getBridge().setRoleRepository(null);
 
@@ -224,7 +224,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
    * Test method for {@link UserBridge#toEntity(com.monogramm.starter.dto.user.UserDto)}.
    */
   @Test
-  public void testToEntityUserDTOWithRoleRepository() {
+  public void testToEntityUserDtoWithRoleRepository() {
     final UserDto dto = this.getBridge().buildDto();
     this.getBridge().setRoleRepository(roleRepository);
 
@@ -263,7 +263,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
    * Test method for {@link UserBridge#toDto(com.monogramm.starter.persistence.user.entity.User)}.
    */
   @Test
-  public void testToDTOUser() {
+  public void testToDtoUser() {
     final User entity = this.getBridge().buildEntity();
     UserDto dto = this.getBridge().toDto(entity);
 

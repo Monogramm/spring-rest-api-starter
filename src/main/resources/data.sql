@@ -24,8 +24,8 @@ INSERT INTO oauth_client_details
     access_token_validity, refresh_token_validity,
     additional_information, autoapprove)
 VALUES
-    ("clientMobileIdPassword", "secret", "api,read,write",
-    "password,authorization_code,refresh_token", 
+    ('clientMobileIdPassword', 'secret', 'api,read,write',
+    'password,authorization_code,refresh_token', 
     null, null, 
     36000, 36000, 
     null, true);
@@ -37,8 +37,8 @@ INSERT INTO oauth_client_details
     access_token_validity, refresh_token_validity,
     additional_information, autoapprove)
 VALUES
-    ("clientWebIdPassword", "secret", "api,read,write",
-    "password,authorization_code,refresh_token", 
+    ('clientWebIdPassword', 'secret', 'api,read,write',
+    'password,authorization_code,refresh_token', 
     null, null, 
     36000, 36000, 
     null, true);

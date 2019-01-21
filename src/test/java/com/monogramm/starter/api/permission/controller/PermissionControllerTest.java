@@ -22,6 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
 
 /**
  * {@link PermissionController} Unit Test.
@@ -62,8 +63,13 @@ public class PermissionControllerTest
   }
 
   @Override
+  protected Authentication buildMockAuthentication() {
+    return mock(Authentication.class);
+  }
+
+  @Override
   protected AbstractGenericController<Permission, PermissionDto> buildTestController() {
-    return new PermissionController(getMockService());
+    return new PermissionController(getMessageSource(), getEventPublisher(), getMockService());
   }
 
   @Override

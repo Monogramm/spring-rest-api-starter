@@ -87,7 +87,7 @@ public class PermissionBridgeTest
    * {@link PermissionBridge#toEntity(com.monogramm.starter.dto.permission.PermissionDto)}.
    */
   @Test
-  public void testToEntityPermissionDTO() {
+  public void testToEntityPermissionDto() {
     final PermissionDto dto = this.getBridge().buildDto();
 
     final String name = "TEST";
@@ -103,7 +103,7 @@ public class PermissionBridgeTest
    * {@link PermissionBridge#toDto(com.monogramm.starter.persistence.permission.entity.Permission)}.
    */
   @Test
-  public void testToDTOPermission() {
+  public void testToDtoPermission() {
     final String name = "TEST";
     final Permission entity = this.getBridge().buildEntity();
     entity.setName(name);

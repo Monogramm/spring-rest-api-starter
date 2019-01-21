@@ -55,3 +55,7 @@ nbproject/*
 
 #spring specific
 .springBeans
+
+#project specific
+h2
+logs

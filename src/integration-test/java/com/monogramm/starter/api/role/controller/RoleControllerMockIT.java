@@ -5,18 +5,21 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.monogramm.Application;
 import com.monogramm.starter.api.AbstractControllerIT;
 import com.monogramm.starter.api.AbstractControllerMockIT;
+import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.role.RoleDto;
@@ -37,6 +40,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
 
 
 /**
@@ -66,11 +70,11 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Roles";
+  public static final String TYPE = RoleController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = RoleController.CONTROLLER_PATH;
 
   private static final String DISPLAYNAME = "Foo";
 
@@ -117,16 +121,30 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
   }
 
   /**
-   * Test method for {@link RoleController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link RoleController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetRoleByIdRandomId() throws Exception {
+    // No permission returned
+    MvcResult result = getMockMvc()
+        .perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
+        .andExpect(status().isNotFound()).andReturn();
+
+    assertNotNull(result.getResponse());
+    assertNotNull(result.getResponse().getContentAsString());
+  }
+
+  /**
+   * Test method for
+   * {@link RoleController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
    * 
    * @throws Exception if the test crashes.
    */
   @Test
   public void testGetRoleById() throws Exception {
-    // No role returned
-    getMockMvc().perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
-        .andExpect(status().isNotFound()).andExpect(content().bytes(new byte[] {}));
-
     // Role previously created should be returned
     getMockMvc()
         .perform(get(CONTROLLER_PATH + '/' + this.testEntity.getId())
@@ -161,7 +179,58 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
 
+  /**
+   * Test method for
+   * {@link RoleController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllRolesPaginated() throws Exception {
+    int expectedSize = 1;
+
+    // There should at least be the test entities...
+    int maxSize = 2;
+    // ...plus the roles created at application initialization
+    if (initialDataLoader.getRoles() != null) {
+      maxSize += initialDataLoader.getRoles().size();
+    }
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
+            .headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Link",
+            "<http://localhost/spring-rest-api-starter-it/api/roles?page=1&size=1>; rel=\"next\", "
+                + "<http://localhost/spring-rest-api-starter-it/api/roles?page=" + maxSize
+                + "&size=1>; rel=\"last\""))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link RoleController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllRolesPaginatedDefaultSize() throws Exception {
+    // There should at least be the test entity...
+    int expectedSize = 2;
+    // ...plus the roles created at application initialization
+    if (initialDataLoader.getRoles() != null) {
+      expectedSize += initialDataLoader.getRoles().size();
+    }
+    expectedSize = Math.min(expectedSize, AbstractGenericController.DEFAULT_SIZE_INT);
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
   }
 
   /**

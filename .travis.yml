@@ -1,14 +1,29 @@
 language: java
 sudo: false # faster builds
 
+services: docker
+
 jdk:
   - oraclejdk8
 
+before_install:
+  - env | sort
+  - name="spring-rest-api-starter"
+  - image="monogramm/docker-spring-rest-api-starter"
+  - dir="."
+
 install:
-  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  # If you provide access to repository
+  #- mvn dockerfile:build
+  - docker build --build-arg=target/*.jar -t "$image" "$dir"
+  - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
+  - docker logs "$name"
+  - docker logs "$name" | grep "Launching application..."
+  - docker stop "$name"
 
 script: 
-  - mvn test site
+  - mvn test verify -P all-tests
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

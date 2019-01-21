@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JSON utilities.
@@ -31,7 +31,7 @@ public final class JsonUtils {
   /**
    * Logger for {@link JsonUtils}.
    */
-  private static final Logger LOG = LogManager.getLogger(JsonUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JsonUtils.class);
 
   /**
    * A static object mapper to parse objects from/to JSON.
@@ -65,7 +65,7 @@ public final class JsonUtils {
       json = JsonUtils.toJson(object);
     } catch (JsonProcessingException e) {
       json = null;
-      LOG.error(e);
+      LOG.error("Object could not be parsed to a JSON string", e);
     }
     return json;
   }

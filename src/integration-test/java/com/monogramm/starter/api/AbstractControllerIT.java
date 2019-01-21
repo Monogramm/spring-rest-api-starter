@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,7 +48,7 @@ public abstract class AbstractControllerIT {
   /**
    * Logger for {@link AbstractControllerFullIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(AbstractControllerIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractControllerIT.class);
 
   /**
    * The request path for login.
@@ -65,7 +65,7 @@ public abstract class AbstractControllerIT {
 
   protected static final String PASSWORD_GRANT_TYPE = "password";
 
-  protected static final String CLIENT_ID = "clientIdPassword";
+  protected static final String CLIENT_ID = "clientWebIdPassword";
   protected static final String CLIENT_SECRET = "secret";
 
   /**

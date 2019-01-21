@@ -105,7 +105,8 @@ public class SimpleCorsFilterTest {
     verify(response, times(1)).setHeader("Access-Control-Max-Age", "3600");
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
         "Content-Type, x-requested-with, Authorization, "
-            + "X-Monogramm-Filter, X-Monogramm-Sort, X-Monogramm-Start-At, X-Monogramm-End-At");
+            + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
+            + "X-Custom-Start-At, X-Custom-End-At");
 
     verify(response, times(1)).setStatus(HttpServletResponse.SC_OK);
 
@@ -139,7 +140,8 @@ public class SimpleCorsFilterTest {
     verify(response, times(1)).setHeader("Access-Control-Max-Age", "3600");
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
         "Content-Type, x-requested-with, Authorization, "
-            + "X-Monogramm-Filter, X-Monogramm-Sort, X-Monogramm-Start-At, X-Monogramm-End-At");
+            + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
+            + "X-Custom-Start-At, X-Custom-End-At");
 
     verify(request, times(1)).getMethod();
 
@@ -170,7 +172,8 @@ public class SimpleCorsFilterTest {
     verify(response, times(1)).setHeader("Access-Control-Max-Age", "3600");
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
         "Content-Type, x-requested-with, Authorization, "
-            + "X-Monogramm-Filter, X-Monogramm-Sort, X-Monogramm-Start-At, X-Monogramm-End-At");
+            + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
+            + "X-Custom-Start-At, X-Custom-End-At");
 
     verify(chain, times(1)).doFilter(null, response);
 

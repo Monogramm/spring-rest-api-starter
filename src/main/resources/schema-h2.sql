@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS oauth_client_details (
 
 CREATE TABLE IF NOT EXISTS oauth_client_token (
   token_id VARCHAR(255),
-  token LONG VARBINARY,
+  token LONGVARBINARY,
   authentication_id VARCHAR(255) PRIMARY KEY,
   user_name VARCHAR(255),
   client_id VARCHAR(255)
@@ -38,11 +38,11 @@ CREATE TABLE IF NOT EXISTS oauth_client_token (
 
 CREATE TABLE IF NOT EXISTS oauth_access_token (
   token_id VARCHAR(255),
-  token LONG VARBINARY,
+  token LONGVARBINARY,
   authentication_id VARCHAR(255) PRIMARY KEY,
   user_name VARCHAR(255),
   client_id VARCHAR(255),
-  authentication LONG VARBINARY,
+  authentication LONGVARBINARY,
   refresh_token VARCHAR(255)
 );
 
@@ -53,8 +53,8 @@ CREATE TABLE IF NOT EXISTS oauth_access_token (
 
 CREATE TABLE IF NOT EXISTS oauth_refresh_token (
   token_id VARCHAR(255),
-  token LONG VARBINARY,
-  authentication LONG VARBINARY
+  token LONGVARBINARY,
+  authentication LONGVARBINARY
 );
 
 -- -----------------------------------------------------
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS oauth_refresh_token (
 
 CREATE TABLE IF NOT EXISTS oauth_code (
   code VARCHAR(255),
-  authentication LONG VARBINARY
+  authentication LONGVARBINARY
 );
 
 -- -----------------------------------------------------

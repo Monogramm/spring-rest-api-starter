@@ -120,10 +120,10 @@ public class UserDtoTest extends AbstractGenericDtoTest<UserDto> {
   }
 
   /**
-   * Test method for {@link UserDto#UserDTO()}.
+   * Test method for {@link UserDto#UserDto()}.
    */
   @Test
-  public void testUserDTO() {
+  public void testUserDto() {
     assertNull(getDto().getUsername());
     assertNull(getDto().getEmail());
     assertNull(getDto().getPassword());
@@ -133,10 +133,10 @@ public class UserDtoTest extends AbstractGenericDtoTest<UserDto> {
   }
 
   /**
-   * Test method for {@link UserDto#UserDTO(com.monogramm.starter.dto.user.UserDto)}.
+   * Test method for {@link UserDto#UserDto(com.monogramm.starter.dto.user.UserDto)}.
    */
   @Test
-  public void testUserDTOUserDTO() {
+  public void testUserDtoUserDto() {
     final UserDto dto = this.buildCopyTestDto();
 
     assertEquals(getDto().getUsername(), dto.getUsername());

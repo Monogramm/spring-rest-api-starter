@@ -233,19 +233,19 @@ public abstract class AbstractGenericDtoTest<T extends AbstractGenericDto> {
   public void testHashCode() {
     assertEquals(dto.hashCode(), dto.hashCode());
 
-    final T anotherDTO = this.buildTestDto();
-    assertEquals(anotherDTO.hashCode(), dto.hashCode());
+    final T anotherDto = this.buildTestDto();
+    assertEquals(anotherDto.hashCode(), dto.hashCode());
 
 
     dto.setId(UUID.randomUUID());
     assertEquals(dto.hashCode(), dto.hashCode());
-    assertNotEquals(anotherDTO.hashCode(), dto.hashCode());
+    assertNotEquals(anotherDto.hashCode(), dto.hashCode());
 
-    anotherDTO.setId(UUID.randomUUID());
-    assertNotEquals(anotherDTO.hashCode(), dto.hashCode());
+    anotherDto.setId(UUID.randomUUID());
+    assertNotEquals(anotherDto.hashCode(), dto.hashCode());
 
-    anotherDTO.setId(dto.getId());
-    assertEquals(anotherDTO.hashCode(), dto.hashCode());
+    anotherDto.setId(dto.getId());
+    assertEquals(anotherDto.hashCode(), dto.hashCode());
   }
 
   /**
@@ -257,32 +257,32 @@ public abstract class AbstractGenericDtoTest<T extends AbstractGenericDto> {
     assertNotEquals(dto, null);
     assertNotEquals(dto, new Object());
 
-    final T anotherDTO = this.buildTestDto();
+    final T anotherDto = this.buildTestDto();
 
-    assertEquals(dto, anotherDTO);
-    assertEquals(anotherDTO, dto);
+    assertEquals(dto, anotherDto);
+    assertEquals(anotherDto, dto);
 
     dto.setId(UUID.randomUUID());
 
-    assertNotEquals(dto, anotherDTO);
-    assertNotEquals(anotherDTO, dto);
+    assertNotEquals(dto, anotherDto);
+    assertNotEquals(anotherDto, dto);
 
-    anotherDTO.setId(UUID.randomUUID());
+    anotherDto.setId(UUID.randomUUID());
 
-    assertNotEquals(dto, anotherDTO);
-    assertNotEquals(anotherDTO, dto);
+    assertNotEquals(dto, anotherDto);
+    assertNotEquals(anotherDto, dto);
 
-    anotherDTO.setId(dto.getId());
+    anotherDto.setId(dto.getId());
 
-    assertEquals(dto, anotherDTO);
-    assertEquals(anotherDTO, dto);
+    assertEquals(dto, anotherDto);
+    assertEquals(anotherDto, dto);
   }
 
   /**
    * Test method for {@link AbstractGenericDto#toJson()}.
    */
   @Test
-  public void testToJSON() {
+  public void testToJson() {
     try {
       assertNotNull(dto.toJson());
     } catch (JsonProcessingException e) {

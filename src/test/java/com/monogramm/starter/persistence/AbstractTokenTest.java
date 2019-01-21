@@ -49,8 +49,8 @@ public abstract class AbstractTokenTest<T extends AbstractToken>
   abstract protected T buildTestEntity(T other);
 
   @Override
-  public void testToJSON() throws JsonProcessingException {
-    super.testToJSON();
+  public void testToJson() throws JsonProcessingException {
+    super.testToJson();
 
     this.getEntity().setCode(DUMMY_CODE);
     assertNotNull(this.getEntity().toJson());

@@ -1,5 +1,6 @@
 package com.monogramm.starter.persistence.role.service;
 
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.role.RoleDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
 import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
@@ -15,6 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * {@link Role} service.
+ * 
+ * @author madmath03
+ */
 @Service
 public class RoleService extends AbstractGenericService<Role, RoleDto> implements IRoleService {
 
@@ -26,11 +32,12 @@ public class RoleService extends AbstractGenericService<Role, RoleDto> implement
    * @param roleDao the role repository.
    * @param userDao the user repository.
    * @param permissionDao the permission repository.
+   * @param authenticationFacade a facade to retrieve the authentication object.
    */
   @Autowired
   public RoleService(final IRoleRepository roleDao, final IUserRepository userDao,
-      final IPermissionRepository permissionDao) {
-    super(roleDao, userDao, new RoleBridge(userDao, permissionDao));
+      final IPermissionRepository permissionDao, IAuthenticationFacade authenticationFacade) {
+    super(roleDao, userDao, new RoleBridge(userDao, permissionDao), authenticationFacade);
     if (permissionDao == null) {
       throw new IllegalArgumentException("Permission repository cannot be null.");
     }

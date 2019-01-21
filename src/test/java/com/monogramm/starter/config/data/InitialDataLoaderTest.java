@@ -161,11 +161,13 @@ public class InitialDataLoaderTest {
    */
   @Test
   public void testOnApplicationEvent() {
-    when(env.getProperty("monogramm.data.demo")).thenReturn("false");
+    when(env.getProperty("application.data.demo")).thenReturn("false");
 
     this.loader.onApplicationEvent(null);
 
-    verify(env, times(1)).getProperty("monogramm.data.demo");
+    verify(env, times(1)).getProperty("application.data.demo");
+    verify(env, times(1)).getProperty("application.data.admin_password");
+    verify(env, times(1)).getProperty("application.data.domain_name", "monogramm.io");
     verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());
@@ -181,11 +183,13 @@ public class InitialDataLoaderTest {
    */
   @Test
   public void testOnApplicationEventWithDemoData() {
-    when(env.getProperty("monogramm.data.demo")).thenReturn("true");
+    when(env.getProperty("application.data.demo")).thenReturn("true");
 
     this.loader.onApplicationEvent(null);
 
-    verify(env, times(1)).getProperty("monogramm.data.demo");
+    verify(env, times(1)).getProperty("application.data.demo");
+    verify(env, times(1)).getProperty("application.data.admin_password");
+    verify(env, times(1)).getProperty("application.data.domain_name", "monogramm.io");
     verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());

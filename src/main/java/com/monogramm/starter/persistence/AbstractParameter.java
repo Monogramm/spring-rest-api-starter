@@ -24,49 +24,70 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    */
   private static final long serialVersionUID = 984519142288845529L;
 
+
+  /**
+   * Parameter name property.
+   */
+  public static final String NAME_PROPERTY = "name";
   /**
    * Parameter name length.
    */
   public static final int MAX_LENGTH_NAME = 32;
 
-  /**
-   * Parameter name length.
-   */
-  public static final int MAX_LENGTH_DESCRIPTION = 32;
 
+  /**
+   * Parameter description property.
+   */
+  public static final String DESCRIPTION_PROPERTY = "description";
+  /**
+   * Parameter description length.
+   */
+  public static final int MAX_LENGTH_DESCRIPTION = 512;
+
+
+  /**
+   * Parameter type property.
+   */
+  public static final String TYPE_PROPERTY = "type";
   /**
    * Parameter type length.
    */
   public static final int MAX_LENGTH_TYPE = 255;
 
+
+  /**
+   * Parameter value property.
+   */
+  public static final String VALUE_PROPERTY = "value";
   /**
    * Parameter value length.
    */
   public static final int MAX_LENGTH_VALUE = 1024;
 
+
   /**
    * The parameter name.
    */
-  @Column(name = "name", unique = true, nullable = false, length = MAX_LENGTH_NAME)
+  @Column(name = NAME_PROPERTY, unique = true, nullable = false, length = MAX_LENGTH_NAME)
   private String name;
 
   /**
    * The parameter description.
    */
-  @Column(name = "description", nullable = true, length = MAX_LENGTH_DESCRIPTION)
+  @Column(name = DESCRIPTION_PROPERTY, nullable = true, length = MAX_LENGTH_DESCRIPTION)
   private String description;
 
   /**
    * The parameter type.
    */
-  @Column(name = "type", nullable = false, length = MAX_LENGTH_TYPE)
+  @Column(name = TYPE_PROPERTY, nullable = false, length = MAX_LENGTH_TYPE)
   @Enumerated(EnumType.STRING)
   private ParameterType type = ParameterType.ANY;
 
   /**
    * The parameter value.
    */
-  @Column(name = "value", nullable = true, length = MAX_LENGTH_VALUE)
+  @Column(name = VALUE_PROPERTY, nullable = true, length = MAX_LENGTH_VALUE)
   private String value;
 
   /**
@@ -103,7 +124,25 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
     super();
 
     this.setName(name);
-    this.setValue(value);
+    this.writeValue(value);
+  }
+
+  /**
+   * Create a {@link AbstractParameter}.
+   * 
+   * @param name the parameter name.
+   * @param type the parameter type.
+   * @param value the parameter value.
+   */
+  public AbstractParameter(String name, ParameterType type, Object value) {
+    super();
+    if (type == null) {
+      throw new IllegalArgumentException("Parameter type cannot be null");
+    }
+
+    this.setName(name);
+    this.setType(type);
+    this.setValue(type.write(value));
   }
 
   /**
@@ -168,7 +207,7 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    * @return the {@link #value}.
    */
   public Object readValue() {
-    return type.read(value);
+    return type.read(this.value);
   }
 
   /**
@@ -177,16 +216,7 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    * @return the {@link #value}.
    */
   public String getValue() {
-    return value;
-  }
-
-  /**
-   * Write the {@link #value} using the {@link #type} writer.
-   * 
-   * @see ParameterType#write(Object)
-   */
-  public void writeValue(String value) {
-    type.write(value);
+    return this.value;
   }
 
   /**
@@ -217,14 +247,10 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
    * 
    * @param value the {@link #value} to set.
    */
-  public void setValue(Object value) {
-    if (value != null) {
-      final ParameterType typeOfValue = ParameterType.typeOf(value);
-      this.setType(typeOfValue);
-      this.setValue(typeOfValue.write(value));
-    } else {
-      this.setValue((String) null);
-    }
+  public void writeValue(Object value) {
+    final ParameterType typeOfValue = ParameterType.typeOf(value);
+    this.setType(typeOfValue);
+    this.setValue(typeOfValue.write(value));
   }
 
   @Override
@@ -315,6 +341,19 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
     }
 
     /**
+     * Create a {@link AbstractParameterBuilder}.
+     * 
+     * @param name the name of your record being built.
+     * @param type the type of your record being built.
+     * @param value the value of your record being built.
+     */
+    protected AbstractParameterBuilder(final String name, final ParameterType type,
+        final Object value) {
+      this();
+      this.name(name).type(type).value(value);
+    }
+
+    /**
      * Set the name and return the builder.
      * 
      * @see AbstractParameter#setName(String)
@@ -359,14 +398,14 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
     /**
      * Set the value and return the builder.
      * 
-     * @see AbstractParameter#setValue(Object)
+     * @see AbstractParameter#writeValue(Object)
      * 
      * @param value the value of your record being built.
      * 
      * @return the builder.
      */
     public AbstractParameterBuilder<T> value(final Object value) {
-      this.getEntity().setValue(value);
+      this.getEntity().writeValue(value);
       return this;
     }
   }

@@ -9,6 +9,8 @@ import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
@@ -22,6 +24,11 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 public abstract class AbstractMailSendingListener<T extends AbstractToken,
     E extends AbstractMailSendingEvent<User>> implements ApplicationListener<E> {
+
+  /**
+   * Logger for {@link AbstractMailSendingListener}.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractMailSendingListener.class);
 
   private final MessageSource messages;
 
@@ -87,7 +94,11 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
     email.setTo(user.getEmail());
     email.setSubject(appName + " - " + subject);
     email.setText(message);
-    email.setFrom(env.getProperty("no_reply.email"));
+    email.setFrom(env.getProperty("application.email.no_reply"));
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Sending email to " + user.getEmail() + ": " + email);
+    }
 
     mailSender.send(email);
   }

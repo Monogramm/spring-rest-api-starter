@@ -39,7 +39,7 @@ public class TypeServiceTest extends AbstractGenericServiceTest<Type, TypeDto, T
 
   @Override
   protected TypeService buildTestService() {
-    return new TypeService(getMockRepository(), getMockUserRepository());
+    return new TypeService(getMockRepository(), getMockUserRepository(), getMockAuthenticationFacade());
   }
 
   @Override

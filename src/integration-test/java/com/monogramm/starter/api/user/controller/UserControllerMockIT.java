@@ -13,13 +13,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.github.madmath03.password.Passwords;
 import com.monogramm.Application;
+import com.monogramm.starter.SmtpServerRule;
 import com.monogramm.starter.api.AbstractControllerIT;
 import com.monogramm.starter.api.AbstractControllerMockIT;
+import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.user.PasswordResetDto;
@@ -37,10 +40,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +53,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
 
 
 /**
@@ -77,26 +83,31 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Users";
+  public static final String TYPE = UserController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
-
+  public static final String CONTROLLER_PATH = UserController.CONTROLLER_PATH;
   /**
    * The request path for registration.
    */
-  public static final String REGISTER_PATH = CONTROLLER_PATH + "/register";
-
+  public static final String REGISTER_PATH = UserController.REGISTER_PATH;
   /**
-   * The request path for registration.
+   * The request path for resetting password.
    */
-  public static final String RESET_PWD_PATH = CONTROLLER_PATH + "/reset_password";
-
+  public static final String RESET_PWD_PATH = UserController.RESET_PWD_PATH;
   /**
-   * The request path for account verification.
+   * The request path for verification request.
    */
-  public static final String VERIFY_PATH = CONTROLLER_PATH + "/verify";
+  public static final String SEND_VERIFICATION_PATH = UserController.SEND_VERIFICATION_PATH;
+  /**
+   * The request path for user verification.
+   */
+  public static final String VERIFY_PATH = UserController.VERIFY_PATH;
+  /**
+   * The request path for changing password.
+   */
+  public static final String CHANGE_PWD_PATH = UserController.CHANGE_PWD_PATH;
 
   private static final String DUMMY_USERNAME = "Foo";
   private static final String DUMMY_EMAIL = "foo@email.com";
@@ -116,6 +127,9 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
 
   @Autowired
   private IPasswordResetTokenService passwordResetTokenService;
+
+  @Rule
+  public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);
 
   @Before
   public void setUp() {
@@ -151,16 +165,30 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
   }
 
   /**
-   * Test method for {@link UserController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link UserController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetUserByIdRandomId() throws Exception {
+    // No permission returned
+    MvcResult result = getMockMvc()
+        .perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
+        .andExpect(status().isNotFound()).andReturn();
+
+    assertNotNull(result.getResponse());
+    assertNotNull(result.getResponse().getContentAsString());
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
    * 
    * @throws Exception if the test crashes.
    */
   @Test
   public void testGetUserById() throws Exception {
-    // No user returned
-    getMockMvc().perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
-        .andExpect(status().isNotFound()).andExpect(content().bytes(new byte[] {}));
-
     // User previously created should be returned
     getMockMvc()
         .perform(get(CONTROLLER_PATH + '/' + this.testEntity.getId())
@@ -196,6 +224,58 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
 
     // We assume the environment is freshly created with only the initial data and test data
     getMockMvc().perform(get(CONTROLLER_PATH).headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllUsersPaginated() throws Exception {
+    int expectedSize = 1;
+
+    // There should at least be the test entities...
+    int maxSize = 4;
+    // ...plus the users created at application initialization
+    if (initialDataLoader.getUsers() != null) {
+      maxSize += initialDataLoader.getUsers().size();
+    }
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
+            .headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Link",
+            "<http://localhost/spring-rest-api-starter-it/api/users?page=1&size=1>; rel=\"next\", "
+                + "<http://localhost/spring-rest-api-starter-it/api/users?page=" + maxSize
+                + "&size=1>; rel=\"last\""))
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link UserController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllUsersPaginatedDefaultSize() throws Exception {
+    // There should at least be the test entity...
+    int expectedSize = 4;
+    // ...plus the users created at application initialization
+    if (initialDataLoader.getUsers() != null) {
+      expectedSize += initialDataLoader.getUsers().size();
+    }
+    expectedSize = Math.min(expectedSize, AbstractGenericController.DEFAULT_SIZE_INT);
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").headers(getHeaders(getMockToken())))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));
@@ -351,8 +431,15 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     assertNotNull(tokens.get(0));
     assertNotNull(tokens.get(0).getCode());
     final PasswordResetToken token = tokens.get(0);
+    final String tokenCode = token.getCode();
     final Date initialExpiration = token.getExpiryDate();
     assertNotNull(initialExpiration);
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(tokenCode));
 
     final char[] password = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
     final PasswordResetDto dto =
@@ -378,15 +465,13 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     final char[] password = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
     final PasswordConfirmationDto dto = new PasswordConfirmationDto(password, password);
 
-    getMockMvc()
-        .perform(put(CONTROLLER_PATH + "/change_password/" + randomId)
-            .headers(getHeaders(getMockToken())).content(toJsonBytes(dto)))
-        .andExpect(status().isNotFound());
+    getMockMvc().perform(put(CHANGE_PWD_PATH + "/" + randomId).headers(getHeaders(getMockToken()))
+        .content(toJsonBytes(dto))).andExpect(status().isNotFound());
 
     // Update test user password should work
     final byte[] passwordJsonBytes = toJsonBytes(dto);
     getMockMvc()
-        .perform(put(CONTROLLER_PATH + "/change_password/" + this.testEntity.getId())
+        .perform(put(CHANGE_PWD_PATH + "/" + this.testEntity.getId())
             .headers(getHeaders(getMockToken())).content(passwordJsonBytes))
         .andExpect(status().isNoContent());
 
@@ -442,6 +527,7 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
         .perform(post(REGISTER_PATH).contentType(MediaType.APPLICATION_JSON_UTF8).content(userJson))
         .andExpect(status().isNoContent()).andExpect(content().bytes(new byte[] {}));
 
+    // Check verification token generated
     final List<VerificationToken> tokens = verificationService.findAll();
     assertNotNull(tokens);
     assertEquals(1, tokens.size());
@@ -450,6 +536,12 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     final VerificationToken token = tokens.get(0);
     final Date initialExpiration = token.getExpiryDate();
     assertNotNull(initialExpiration);
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(token.getCode()));
 
     // Register again should generate conflict
     getMockMvc()
@@ -485,19 +577,18 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
   @Test
   public void testSendVerificationAndVerify() throws Exception {
     // Verifying already verified user should not send any email but work anyway
-    getMockMvc().perform(post(CONTROLLER_PATH + "/send_verification")
-        .headers(getHeaders(getMockToken())).content(getTestUser().getEmail()))
-        .andExpect(status().isOk());
+    getMockMvc().perform(post(SEND_VERIFICATION_PATH).headers(getHeaders(getMockToken()))
+        .content(getTestUser().getEmail())).andExpect(status().isOk());
 
     List<VerificationToken> tokens = verificationService.findAll();
     assertNotNull(tokens);
     assertEquals(0, tokens.size());
 
     // Request to send a verification email should work
-    getMockMvc().perform(post(CONTROLLER_PATH + "/send_verification")
-        .headers(getHeaders(getMockToken())).content(this.testEntity.getEmail()))
-        .andExpect(status().isNoContent());
+    getMockMvc().perform(post(SEND_VERIFICATION_PATH).headers(getHeaders(getMockToken()))
+        .content(this.testEntity.getEmail())).andExpect(status().isNoContent());
 
+    // Check verification token generated
     tokens = verificationService.findAll();
     assertNotNull(tokens);
     assertEquals(1, tokens.size());
@@ -506,6 +597,12 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
     final VerificationToken token = tokens.get(0);
     final Date initialExpiration = token.getExpiryDate();
     assertNotNull(initialExpiration);
+
+    // Check email received and its content
+    MimeMessage[] receivedMessages = smtpServerRule.getMessages();
+    assertEquals(1, receivedMessages.length);
+    final Object mailContent = receivedMessages[0].getContent();
+    assertTrue(((String) mailContent).contains(token.getCode()));
 
     // Verifying on random UUID should not find any user
     getMockMvc().perform(put(VERIFY_PATH + "/" + randomId).headers(getHeaders(getMockToken()))

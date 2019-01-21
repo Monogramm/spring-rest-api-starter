@@ -5,6 +5,7 @@ import com.monogramm.starter.api.user.event.OnPasswordResetEvent;
 import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
 import com.monogramm.starter.config.data.GenericOperation;
+import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.PasswordResetDto;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
@@ -23,28 +24,35 @@ import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * The User API Controller.
+ * The {@link User} API Controller.
  * 
  * @author madmath03
  */
@@ -54,7 +62,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * Logger for {@link UserController}.
    */
-  private static final Logger LOG = LogManager.getLogger(UserController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
 
   /**
    * The main data type handled by this controller.
@@ -63,7 +71,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * The request base path of this controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = SEP + "users";
   /**
    * The request path for registration.
    */
@@ -126,7 +134,10 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   public static final String AUTH_DELETE = OAuth2WebSecurityConfig.AUTH_PREFIX + AUTH_TYPE
       + GenericOperation.PERM_SEP + GenericOperation.PERM_DELETE;
 
-  private ApplicationEventPublisher eventPublisher;
+  /**
+   * The Authorities describing Administration permissions of this controller.
+   */
+  protected static final String[] ADMIN_AUTH = {AUTH_LIST};
 
   private IVerificationTokenService verificationTokenService;
 
@@ -135,20 +146,34 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   /**
    * Create a {@link UserController}.
    * 
-   * @param userService the users service.
+   * @param messageSource the i18n message source.
    * @param eventPublisher the event publisher.
+   * @param userService the users service.
    * @param verificationTokenService the verification token service.
    * @param passwordResetTokenService the password reset token service.
    */
   @Autowired
-  public UserController(IUserService userService, ApplicationEventPublisher eventPublisher,
-      IVerificationTokenService verificationTokenService,
+  public UserController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
+      IUserService userService, IVerificationTokenService verificationTokenService,
       IPasswordResetTokenService passwordResetTokenService) {
-    super(userService);
+    super(messageSource, eventPublisher, userService);
 
-    this.eventPublisher = eventPublisher;
     this.verificationTokenService = verificationTokenService;
     this.passwordResetTokenService = passwordResetTokenService;
+  }
+
+  @Override
+  protected UserNotFoundException buildEntityNotFoundException(String id, WebRequest request) {
+    final Locale locale = request.getLocale();
+    final String msg = getMessageSource().getMessage("controller.entity_not_found",
+        new String[] {User.class.getSimpleName(), id}, locale);
+
+    return new UserNotFoundException(msg);
+  }
+
+  @Override
+  protected String[] getAdminAuthorities() {
+    return ADMIN_AUTH;
   }
 
   @Override
@@ -162,41 +187,52 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
-  public ResponseEntity<UserDto> getDataById(@PathVariable @ValidUuid String id) {
-    return super.getDataById(id);
+  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
+  public UserDto getDataById(@PathVariable @ValidUuid String id, WebRequest request,
+      HttpServletResponse response) {
+    return super.getDataById(id, request, response);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public ResponseEntity<List<UserDto>> getAllData() {
+  public List<UserDto> getAllData() {
     return super.getAllData();
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH, method = RequestMethod.POST,
-      consumes = "application/json")
+  @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  public List<UserDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.getAllDataPaginated(page, size, request, builder, response);
+  }
+
+  @Override
+  @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<UserDto> addData(@RequestBody UserDto dto, UriComponentsBuilder builder) {
-    return super.addData(dto, builder);
+  public ResponseEntity<UserDto> addData(Authentication authentication, @RequestBody UserDto dto,
+      UriComponentsBuilder builder, HttpServletResponse response) {
+    return super.addData(authentication, dto, builder, response);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CONTROLLER_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<UserDto> updateData(@PathVariable @ValidUuid String id,
-      @RequestBody UserDto dto) {
-    return super.updateData(id, dto);
+  public ResponseEntity<UserDto> updateData(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody UserDto dto) {
+    return super.updateData(authentication, id, dto);
   }
 
   @Override
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}", method = RequestMethod.DELETE)
+  @DeleteMapping(value = CONTROLLER_PATH + "/{id}")
   @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
-  public ResponseEntity<Void> deleteData(@PathVariable @ValidUuid String id) {
-    return super.deleteData(id);
+  public ResponseEntity<Void> deleteData(Authentication authentication,
+      @PathVariable @ValidUuid String id) {
+    return super.deleteData(authentication, id);
   }
 
 
@@ -253,8 +289,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = CONTROLLER_PATH + "/get", method = RequestMethod.GET)
+  @GetMapping(value = CONTROLLER_PATH + "/get")
   @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
+  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
   public ResponseEntity<UserDto> getUserByUsernameOrEmail(
       @RequestParam(required = false) String username,
       @RequestParam(required = false) String email) {
@@ -313,7 +350,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    *         </ul>
    * 
    */
-  @RequestMapping(value = "/" + RESET_PWD_PATH, method = RequestMethod.POST)
+  @PostMapping(value = RESET_PWD_PATH)
+  @PreAuthorize(value = "isAnonymous()")
   public ResponseEntity<Void> resetPassword(@RequestBody String email, WebRequest request) {
     User user;
     try {
@@ -391,7 +429,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = "/" + RESET_PWD_PATH, method = RequestMethod.PUT)
+  @PutMapping(value = RESET_PWD_PATH)
+  @PreAuthorize(value = "isAnonymous() || hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> resetPassword(@RequestBody @Valid PasswordResetDto passwordReset) {
     HttpStatus status;
 
@@ -429,7 +468,10 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   private void sendEmailPasswordReset(final User user, WebRequest request) {
-    eventPublisher.publishEvent(
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Requesting to send password reset email for user: " + user);
+    }
+    this.getEventPublisher().publishEvent(
         new OnPasswordResetEvent(user, request.getLocale(), request.getContextPath()));
   }
 
@@ -440,6 +482,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * Update a user's password.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * @param password <em>Required Body Content:</em> a JSON data about the new user password.
    * 
@@ -507,24 +550,40 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = CHANGE_PWD_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CHANGE_PWD_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<Void> changePassword(@PathVariable String id,
-      @RequestBody @Valid PasswordConfirmationDto password) {
+  public ResponseEntity<Void> changePassword(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody @Valid PasswordConfirmationDto password) {
     HttpStatus status;
 
     try {
       if (password == null) {
         status = HttpStatus.BAD_REQUEST;
       } else {
-        final User user =
-            this.getService().setPassword(UUID.fromString(id), password.getPassword());
+        // Only activate if owner or has administration authorities
+        final User user;
+
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          user = this.getService().setPasswordByOwner(UUID.fromString(id), password.getPassword(),
+              ownerId);
+        } else {
+          user = this.getService().setPassword(UUID.fromString(id), password.getPassword());
+        }
 
         if (user == null) {
           status = HttpStatus.NOT_FOUND;
         } else {
           status = HttpStatus.NO_CONTENT;
+
+          // XXX This should be done using Spring Data Auditing
+          // Set last modification user
+          final User principalUser = this.getPrincipalUser(authentication);
+          user.setModifiedBy(principalUser);
+          this.getService().update(user);
         }
       }
     } catch (UserNotFoundException | IllegalArgumentException e) {
@@ -536,12 +595,13 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   /**
-   * Activate a user account
+   * Activate a user account.
    * 
    * <p>
    * Change the active status of a user account.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * @param enabled <em>Required Body Content:</em> a JSON data about the new user active status.
    * 
@@ -609,22 +669,39 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = CONTROLLER_PATH + "/{id}/activate", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = CONTROLLER_PATH + "/{id}/activate", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<Void> activate(@PathVariable String id, @RequestBody Boolean enabled) {
+  public ResponseEntity<Void> activate(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody Boolean enabled) {
     HttpStatus status;
 
     if (enabled == null) {
       status = HttpStatus.BAD_REQUEST;
     } else {
       try {
-        final User user = this.getService().setEnabled(UUID.fromString(id), enabled);
+        // Only activate if owner or has administration authorities
+        final User user;
+
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          user = this.getService().setEnabledByOwner(UUID.fromString(id), enabled, ownerId);
+        } else {
+          user = this.getService().setEnabled(UUID.fromString(id), enabled);
+        }
 
         if (user == null) {
           status = HttpStatus.NOT_FOUND;
         } else {
           status = HttpStatus.NO_CONTENT;
+
+          // XXX This should be done using Spring Data Auditing
+          // Set last modification user
+          final User principalUser = this.getPrincipalUser(authentication);
+          user.setModifiedBy(principalUser);
+          this.getService().update(user);
         }
       } catch (UserNotFoundException | IllegalArgumentException e) {
         LOG.debug("activate(id=" + id + ", enabled=" + enabled + ")", e);
@@ -696,9 +773,12 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * @throws EntityNotFoundException if a default entity associated to a new user account is not
    *         found.
    */
-  @RequestMapping(value = REGISTER_PATH, method = RequestMethod.POST, consumes = "application/json")
+  @PostMapping(value = REGISTER_PATH, consumes = "application/json")
+  @PreAuthorize(value = "isAnonymous()")
   public ResponseEntity<Void> register(@RequestBody @Valid RegistrationDto registration,
       WebRequest request) {
+    LOG.debug("Registering new user...");
+
     boolean registered;
     try {
       registered = this.getService().register(registration);
@@ -708,11 +788,19 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
     HttpStatus status;
     if (registered) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("New user registered: " + registration.getEmail());
+      }
       final User user = this.getService().findByEmail(registration.getEmail());
+
+      // Make the registered user owner of its own account
+      user.setOwner(user);
+      this.getService().update(user);
 
       this.sendEmailVerificationEvent(user, request);
       status = HttpStatus.NO_CONTENT;
     } else {
+      LOG.debug("Conflict on user registration");
       status = HttpStatus.CONFLICT;
     }
 
@@ -798,9 +886,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    *         </ul>
    * 
    */
-  @RequestMapping(value = SEND_VERIFICATION_PATH, method = RequestMethod.POST,
-      consumes = "application/json")
-  @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
+  @PostMapping(value = SEND_VERIFICATION_PATH, consumes = "application/json")
+  @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<Void> sendVerification(@RequestBody String email, WebRequest request) {
     User user;
     try {
@@ -812,6 +899,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
     HttpStatus status;
     if (user == null) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("No user account found matching email: " + email);
+      }
       /*
        * Do not alert the client that no account exists. This would allow an attacker to identify
        * user accounts.
@@ -828,17 +918,21 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   private void sendEmailVerificationEvent(final User user, final WebRequest request) {
-    eventPublisher.publishEvent(
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Requesting to send verification email for user: " + user);
+    }
+    this.getEventPublisher().publishEvent(
         new OnRegistrationCompleteEvent(user, request.getLocale(), request.getContextPath()));
   }
 
   /**
-   * Verify a user account
+   * Verify a user account.
    * 
    * <p>
    * Mark a user account as verified.
    * </p>
    * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param id <em>Required URL Path variable:</em> universal unique identifier (i.e. {@code UUID}).
    * @param token <em>Required Body Content:</em> a JSON data about the
    *        {@link VerificationToken#getCode()} to verify a user account.
@@ -890,11 +984,12 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    *         </ul>
    */
-  @RequestMapping(value = "/" + VERIFY_PATH + "/{id}", method = RequestMethod.PUT,
-      consumes = "application/json")
+  @PutMapping(value = VERIFY_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
-  public ResponseEntity<Void> verify(@PathVariable String id, @RequestBody String token) {
+  public ResponseEntity<Void> verify(Authentication authentication,
+      @PathVariable @ValidUuid String id, @RequestBody String token) {
     HttpStatus status;
+    LOG.debug("Verifying user...");
 
     final Date now = new Date();
     try {
@@ -904,16 +999,51 @@ public class UserController extends AbstractGenericController<User, UserDto> {
       final VerificationToken verificationToken =
           verificationTokenService.findByUserAndCode(userId, token);
 
-      // If a valid token exists and verification is successful
       // TODO use more complex request body to verify email attached to token
-      if (verificationToken != null && now.before(verificationToken.getExpiryDate())
-          && this.getService().verify(userId) != null) {
+      // If a valid token exists
+      final User user;
+      if (verificationToken != null && now.before(verificationToken.getExpiryDate())) {
+
+        // Only verify if owner or has administration authorities
+        final String[] adminAuthorities = this.getAdminAuthorities();
+        if (adminAuthorities != null && adminAuthorities.length > 0
+            && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+          final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
+
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Verifying owned user account: " + userId);
+          }
+
+          user = this.getService().verifyByOwner(userId, ownerId);
+        } else {
+
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("Verifying user account: " + userId);
+          }
+          user = this.getService().verify(userId);
+        }
+
+      } else {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("No verification token matching: " + userId + ", " + token);
+        }
+
+        user = null;
+      }
+
+      if (user == null) {
+        status = HttpStatus.NOT_FOUND;
+      } else {
         status = HttpStatus.NO_CONTENT;
         // Invalidate the token
         verificationToken.setExpiryDate(now);
         verificationTokenService.update(verificationToken);
-      } else {
-        status = HttpStatus.NOT_FOUND;
+
+        // XXX This should be done using Spring Data Auditing
+        // Set last modification user
+        final User principalUser = this.getPrincipalUser(authentication);
+        user.setModifiedBy(principalUser);
+        this.getService().update(user);
       }
 
     } catch (VerificationTokenNotFoundException | UserNotFoundException
@@ -924,4 +1054,5 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
     return new ResponseEntity<>(status);
   }
+
 }

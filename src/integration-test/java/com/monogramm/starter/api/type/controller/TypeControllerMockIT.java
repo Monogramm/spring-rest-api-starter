@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.monogramm.Application;
 import com.monogramm.starter.api.AbstractControllerIT;
 import com.monogramm.starter.api.AbstractControllerMockIT;
+import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.type.TypeDto;
@@ -29,17 +31,18 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
 
 
 /**
@@ -69,18 +72,18 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
   /**
    * Logger for {@link TypeControllerMockIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(TypeControllerMockIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TypeControllerMockIT.class);
 
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Types";
+  public static final String TYPE = TypeController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = TypeController.CONTROLLER_PATH;
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = TypeControllerMockIT.class.getSimpleName();
 
   @Autowired
   private InitialDataLoader initialDataLoader;
@@ -132,16 +135,30 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
   }
 
   /**
-   * Test method for {@link TypeController#getDataById(java.lang.String)}.
+   * Test method for
+   * {@link TypeController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetTypeByIdRandomId() throws Exception {
+    // No permission returned
+    MvcResult result = getMockMvc()
+        .perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
+        .andExpect(status().isNotFound()).andReturn();
+
+    assertNotNull(result.getResponse());
+    assertNotNull(result.getResponse().getContentAsString());
+  }
+
+  /**
+   * Test method for
+   * {@link TypeController#getDataById(String, org.springframework.web.context.request.WebRequest, javax.servlet.http.HttpServletResponse)}.
    * 
    * @throws Exception if the test crashes.
    */
   @Test
   public void testGetTypeById() throws Exception {
-    // No type returned
-    getMockMvc().perform(get(CONTROLLER_PATH + '/' + randomId).headers(getHeaders(getMockToken())))
-        .andExpect(status().isNotFound()).andExpect(content().bytes(new byte[] {}));
-
     // Type previously created should be returned
     getMockMvc()
         .perform(get(CONTROLLER_PATH + '/' + this.testEntity.getId())
@@ -173,6 +190,47 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
     }
 
     getMockMvc().perform(get(CONTROLLER_PATH).headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link TypeController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllTypesPaginated() throws Exception {
+    int expectedSize = 1;
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
+            .headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link TypeController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllTypesPaginatedDefaultSize() throws Exception {
+    // There should at least be the test entity...
+    int expectedSize = 1;
+    // ...plus the types created at application initialization
+    if (initialDataLoader.getTypes() != null) {
+      expectedSize += initialDataLoader.getTypes().size();
+    }
+    expectedSize = Math.min(expectedSize, AbstractGenericController.DEFAULT_SIZE_INT);
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").headers(getHeaders(getMockToken())))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));

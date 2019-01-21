@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class IPermissionRepositoryIT
     extends AbstractGenericRepositoryIT<Permission, IPermissionRepository> {
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = IPermissionRepositoryIT.class.getSimpleName();
 
   @Autowired
   private InitialDataLoader initialDataLoader;
@@ -128,7 +128,7 @@ public class IPermissionRepositoryIT
    * Test method for {@link IPermissionRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDString() {
+  public void testExistsUuidString() {
     final boolean expected = true;
     final Permission model = this.buildTestEntity();
     final List<Permission> models = new ArrayList<>(1);
@@ -144,7 +144,7 @@ public class IPermissionRepositoryIT
    * Test method for {@link IPermissionRepository#exists(java.util.UUID, java.lang.String)}.
    */
   @Test
-  public void testExistsUUIDStringNotFound() {
+  public void testExistsUuidStringNotFound() {
     final boolean expected = false;
 
     final boolean actual = getRepository().exists(RANDOM_ID, DISPLAYNAME);

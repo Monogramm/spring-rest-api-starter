@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * The Types Data Access Object (DAO) interface.
+ * The {@link Type} Data Access Object (DAO) interface.
  * 
  * @author madmath03
  */
@@ -28,8 +28,7 @@ public interface ITypeRepository extends GenericRepository<Type> {
    * 
    * @return the list of all the types matching the search through the repository.
    */
-  @Query("FROM Type AS t "
-      + "WHERE LOWER(t.name) LIKE concat('%', LOWER(:name), '%')")
+  @Query("FROM Type AS t " + "WHERE LOWER(t.name) LIKE concat('%', LOWER(:name), '%')")
   List<Type> findAllContainingNameIgnoreCase(@Param("name") final String name);
 
   /**
@@ -54,6 +53,5 @@ public interface ITypeRepository extends GenericRepository<Type> {
    */
   @Query("SELECT count(t) > 0 FROM Type AS t "
       + "WHERE t.id = :typeId OR LOWER(t.name) = LOWER(:name)")
-  boolean exists(@Param("typeId") final UUID typeId,
-      @Param("name") final String name);
+  boolean exists(@Param("typeId") final UUID typeId, @Param("name") final String name);
 }

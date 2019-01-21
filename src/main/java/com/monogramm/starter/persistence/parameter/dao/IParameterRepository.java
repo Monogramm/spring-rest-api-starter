@@ -17,7 +17,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * IParameterRepository.
+ * The {@link Parameter} Data Access Object (DAO) interface.
  * 
  * @author madmath03
  */

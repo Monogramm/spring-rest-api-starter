@@ -18,12 +18,12 @@ import com.monogramm.starter.persistence.user.entity.User;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
@@ -59,18 +59,18 @@ public class TypeControllerFullIT extends AbstractControllerFullIT {
   /**
    * Logger for {@link TypeControllerFullIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(TypeControllerFullIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(TypeControllerFullIT.class);
 
   /**
    * The managed type of this tested controller.
    */
-  public static final String TYPE = "Types";
+  public static final String TYPE = TypeController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = TypeController.CONTROLLER_PATH;
 
-  private static final String DISPLAYNAME = "Foo";
+  private static final String DISPLAYNAME = TypeControllerFullIT.class.getSimpleName();
 
   @Autowired
   private ITypeService typeService;
@@ -207,6 +207,49 @@ public class TypeControllerFullIT extends AbstractControllerFullIT {
     final HttpHeaders headers = getHeaders();
 
     final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Object> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for
+   * {@link TypeController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllTypesPaginated() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<TypeDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, TypeDto[].class);
+
+    final TypeDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DISPLAYNAME.equals(a.getName())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link TypeController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllTypesPaginatedNoAuthorization() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders();
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<Object> responseEntity =

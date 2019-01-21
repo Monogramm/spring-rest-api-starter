@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%style{%d{ISO8601}}{black} [%style{%t}{bright,blue}] %highlight{%-5level } %style{%logger{36}.%M:%L}{yellow}: %msg%n%throwable" />
+        </Console>
+        <RollingFile name="RollingFile" fileName="logs/app.log"
+            filePattern="logs/app.%d{yyyy-MM-dd}.%i.log.gz" ignoreExceptions="false">
+            <PatternLayout
+                pattern="%d{ISO8601} [%t] %-5level %logger{36}.%M:%L: %msg%n%throwable" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="500 KB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="logs/app.*.log.gz" />
+                    <IfLastModified age="20d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- LOG everything at WARN level -->
+        <Root level="warn">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+
+        <!-- LOG "com.monogramm*" at INFO level -->
+        <Logger name="com.monogramm" level="info"></Logger>
+
+        <!-- LOG some useful directories at WARN level -->
+        <Logger name="org.hibernate" level="warn"></Logger>
+        <Logger name="org.springframework.web" level="warn"></Logger>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder"
+            level="warn"></Logger>
+    </Loggers>
+</Configuration>

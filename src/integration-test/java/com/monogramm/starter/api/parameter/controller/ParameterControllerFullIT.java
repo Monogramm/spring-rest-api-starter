@@ -22,12 +22,12 @@ import com.monogramm.starter.persistence.user.entity.User;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
@@ -62,16 +62,16 @@ public class ParameterControllerFullIT extends AbstractControllerFullIT {
   /**
    * Logger for {@link ParameterControllerFullIT}.
    */
-  private static final Logger LOG = LogManager.getLogger(ParameterControllerFullIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ParameterControllerFullIT.class);
 
   /**
    * The managed parameter of this tested controller.
    */
-  public static final String TYPE = "Parameters";
+  public static final String TYPE = ParameterController.TYPE;
   /**
    * The request base path of this tested controller.
    */
-  public static final String CONTROLLER_PATH = '/' + TYPE;
+  public static final String CONTROLLER_PATH = ParameterController.CONTROLLER_PATH;
 
   protected static final String DUMMY_NAME = "Foo";
   protected static final Object DUMMY_VALUE = 42;
@@ -212,6 +212,49 @@ public class ParameterControllerFullIT extends AbstractControllerFullIT {
     final HttpHeaders headers = getHeaders();
 
     final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Object> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+
+    assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for
+   * {@link ParameterController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllParametersPaginated() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.accessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<ParameterDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, ParameterDto[].class);
+
+    final ParameterDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DUMMY_NAME.equals(a.getName())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link ParameterController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllParametersPaginatedNoAuthorization() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders();
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<Object> responseEntity =
