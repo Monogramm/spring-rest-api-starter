@@ -1,10 +1,11 @@
 FROM openjdk:8-jre-alpine
 
+# Expected JAR file path as argument
+ARG JAR_FILE
 
 # Application configuration
-ENV VERSION 0.5.0-SNAPSHOT
 ENV APP_CONFIG /srv/app/config/application.properties
-ENV APP_SERVER_CONTEXT_PATH /spring-rest-api-starter/api
+ENV APP_SERVER_CONTEXT_PATH /api
 ENV APP_SERVER_PORT 8080
 
 ENV APP_DOMAIN_NAME company.com
@@ -46,7 +47,16 @@ RUN set -ex; \
 	mkdir -p /srv/app/logs; \
 	mkdir -p /srv/app/keys; \
 	mkdir -p /srv/app/config;
-COPY target/spring-rest-api-starter-$VERSION.jar /srv/app/spring-rest-api-starter.jar
+
+
+# Copy expected JAR file in container
+COPY ${JAR_FILE} /srv/app/app.jar
+
+
+# Copy entrypoint
+COPY docker-entrypoint.sh /entrypoint.sh
+RUN set -ex; \
+	chmod 755 /entrypoint.sh;
 
 
 EXPOSE 8080 8443
@@ -58,14 +68,8 @@ VOLUME /srv/app/data
 
 WORKDIR /srv/app/
 
-
-# Copy entrypoint
-COPY docker-entrypoint.sh /entrypoint.sh
-RUN set -ex; \
-	chmod 755 /entrypoint.sh;
-
 # Healthcheck
 HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT$APP_SERVER_CONTEXT_PATH/health 2>&1 | grep UP
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["java -jar spring-rest-api-starter.jar"]
+CMD ["java", "-jar", "app.jar"]

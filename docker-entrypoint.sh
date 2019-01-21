@@ -1,5 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 set -e
+
+echo "Application Docker entrypoint initialization..."
 
 # If no config provided in volume, setup a default config from environment variables
 if [ ! -f $APP_CONFIG ]; then
@@ -140,6 +142,9 @@ if [ ! -f $APP_CONFIG ]; then
 	#echo "# if set, create groups on ldap server under ldap.group.base" >>  $APP_CONFIG
 	#echo "ldap.group.object.class=${LDAP_GROUP_CLASS}" >>  $APP_CONFIG
 
+	echo "Application configuration generated."
+else
+	echo "Application configuration found."
 fi
 
 echo "Launching application..."

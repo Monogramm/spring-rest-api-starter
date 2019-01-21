@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -66,6 +67,7 @@
 		<!-- General properties -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dependency.locations.enabled>false</dependency.locations.enabled>
+		<docker.image.prefix>monogramm</docker.image.prefix>
 
 		<java.version>1.8</java.version>
 
@@ -74,6 +76,7 @@
 		<commons-lang.version>2.2</commons-lang.version>
 		<commons-io.version>2.3</commons-io.version>
 		<spring-security-oauth.version>2.2.1.RELEASE</spring-security-oauth.version>
+		<dockerfile.version>1.4.10</dockerfile.version>
 
 		<!-- Test & Verify properties -->
 		<greenmail.version>1.5.9</greenmail.version>
@@ -326,6 +329,18 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<executable>true</executable>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile.version}</version>
+				<configuration>
+					<repository>${docker.image.prefix}/${project.artifactId}</repository>
+					<buildArgs>
+						<JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
 				</configuration>
 			</plugin>
 
