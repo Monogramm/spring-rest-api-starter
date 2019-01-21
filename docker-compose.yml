@@ -24,6 +24,7 @@ services:
       - backend_db
     volumes:
       - /srv/spring_rest_api_starter/back/logs:/srv/app/logs
+      - /srv/spring_rest_api_starter/back/keys:/srv/app/keys
       - /srv/spring_rest_api_starter/back/config:/srv/app/config
     environment:
       # Application configuration
