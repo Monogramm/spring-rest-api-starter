@@ -39,14 +39,17 @@ ENV MAIL_USER USERNAME@company.com
 ENV MAIL_PASSWORD PASSWORD
 ENV MAIL_STARTTLS true
 
-# Copy application
+# Setup application folders and tools
 RUN set -ex; \
 	mkdir -p /srv/app; \
 	chmod 755 /srv/app; \
 	mkdir -p /srv/app/data; \
 	mkdir -p /srv/app/logs; \
 	mkdir -p /srv/app/keys; \
-	mkdir -p /srv/app/config;
+	mkdir -p /srv/app/config; \
+	# install openssl
+	apk add --update openssl && \
+    rm -rf /var/cache/apk/*
 
 VOLUME /srv/app/config
 VOLUME /srv/app/keys

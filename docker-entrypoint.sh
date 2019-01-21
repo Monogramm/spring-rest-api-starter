@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "Application Docker entrypoint initialization..."
+echo "Application entrypoint initialization..."
 
 # If no config provided in volume, setup a default config from environment variables
 if [ ! -f $APP_CONFIG ]; then
@@ -28,14 +28,9 @@ if [ ! -f $APP_CONFIG ]; then
 		mkdir -p /srv/app/keys
 
 		echo "Generating Java Key Store for signing access tokens..."
-		keytool -genkeypair -alias $APP_VERIFIER_KEY_ALIAS \
-			-dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" \
-			-keyalg RSA -keypass $APP_VERIFIER_KEY_PASS -keystore /srv/app/keys/private.jks \
-			-storepass $APP_VERIFIER_KEY_PASS
+		keytool -genkeypair -alias $APP_VERIFIER_KEY_ALIAS -dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keyalg RSA -keypass $APP_VERIFIER_KEY_PASS -keystore /srv/app/keys/private.jks -storepass $APP_VERIFIER_KEY_PASS
 
-		keytool -importkeystore \
-			-srckeystore /srv/app/keys/private.jks \
-			-destkeystore /srv/app/keys/private.jks -deststoretype pkcs12
+		keytool -importkeystore -srckeystore /srv/app/keys/private.jks -destkeystore /srv/app/keys/private.jks -deststoretype pkcs12
 		echo "JKS generated in /srv/app/keys/"
 
 		keytool -list -rfc --keystore /srv/app/keys/private.jks | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
