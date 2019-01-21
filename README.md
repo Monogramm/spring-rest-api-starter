@@ -67,7 +67,7 @@ A Dockerfile and docker-compose template are available at the root of this proje
 After building the project, the docker image can be created:
 ```
 mvn clean install
-docker build -t "monogramm/docker-spring-rest-api-starter" "."
+docker build --build-arg=target/*.jar -t "monogramm/docker-spring-rest-api-starter" "."
 ```
 
 ### Tools
