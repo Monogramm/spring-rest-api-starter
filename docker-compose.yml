@@ -42,3 +42,5 @@ services:
       - MAIL_USER=spring_rest_api_starter@company.com
       - MAIL_PASSWORD=spring_rest_api_starter_password
       - MAIL_STARTTLS=true
+
+# You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS

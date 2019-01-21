@@ -59,6 +59,7 @@ COPY ${JAR_FILE} /srv/app/app.jar
 
 WORKDIR /srv/app/
 
+
 EXPOSE 8080 8443
 
 # Healthcheck
