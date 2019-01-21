@@ -36,6 +36,7 @@ if [ ! -f $APP_CONFIG ]; then
 		keytool -list -rfc --keystore /srv/app/keys/private.jks | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
 		echo "Public key extracted in /srv/app/keys/"
 
+		echo "# Access token verifier key" >>  $APP_CONFIG
 		echo "application.security.public-key-path=/srv/app/keys/public.txt" >>  $APP_CONFIG
 		echo "application.security.private-key-path=/srv/app/keys/private.jks" >>  $APP_CONFIG
 		echo "application.security.private-key-password=$APP_VERIFIER_KEY_PASS" >>  $APP_CONFIG
