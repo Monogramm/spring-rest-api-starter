@@ -111,8 +111,8 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "spring.mail.port=${MAIL_PORT}" >>  $APP_CONFIG
 	echo "spring.mail.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
 	echo "spring.mail.properties.mail.transport.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
-	echo "spring.mail.username=${SMTP_USER_NAME}" >>  $APP_CONFIG
-	echo "spring.mail.password=${SMTP_PASSWORD}" >>  $APP_CONFIG
+	echo "spring.mail.username=${MAIL_USER}" >>  $APP_CONFIG
+	echo "spring.mail.password=${MAIL_PASSWORD}" >>  $APP_CONFIG
 	echo "spring.mail.properties.mail.smtps.starttls.enable=${MAIL_STARTTLS}" >>  $APP_CONFIG
 
 
