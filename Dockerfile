@@ -13,7 +13,7 @@ ENV APP_DOMAIN_NAME company.com
 ENV APP_ADMIN_PASSWORD youshouldoverwritethiswithsomethingelse
 
 ENV APP_SIGNING_KEY youshouldoverwritethiswithsomethingelse
-ENV APP_VERIFIER_KEY_PASS youshouldoverwritethiswithsomethingelse
+ENV APP_VERIFIER_KEY_PASS ''
 ENV APP_VERIFIER_KEY_ALIAS spring_rest_api_starter_key
 
 ENV APP_DEMO_DATA false
