@@ -29,7 +29,7 @@ if [ ! -f $APP_CONFIG ]; then
 
 		echo "Generating Java Key Store for signing access tokens..."
 		keytool -genkeypair -alias $APP_VERIFIER_KEY_ALIAS \
-			-dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=GB" \
+			-dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" \
 			-keyalg RSA -keypass $APP_VERIFIER_KEY_PASS -keystore /srv/app/keys/private.jks \
 			-storepass $APP_VERIFIER_KEY_PASS
 

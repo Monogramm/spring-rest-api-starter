@@ -17,7 +17,7 @@ install:
   # If you provide access to repository
   #- mvn dockerfile:build
   - docker build --build-arg=target/*.jar -t "$image" "$dir"
-  - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2
+  - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
   - docker logs "$name"
   - docker logs "$name" | grep "Launching application..."
   - docker stop "$name"
