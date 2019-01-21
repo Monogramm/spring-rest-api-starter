@@ -30,9 +30,12 @@ dependencies {
     // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    // Use MySQL Connector-J
-    compile 'mysql:mysql-connector-java'
+    // Use H2 connector
+    compile 'com.h2database:h2'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
+configurations.all {
+    exclude module: 'spring-boot-starter-logging'
+}
