@@ -48,28 +48,27 @@ RUN set -ex; \
 	mkdir -p /srv/app/keys; \
 	mkdir -p /srv/app/config;
 
+VOLUME /srv/app/config
+VOLUME /srv/app/keys
+VOLUME /srv/app/logs
+VOLUME /srv/app/data
+
 
 # Copy expected JAR file in container
 COPY ${JAR_FILE} /srv/app/app.jar
+
+WORKDIR /srv/app/
+
+EXPOSE 8080 8443
+
+# Healthcheck
+HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT$APP_SERVER_CONTEXT_PATH/health 2>&1 | grep UP
 
 
 # Copy entrypoint
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN set -ex; \
 	chmod 755 /entrypoint.sh;
-
-
-EXPOSE 8080 8443
-
-VOLUME /srv/app/config
-VOLUME /srv/app/keys
-VOLUME /srv/app/logs
-VOLUME /srv/app/data
-
-WORKDIR /srv/app/
-
-# Healthcheck
-HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT$APP_SERVER_CONTEXT_PATH/health 2>&1 | grep UP
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
