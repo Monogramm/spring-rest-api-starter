@@ -10,6 +10,7 @@ import com.monogramm.starter.api.permission.controller.PermissionController;
 import com.monogramm.starter.api.role.controller.RoleController;
 import com.monogramm.starter.api.type.controller.TypeController;
 import com.monogramm.starter.api.user.controller.UserController;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.service.IParameterService;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.service.IPermissionService;
@@ -187,10 +188,13 @@ public class InitialDataLoader extends AbstractDataLoader {
   }
 
   private boolean initDefaultParameters() {
-    // XXX Create a parameter containing the application version
-    // TODO Create a parameter to disable user registration at will
+    // XXX Create a parameter containing the application version?
 
-    return true;
+    // Parameter to disable user registration at will
+    final Parameter regsitrationEnabled =
+        this.createParameter(UserController.REGISTRATION_ENABLED, Boolean.TRUE);
+
+    return regsitrationEnabled != null;
   }
 
   private boolean initDefaultUsers() {

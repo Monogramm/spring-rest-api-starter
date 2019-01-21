@@ -21,6 +21,8 @@ import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.parameter.service.IParameterService;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 import com.monogramm.starter.persistence.user.entity.User;
@@ -67,6 +69,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   private char[] password;
 
+  private IParameterService parameterService;
   private IVerificationTokenService verificationService;
   private IPasswordResetTokenService passwordResetTokenService;
 
@@ -81,6 +84,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void setUp() throws Exception {
     password = PASSWORD.clone();
 
+    parameterService = mock(IParameterService.class);
+    assertNotNull(parameterService);
     verificationService = mock(IVerificationTokenService.class);
     assertNotNull(verificationService);
     passwordResetTokenService = mock(IPasswordResetTokenService.class);
@@ -104,6 +109,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
     this.password = null;
 
+    Mockito.reset(parameterService);
     Mockito.reset(verificationService);
     Mockito.reset(passwordResetTokenService);
 
@@ -135,7 +141,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   @Override
   protected AbstractGenericController<User, UserDto> buildTestController() {
     return new UserController(getMessageSource(), getEventPublisher(), getMockService(),
-        verificationService, passwordResetTokenService);
+        parameterService, verificationService, passwordResetTokenService);
   }
 
   @Override
@@ -862,6 +868,26 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     verify(getMockService(), times(1)).findByEmail(model.getEmail());
     verify(getMockService(), times(1)).update(user);
     verifyNoMoreInteractions(getMockService());
+  }
+
+  /**
+   * Test method for {@link UserController#register(RegisterRequest)}.
+   * 
+   * @throws EntityNotFoundException if a default entity associated to a new user account is not
+   *         found.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void testRegisterDisabled() {
+    final RegistrationDto model = new RegistrationDto();
+    model.setUsername(USERNAME);
+    model.setEmail(EMAIL);
+    model.setPassword(PASSWORD);
+    model.setMatchingPassword(PASSWORD);
+
+    when(parameterService.findByName(UserController.REGISTRATION_ENABLED))
+        .thenReturn(Parameter.builder(UserController.REGISTRATION_ENABLED, Boolean.FALSE).build());
+
+    getController().register(model, request);
   }
 
   /**
