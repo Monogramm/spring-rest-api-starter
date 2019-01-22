@@ -90,7 +90,11 @@ if [ ! -f $APP_CONFIG ]; then
 	fi
 
 	if [ ! -z $DB_HOST ]; then
-		echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
+		if [ ${DB_PLATFORM} = 'mysql' ]; then
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull" >>  $APP_CONFIG
+		else
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
+		fi
 	elif [ ${DB_PLATFORM} = 'h2' ]; then
 		mkdir -p /srv/app/data/h2
 
