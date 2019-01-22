@@ -59,6 +59,8 @@ if [ ! -f $APP_CONFIG ]; then
 		echo "spring.datasource.driver-class-name=${DB_DRIVER}" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'h2' ]; then
 		echo "spring.datasource.driver-class-name=org.h2.Driver" >>  $APP_CONFIG
+	elif [ ${DB_PLATFORM} = 'mariadb' ]; then
+		echo "spring.datasource.driver-class-name=org.mariadb.jdbc.Driver" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'mysql' ]; then
 		echo "spring.datasource.driver-class-name=com.mysql.jdbc.Driver" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'postgresql' ]; then
@@ -69,6 +71,8 @@ if [ ! -f $APP_CONFIG ]; then
 		echo "spring.jpa.properties.hibernate.dialect=${DB_DIALECT}" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'h2' ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.h2.Driver" >>  $APP_CONFIG
+	elif [ ${DB_PLATFORM} = 'mariadb' ]; then
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB53Dialect" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'mysql' ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'postgresql' ]; then
@@ -77,12 +81,16 @@ if [ ! -f $APP_CONFIG ]; then
 
 	if [ ! -z $DB_STORAGE ]; then
 		echo "spring.jpa.properties.hibernate.dialect.storage_engine=${DB_STORAGE}" >>  $APP_CONFIG
+	elif [ ${DB_PLATFORM} = 'mariadb' ]; then
+		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'mysql' ]; then
 		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >>  $APP_CONFIG
 	fi
 
 	if [ -z $DB_PORT ]; then
-		if [ ${DB_PLATFORM} = 'mysql' ]; then
+		if [ ${DB_PLATFORM} = 'mariadb' ]; then
+			DB_PORT=3306
+		elif [ ${DB_PLATFORM} = 'mysql' ]; then
 			DB_PORT=3306
 		elif [ ${DB_PLATFORM} = 'postgresql' ]; then
 			DB_PORT=5432
@@ -90,8 +98,10 @@ if [ ! -f $APP_CONFIG ]; then
 	fi
 
 	if [ ! -z $DB_HOST ]; then
-		if [ ${DB_PLATFORM} = 'mysql' ]; then
+		if [ ${DB_PLATFORM} = 'mariadb' ]; then
 			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull" >>  $APP_CONFIG
+		elif [ ${DB_PLATFORM} = 'mysql' ]; then
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull&verifyServerCertificate=false&useSSL=false" >>  $APP_CONFIG
 		else
 			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
 		fi
@@ -100,6 +110,8 @@ if [ ! -f $APP_CONFIG ]; then
 
 		echo "In memory H2 database will be stored in /srv/app/data/h2"
 		echo "spring.datasource.url=jdbc:h2:file:/srv/app/data/h2/${DB_NAME}" >>  $APP_CONFIG
+	else
+		echo "spring.datasource.url=jdbc:${DB_PLATFORM}://localhost:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
 	fi
 
 	echo "spring.datasource.username=${DB_USER}" >>  $APP_CONFIG
@@ -111,11 +123,13 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "# ~~~~~" >>  $APP_CONFIG
 	echo "spring.mail.host=${MAIL_HOST}" >>  $APP_CONFIG
 	echo "spring.mail.port=${MAIL_PORT}" >>  $APP_CONFIG
-	echo "spring.mail.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
-	echo "spring.mail.properties.mail.transport.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
 	echo "spring.mail.username=${MAIL_USER}" >>  $APP_CONFIG
 	echo "spring.mail.password=${MAIL_PASSWORD}" >>  $APP_CONFIG
-	echo "spring.mail.properties.mail.smtps.starttls.enable=${MAIL_STARTTLS}" >>  $APP_CONFIG
+	echo "spring.mail.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.transport.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.smtp.auth=true" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.smtp.ssl.enable=${MAIL_SSL}" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.smtp.starttls.enable=${MAIL_STARTTLS}" >>  $APP_CONFIG
 
 
 	# Coming features

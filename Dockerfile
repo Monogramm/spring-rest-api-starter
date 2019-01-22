@@ -37,7 +37,8 @@ ENV MAIL_PORT 465
 ENV MAIL_PROTOCOL smtps
 ENV MAIL_USER USERNAME@company.com
 ENV MAIL_PASSWORD PASSWORD
-ENV MAIL_STARTTLS true
+ENV MAIL_SSL true
+ENV MAIL_STARTTLS false
 
 # Setup application folders and tools
 RUN set -ex; \
@@ -72,9 +73,9 @@ HEALTHCHECK CMD curl -v --silent http://localhost:$APP_SERVER_PORT$APP_SERVER_CO
 
 
 # Copy entrypoint
-COPY docker-entrypoint.sh entrypoint.sh
+COPY docker-entrypoint.sh /entrypoint.sh
 RUN set -ex; \
-	chmod 755 entrypoint.sh
+	chmod 755 /entrypoint.sh
 
-ENTRYPOINT ["sh", "entrypoint.sh"]
+ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
