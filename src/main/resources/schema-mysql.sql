@@ -79,8 +79,8 @@ CREATE TABLE IF NOT EXISTS oauth_approvals (
     clientId VARCHAR(255),
     scope VARCHAR(255),
     status VARCHAR(10),
-    expiresAt TIMESTAMP,
-    lastModifiedAt TIMESTAMP
+    expiresAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    lastModifiedAt TIMESTAMP NULL DEFAULT NULL
 );
 
 -- -----------------------------------------------------
