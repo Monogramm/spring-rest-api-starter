@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.user.entity.User;
 
@@ -198,6 +199,7 @@ public class UserDto extends AbstractGenericDto {
    * 
    * @return the {@link #roleName}.
    */
+  @JsonIgnore
   public String getRoleName() {
     return roleName;
   }
