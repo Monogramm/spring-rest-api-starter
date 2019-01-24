@@ -8,7 +8,7 @@ import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 
 /**
- * PageNotFoundException.
+ * <em>"Page not found"</em> Exception.
  * 
  * @see AbstractGenericController#getAllDataPaginated(int, int,
  *      org.springframework.web.context.request.WebRequest,

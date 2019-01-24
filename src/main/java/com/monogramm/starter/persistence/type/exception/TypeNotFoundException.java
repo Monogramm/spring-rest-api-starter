@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.type.exception;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 
 /**
- * TypeNotFoundException.
+ * <em>"{@link Type}  not found"</em> Exception.
  * 
  * @author madmath03
  */

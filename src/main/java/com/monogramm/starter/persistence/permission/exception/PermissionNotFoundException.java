@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.permission.exception;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 
 /**
- * PermissionNotFoundException.
+ * <em>"{@link Permission}  not found"</em> Exception.
  * 
  * @author madmath03
  */

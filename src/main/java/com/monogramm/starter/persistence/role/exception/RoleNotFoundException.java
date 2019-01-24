@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.role.exception;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 
 /**
- * RoleNotFoundException.
+ * <em>"{@link Role}  not found"</em> Exception.
  * 
  * @author madmath03
  */

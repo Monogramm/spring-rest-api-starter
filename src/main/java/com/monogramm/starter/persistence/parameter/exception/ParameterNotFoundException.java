@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.parameter.exception;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 
 /**
- * ParameterNotFoundException.
+ * <em>"{@link Parameter}  not found"</em> Exception.
  * 
  * @author madmath03
  */
