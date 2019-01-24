@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.madmath03.password.Passwords;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.persistence.AbstractToken;
+import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.role.entity.Role;
@@ -219,6 +220,26 @@ public class User extends AbstractGenericEntity {
   @JsonIgnore
   @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
   private final Set<Parameter> ownedParameters = new HashSet<>();
+
+
+  /**
+   * Medias created by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = CREATED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Media> createdMedias = new HashSet<>();
+  /**
+   * Medias modified by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = MODIFIED_BY_FIELD, fetch = FetchType.LAZY)
+  private final Set<Media> modifiedMedias = new HashSet<>();
+  /**
+   * Medias owned by this user.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = OWNER_FIELD, fetch = FetchType.LAZY)
+  private final Set<Media> ownedMedias = new HashSet<>();
 
 
   /**
@@ -531,6 +552,9 @@ public class User extends AbstractGenericEntity {
 
     // Set to null references to this user
     resetRelationships(createdParameters, modifiedParameters, ownedParameters);
+
+    // Set to null references to this user
+    resetRelationships(createdMedias, modifiedMedias, ownedMedias);
 
     // Set to null references to this user
     resetRelationships(createdPasswordResetTokens, modifiedPasswordResetTokens,
