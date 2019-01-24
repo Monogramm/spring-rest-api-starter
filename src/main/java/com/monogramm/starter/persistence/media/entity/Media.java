@@ -56,11 +56,24 @@ public class Media extends AbstractGenericEntity {
    * Get a new {@link MediaBuilder}.
    * 
    * @param name the name of your record being built.
+   * @param path the path of your record being built.
    *
    * @return a new {@link MediaBuilder}.
    */
-  public static MediaBuilder builder(final String name) {
-    return new MediaBuilder(name);
+  public static MediaBuilder builder(final String name, final String path) {
+    return new MediaBuilder(name, path);
+  }
+
+  /**
+   * Get a new {@link MediaBuilder}.
+   * 
+   * @param name the name of your record being built.
+   * @param path the path of your record being built.
+   *
+   * @return a new {@link MediaBuilder}.
+   */
+  public static MediaBuilder builder(final String name, final Path path) {
+    return new MediaBuilder(name, path);
   }
 
 
@@ -320,10 +333,24 @@ public class Media extends AbstractGenericEntity {
      * Create a {@link MediaBuilder}.
      * 
      * @param name the name of your record being built.
+     * @param path the path of your record being built.
      */
-    private MediaBuilder(final String name) {
+    private MediaBuilder(final String name, final String path) {
       this();
       this.name(name);
+      this.path(path);
+    }
+
+    /**
+     * Create a {@link MediaBuilder}.
+     * 
+     * @param name the name of your record being built.
+     * @param path the path of your record being built.
+     */
+    private MediaBuilder(final String name, final Path path) {
+      this();
+      this.name(name);
+      this.path(path);
     }
 
     @Override

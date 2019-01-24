@@ -35,8 +35,8 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
     return Media.builder().build();
   }
 
-  protected Media buildTestEntity(final String name) {
-    return Media.builder(name).build();
+  protected Media buildTestEntity(final String name, final String path) {
+    return Media.builder(name, path).build();
   }
 
   @Override
@@ -299,7 +299,7 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
    */
   @Test
   public void testUpdateName() {
-    final Media anotherEntity = this.buildTestEntity(DISPLAYNAME);
+    final Media anotherEntity = this.buildTestEntity(DISPLAYNAME, PATH);
 
     this.getEntity().update(anotherEntity);
 

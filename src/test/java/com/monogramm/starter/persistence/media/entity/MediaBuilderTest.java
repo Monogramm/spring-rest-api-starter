@@ -25,6 +25,7 @@ import org.junit.Test;
 public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.MediaBuilder> {
 
   private static final String DISPLAYNAME = "TEST";
+  private static final String PATH = "TEST/MYFILE.TXT";
 
   @Override
   protected MediaBuilder buildTestEntityBuilder() {
@@ -50,7 +51,7 @@ public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.Med
    */
   @Test
   public void testGetBuilderString() {
-    Media.MediaBuilder builder = Media.builder(DISPLAYNAME);
+    Media.MediaBuilder builder = Media.builder(DISPLAYNAME, PATH);
 
     assertNotNull(builder);
 

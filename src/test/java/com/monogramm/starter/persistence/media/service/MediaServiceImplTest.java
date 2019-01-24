@@ -42,6 +42,7 @@ public class MediaServiceImplTest
     extends AbstractGenericServiceTest<Media, MediaDto, MediaServiceImpl> {
 
   private static final String DISPLAYNAME = MediaServiceImplTest.class.getSimpleName();
+  private static final String PATH = "TEST/MYFILE.TXT";
 
   /**
    * @throws java.lang.Exception if the test setup crashes.
@@ -77,7 +78,7 @@ public class MediaServiceImplTest
 
   @Override
   protected Media buildTestEntity() {
-    return Media.builder(DISPLAYNAME).id(ID).build();
+    return Media.builder(DISPLAYNAME, PATH).id(ID).build();
   }
 
   @Override
