@@ -78,7 +78,7 @@ public class ITypeRepositoryIT extends AbstractGenericRepositoryIT<Type, ITypeRe
   public void testFindByNameIgnoreCase() {
     final Type model = this.buildTestEntity();
     model.setName(model.getName().toUpperCase());
-    getRepository().add(model);
+    addTestEntity(model);
 
     final Type actual = getRepository().findByNameIgnoreCase(DISPLAYNAME);
 
@@ -102,8 +102,8 @@ public class ITypeRepositoryIT extends AbstractGenericRepositoryIT<Type, ITypeRe
    */
   @Test
   public void testFindByNameIgnoreCaseNonUnique() {
-    getRepository().add(Type.builder(DISPLAYNAME + "1").build());
-    getRepository().add(Type.builder(DISPLAYNAME + "2").build());
+    addTestEntity(Type.builder(DISPLAYNAME + "1").build());
+    addTestEntity(Type.builder(DISPLAYNAME + "2").build());
 
     assertNull(getRepository().findByNameIgnoreCase(DISPLAYNAME));
   }

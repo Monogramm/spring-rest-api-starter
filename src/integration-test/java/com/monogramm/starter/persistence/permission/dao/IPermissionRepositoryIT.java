@@ -80,7 +80,7 @@ public class IPermissionRepositoryIT
   public void testFindByNameIgnoreCase() {
     final Permission model = this.buildTestEntity();
     model.setName(model.getName().toUpperCase());
-    getRepository().add(model);
+    addTestEntity(model);
 
     final Permission actual = getRepository().findByNameIgnoreCase(DISPLAYNAME);
 
@@ -104,8 +104,8 @@ public class IPermissionRepositoryIT
    */
   @Test
   public void testFindByNameIgnoreCaseNonUnique() {
-    getRepository().add(Permission.builder(DISPLAYNAME + "1").build());
-    getRepository().add(Permission.builder(DISPLAYNAME + "2").build());
+    addTestEntity(Permission.builder(DISPLAYNAME + "1").build());
+    addTestEntity(Permission.builder(DISPLAYNAME + "2").build());
 
     assertNull(getRepository().findByNameIgnoreCase(DISPLAYNAME));
   }

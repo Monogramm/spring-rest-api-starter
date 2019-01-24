@@ -56,7 +56,7 @@ public class IPasswordResetTokenRepositoryIT
   @Test
   public void testFindByUserAndToken() {
     final PasswordResetToken model = this.buildTestEntity();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final PasswordResetToken actual =
         getRepository().findByUserAndCode(owner.getId(), model.getCode());

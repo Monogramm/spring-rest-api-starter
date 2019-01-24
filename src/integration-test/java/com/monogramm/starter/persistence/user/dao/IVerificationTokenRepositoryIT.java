@@ -56,7 +56,7 @@ public class IVerificationTokenRepositoryIT
   @Test
   public void testFindByUserAndToken() {
     final VerificationToken model = this.buildTestEntity();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final VerificationToken actual =
         getRepository().findByUserAndCode(owner.getId(), model.getCode());

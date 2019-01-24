@@ -59,7 +59,7 @@ public class IParameterRepositoryIT
   public void testFindByNameIgnoreCase() {
     final Parameter model = this.buildTestEntity();
     model.setName(model.getName().toUpperCase());
-    getRepository().add(model);
+    addTestEntity(model);
 
     final Parameter actual = getRepository().findByNameIgnoreCase(DUMMY_NAME);
 

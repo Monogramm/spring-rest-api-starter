@@ -118,7 +118,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testFindByUsernameIgnoreCase() {
     final User model = User.builder(USERNAME.toUpperCase(), EMAIL.toUpperCase()).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().findByUsernameIgnoreCase(USERNAME);
 
@@ -142,8 +142,8 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
    */
   @Test
   public void testFindByUsernameIgnoreCaseNonUnique() {
-    getRepository().add(User.builder(USERNAME + "1", EMAIL + "1").build());
-    getRepository().add(User.builder(USERNAME + "2", EMAIL + "2").build());
+    addTestEntity(User.builder(USERNAME + "1", EMAIL + "1").build());
+    addTestEntity(User.builder(USERNAME + "2", EMAIL + "2").build());
 
     assertNull(getRepository().findByUsernameIgnoreCase(USERNAME));
   }
@@ -166,7 +166,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testFindByEmailIgnoreCase() {
     final User model = User.builder(USERNAME.toUpperCase(), EMAIL.toUpperCase()).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().findByEmailIgnoreCase(EMAIL);
 
@@ -190,8 +190,8 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
    */
   @Test
   public void testFindByEmailIgnoreCaseNonUnique() {
-    getRepository().add(User.builder(USERNAME + "1", EMAIL + "1").build());
-    getRepository().add(User.builder(USERNAME + "2", EMAIL + "2").build());
+    addTestEntity(User.builder(USERNAME + "1", EMAIL + "1").build());
+    addTestEntity(User.builder(USERNAME + "2", EMAIL + "2").build());
 
     assertNull(getRepository().findByEmailIgnoreCase(EMAIL));
   }
@@ -215,7 +215,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testFindByUsernameOrEmailIgnoreCase() {
     final User model = User.builder(USERNAME.toUpperCase(), EMAIL.toUpperCase()).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().findByUsernameOrEmailIgnoreCase(USERNAME, EMAIL);
 
@@ -241,8 +241,8 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
    */
   @Test
   public void testFindByUsernameOrEmailIgnoreCaseNonUnique() {
-    getRepository().add(User.builder(USERNAME + "1", EMAIL + "1").build());
-    getRepository().add(User.builder(USERNAME + "2", EMAIL + "2").build());
+    addTestEntity(User.builder(USERNAME + "1", EMAIL + "1").build());
+    addTestEntity(User.builder(USERNAME + "2", EMAIL + "2").build());
 
 
     getRepository().findByUsernameOrEmailIgnoreCase(USERNAME, EMAIL);
@@ -271,7 +271,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testSetPassword() {
     final User model = User.builder(USERNAME, EMAIL).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().setPassword(model.getId(), testPassword);
 
@@ -293,7 +293,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testSetPasswordByOwner() {
     final User model = User.builder(USERNAME, EMAIL).owner(owner).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().setPasswordByOwner(model.getId(), testPassword, owner);
 
@@ -316,7 +316,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testSetEnabled() {
     final User model = User.builder(USERNAME, EMAIL).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().setEnabled(model.getId(), false);
 
@@ -338,7 +338,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testSetEnabledByOwner() {
     final User model = User.builder(USERNAME, EMAIL).owner(owner).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().setEnabledByOwner(model.getId(), false, owner);
 
@@ -361,7 +361,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testSetVerified() {
     final User model = User.builder(USERNAME, EMAIL).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().setVerified(model.getId(), false);
 
@@ -383,7 +383,7 @@ public class IUserRepositoryIT extends AbstractGenericRepositoryIT<User, IUserRe
   @Test
   public void testSetVerifiedByOwner() {
     final User model = User.builder(USERNAME, EMAIL).owner(owner).build();
-    getRepository().add(model);
+    addTestEntity(model);
 
     final User actual = getRepository().setVerifiedByOwner(model.getId(), false, owner);
 

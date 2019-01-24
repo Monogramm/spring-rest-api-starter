@@ -78,7 +78,7 @@ public class IRoleRepositoryIT extends AbstractGenericRepositoryIT<Role, IRoleRe
   public void testFindByNameIgnoreCase() {
     final Role model = this.buildTestEntity();
     model.setName(model.getName().toUpperCase());
-    getRepository().add(model);
+    addTestEntity(model);
 
     final Role actual = getRepository().findByNameIgnoreCase(DISPLAYNAME);
 
@@ -102,8 +102,8 @@ public class IRoleRepositoryIT extends AbstractGenericRepositoryIT<Role, IRoleRe
    */
   @Test
   public void testFindByNameIgnoreCaseNonUnique() {
-    getRepository().add(Role.builder(DISPLAYNAME + "1").build());
-    getRepository().add(Role.builder(DISPLAYNAME + "2").build());
+    addTestEntity(Role.builder(DISPLAYNAME + "1").build());
+    addTestEntity(Role.builder(DISPLAYNAME + "2").build());
 
     assertNull(getRepository().findByNameIgnoreCase(DISPLAYNAME));
   }

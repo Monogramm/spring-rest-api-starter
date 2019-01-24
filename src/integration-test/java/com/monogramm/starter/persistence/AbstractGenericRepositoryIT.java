@@ -72,15 +72,28 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @PersistenceContext
   private EntityManager entityManager;
 
+  private List<T> testEntities;
+
   @Before
   public void setUp() {
     this.owner = User.builder(OWNER_USERNAME, OWNER_EMAIL).build();
     userRepository.add(this.owner);
+
+    testEntities = new ArrayList<>();
   }
 
   @After
   public void tearDown() {
     userRepository.delete(this.owner);
+
+    for (T entity : testEntities) {
+      repository.delete(entity);
+    }
+  }
+
+  protected void addTestEntity(T entity) {
+    repository.add(entity);
+    testEntities.add(entity);
   }
 
   /**
@@ -239,8 +252,8 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
 
     assertNull(updatedModel);
   }
-  
-  
+
+
 
   /**
    * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
@@ -263,7 +276,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
     assertEquals(Integer.valueOf(0), repository.deleteById(RANDOM_ID));
   }
 
-  
+
   /**
    * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
    */
@@ -285,8 +298,8 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testDeleteByIdAndOwnerNotFound() {
     assertEquals(Integer.valueOf(0), repository.deleteByIdAndOwner(RANDOM_ID, null));
   }
-  
-  
+
+
 
   /**
    * Test method for {@link GenericRepository#exists(java.util.UUID)}.
