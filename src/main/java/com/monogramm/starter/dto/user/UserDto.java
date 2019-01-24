@@ -53,6 +53,11 @@ public class UserDto extends AbstractGenericDto {
    */
   private UUID role;
 
+  /**
+   * The user\'s account role display name.
+   */
+  private String roleName;
+
 
   /**
    * Create a {@link UserDto}.
@@ -186,6 +191,24 @@ public class UserDto extends AbstractGenericDto {
    */
   public final void setRole(UUID role) {
     this.role = role;
+  }
+
+  /**
+   * Get the {@link #roleName}.
+   * 
+   * @return the {@link #roleName}.
+   */
+  public String getRoleName() {
+    return roleName;
+  }
+
+  /**
+   * Set the {@link #roleName}.
+   * 
+   * @param roleName the {@link #roleName} to set.
+   */
+  public void setRoleName(String roleName) {
+    this.roleName = roleName;
   }
 
   @Override
