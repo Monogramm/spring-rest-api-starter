@@ -5,7 +5,7 @@
 package com.monogramm.starter.persistence;
 
 /**
- * EntityNotFoundException.
+ * <em>"{@link AbstractGenericEntity} not found"</em> Exception.
  * 
  * @author madmath03
  */
@@ -63,8 +63,8 @@ public abstract class EntityNotFoundException extends RuntimeException {
    * @param enableSuppression whether or not suppression is enabled or disabled
    * @param writableStackTrace whether or not the stack trace should be writable
    */
-  public EntityNotFoundException(String message, Throwable cause,
-      boolean enableSuppression, boolean writableStackTrace) {
+  public EntityNotFoundException(String message, Throwable cause, boolean enableSuppression,
+      boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
 
