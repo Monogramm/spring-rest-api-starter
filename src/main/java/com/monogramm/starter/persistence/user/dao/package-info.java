@@ -1,5 +1,5 @@
 /**
- * The <em>Users</em> DAO.
+ * The <em>Users</em> Data Access Objects.
  * 
  * @author madmath03
  */

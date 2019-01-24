@@ -1,5 +1,5 @@
 /**
- * The <em>Types</em> DAO.
+ * The <em>Types</em> Data Access Objects.
  * 
  * @author madmath03
  */

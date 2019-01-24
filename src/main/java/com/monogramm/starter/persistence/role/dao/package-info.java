@@ -1,5 +1,5 @@
 /**
- * The <em>Roles</em> DAO.
+ * The <em>Roles</em> Data Access Objects.
  * 
  * @author madmath03
  */
