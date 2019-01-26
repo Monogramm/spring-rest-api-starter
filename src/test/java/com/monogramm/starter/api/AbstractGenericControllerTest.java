@@ -245,6 +245,26 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
+   * Get the {@link #mockRequest}.
+   * 
+   * @return the {@link #mockRequest}.
+   */
+  protected WebRequest getMockRequest() {
+    return mockRequest;
+  }
+
+  /**
+   * Get the {@link #mockResponse}.
+   * 
+   * @return the {@link #mockResponse}.
+   */
+  protected HttpServletResponse getMockResponse() {
+    return mockResponse;
+  }
+
+
+
+  /**
    * Test method for {@link AbstractGenericController#getService()}.
    */
   @Test
