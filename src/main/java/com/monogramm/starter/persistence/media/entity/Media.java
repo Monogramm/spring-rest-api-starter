@@ -4,15 +4,19 @@
 
 package com.monogramm.starter.persistence.media.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Media.
@@ -80,7 +84,8 @@ public class Media extends AbstractGenericEntity {
   /**
    * The name of this record.
    */
-  @Column(name = "name", unique = true, nullable = false, length = MAX_LENGTH_DISPLAYNAME)
+  @Column(name = "name", unique = true, nullable = false, updatable = false,
+      length = MAX_LENGTH_DISPLAYNAME)
   private String name = null;
 
   /**
@@ -104,8 +109,13 @@ public class Media extends AbstractGenericEntity {
   /**
    * The path of this record.
    */
-  @Column(name = "path", nullable = false, length = MAX_LENGTH_PATH)
+  @Column(name = "path", nullable = false, updatable = false, length = MAX_LENGTH_PATH)
   private String path = null;
+
+
+  @Transient
+  @JsonIgnore
+  private transient InputStream inputStream;
 
 
   /**
@@ -245,6 +255,24 @@ public class Media extends AbstractGenericEntity {
     this.setPath(path != null ? path.toString() : null);
   }
 
+  /**
+   * Get the {@link #inputStream}.
+   * 
+   * @return the {@link #inputStream}.
+   */
+  public InputStream getInputStream() {
+    return inputStream;
+  }
+
+  /**
+   * Set the {@link #inputStream}.
+   * 
+   * @param inputStream the {@link #inputStream} to set.
+   */
+  public void setInputStream(InputStream inputStream) {
+    this.inputStream = inputStream;
+  }
+
 
   @Override
   public <T extends AbstractGenericEntity> void update(T entity) {
@@ -253,11 +281,10 @@ public class Media extends AbstractGenericEntity {
     if (entity instanceof Media) {
       final Media media = (Media) entity;
 
-      this.setName(media.getName());
+      // Name and path updates are forbidden and will be ignored
       this.setDescription(media.getDescription());
       this.setStartDate(media.getStartDate());
       this.setEndDate(media.getEndDate());
-      this.setPath(media.getPath());
     }
   }
 
@@ -312,6 +339,15 @@ public class Media extends AbstractGenericEntity {
     }
 
     return equals;
+  }
+  
+  @Override
+  protected void preInsert() {
+    super.preInsert();
+
+    // Set the path as 
+    final UUID entityId = this.getId();
+    this.setPath(entityId.toString());
   }
 
   /**

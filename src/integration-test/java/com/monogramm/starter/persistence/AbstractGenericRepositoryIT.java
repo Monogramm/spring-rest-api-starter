@@ -92,7 +92,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   }
 
   protected void addTestEntity(T entity) {
-    repository.add(entity);
+    addTestEntity(entity);
     testEntities.add(entity);
   }
 
@@ -127,7 +127,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @Test
   public void testFindById() {
     final T model = this.buildTestEntity();
-    repository.add(model);
+    addTestEntity(model);
 
     final T actual = repository.findById(model.getId());
 
@@ -141,7 +141,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testAdd() {
     final T model = this.buildTestEntity();
 
-    repository.add(model);
+    addTestEntity(model);
 
     assertNotNull(model.getId());
     assertNotNull(model.getCreatedAt());
@@ -154,7 +154,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @Test
   public void testUpdate() {
     final T model = this.buildTestEntity();
-    repository.add(model);
+    addTestEntity(model);
 
     assertNotNull(model.getId());
     assertNotNull(model.getCreatedAt());
@@ -207,7 +207,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testUpdateByOwner() {
     final T model = this.buildTestEntity();
     model.setOwner(owner);
-    repository.add(model);
+    addTestEntity(model);
 
     assertNotNull(model.getId());
     assertNotNull(model.getCreatedAt());
@@ -261,7 +261,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @Test
   public void testDeleteById() {
     final T model = this.buildTestEntity();
-    repository.add(model);
+    addTestEntity(model);
 
     final Integer deleted = repository.deleteById(model.getId());
 
@@ -284,7 +284,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testDeleteByIdAndOwner() {
     final T model = this.buildTestEntity();
     model.setOwner(owner);
-    repository.add(model);
+    addTestEntity(model);
 
     final Integer deleted = repository.deleteByIdAndOwner(model.getId(), owner);
 

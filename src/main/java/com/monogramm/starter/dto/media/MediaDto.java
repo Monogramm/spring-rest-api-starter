@@ -4,11 +4,14 @@
 
 package com.monogramm.starter.dto.media;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.media.entity.Media;
 
 import java.util.Date;
 import java.util.Objects;
+
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * MediaDto.
@@ -48,6 +51,11 @@ public class MediaDto extends AbstractGenericDto {
    * The path of this record.
    */
   private String path = null;
+
+  /**
+   * The resource content of this record.
+   */
+  private MultipartFile resource = null;
 
 
   /**
@@ -164,6 +172,26 @@ public class MediaDto extends AbstractGenericDto {
    */
   public void setPath(String path) {
     this.path = path;
+  }
+
+
+  /**
+   * Get the {@link #resource}.
+   * 
+   * @return the {@link #resource}.
+   */
+  @JsonIgnore
+  public MultipartFile getResource() {
+    return resource;
+  }
+
+  /**
+   * Set the {@link #resource}.
+   * 
+   * @param resource the {@link #resource} to set.
+   */
+  public void setResource(MultipartFile resource) {
+    this.resource = resource;
   }
 
 

@@ -1,5 +1,7 @@
 package com.monogramm;
 
+import com.monogramm.starter.persistence.media.config.FileStorageProperties;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -8,11 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 
 @SpringBootApplication
+@EnableConfigurationProperties({FileStorageProperties.class})
 public class Application {
 
   /**

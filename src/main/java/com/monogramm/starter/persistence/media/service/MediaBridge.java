@@ -9,7 +9,12 @@ import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
 
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Bridge to convert a {@link MediaDto} to a {@link Media} and vice versa.
@@ -17,6 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author madmath03
  */
 public class MediaBridge extends AbstractGenericBridge<Media, MediaDto> {
+
+  /**
+   * Logger for {@link MediaBridge}.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(MediaBridge.class);
 
   /**
    * Create a {@link MediaBridge}.
@@ -57,7 +67,21 @@ public class MediaBridge extends AbstractGenericBridge<Media, MediaDto> {
   public Media toEntity(final MediaDto dto) {
     final Media entity = super.toEntity(dto);
 
-    entity.setName(dto.getName());
+    final MultipartFile dtoResource = dto.getResource();
+    if (dtoResource != null) {
+      try {
+        entity.setInputStream(dtoResource.getInputStream());
+      } catch (IOException e) {
+        LOG.debug("Could not to get resource content", e);
+        entity.setInputStream(null);
+      }
+    }
+
+    if (dto.getName() == null && dtoResource != null) {
+      entity.setName(dtoResource.getOriginalFilename());
+    } else {
+      entity.setName(dto.getName());
+    }
     entity.setDescription(dto.getDescription());
     entity.setStartDate(dto.getStartDate());
     entity.setEndDate(dto.getEndDate());

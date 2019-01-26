@@ -7,15 +7,22 @@ package com.monogramm.starter.persistence.media.service;
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
+import com.monogramm.starter.persistence.media.config.FileStorageProperties;
 import com.monogramm.starter.persistence.media.dao.MediaRepository;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
+import com.monogramm.starter.persistence.media.exception.MediaStorageException;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.entity.User;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,17 +35,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
     implements MediaService {
 
+  private final Path storageLocation;
+
   /**
    * Create a {@link MediaService}.
    * 
    * @param repository the media repository.
    * @param userRepository the user repository.
    * @param authenticationFacade a facade to retrieve the authentication object.
+   * @param storageProperties storage properties
    */
   @Autowired
   public MediaServiceImpl(MediaRepository repository, IUserRepository userRepository,
-      IAuthenticationFacade authenticationFacade) {
+      IAuthenticationFacade authenticationFacade, final FileStorageProperties storageProperties) {
     super(repository, userRepository, new MediaBridge(userRepository), authenticationFacade);
+
+    this.storageLocation = storageProperties.getUploadDir().toAbsolutePath().normalize();
+
+    try {
+      Files.createDirectories(this.storageLocation);
+    } catch (Exception e) {
+      throw new MediaStorageException(
+          "Could not create the directory where the uploaded files will be stored.", e);
+    }
   }
 
   @Override
@@ -50,6 +69,130 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
   public MediaBridge getBridge() {
     return (MediaBridge) super.getBridge();
   }
+
+
+  /**
+   * Construct a path from storage location for specified entity.
+   * 
+   * <p>
+   * Basically, we use the entity {@code UUID} as the containing folder.
+   * </p>
+   * 
+   * @param entity entity
+   * @param storageLocation storage location
+   * 
+   * @return the entity directory for the storage.
+   * 
+   * @throws NullPointerException if entity or entity UUID is {@code null}
+   */
+  protected static Path getEntityDirectory(final Media entity, final Path storageLocation) {
+    return storageLocation.resolve(entity.getPath()).normalize();
+  }
+
+  /**
+   * Construct a path from storage location for specified entity.
+   * 
+   * <p>
+   * Basically, we use the entity {@code UUID} as the containing folder.
+   * </p>
+   * 
+   * @param entity entity
+   * 
+   * @return the entity directory for the storage.
+   * 
+   * @throws NullPointerException if entity or entity UUID is {@code null}
+   */
+  protected Path getEntityDirectory(final Media entity) {
+    return getEntityDirectory(entity, storageLocation);
+  }
+
+
+  @Override
+  public Resource loadById(UUID entityId) {
+    final Media entity = this.findById(entityId);
+    return loadFromStorage(entity);
+  }
+
+  @Override
+  public Resource loadByIdAndOwner(UUID entityId, User owner) {
+    final Media entity = this.findByIdAndOwner(entityId, owner);
+    return loadFromStorage(entity);
+  }
+
+  private Resource loadFromStorage(final Media entity) {
+    final Resource file;
+
+    if (entity != null) {
+      final Path mediaFolder = this.getEntityDirectory(entity);
+      file = StorageUtils.loadFileAsResource(mediaFolder);
+    } else {
+      file = null;
+    }
+
+    return file;
+  }
+
+
+  @Override
+  @Transactional
+  public boolean add(Media entity) {
+    return addToRepositoryAndStorage(entity, entity.getInputStream());
+  }
+
+  private boolean addToRepositoryAndStorage(Media entity, InputStream inputStream) {
+    final boolean persisted = super.add(entity);
+
+    boolean stored;
+    if (persisted) {
+      final Path mediaFolder = this.getEntityDirectory(entity);
+      stored = StorageUtils.storeFile(entity.getName(), inputStream, mediaFolder) != null;
+      // If storage fails, the exception should trigger the rollback of persistence
+    } else {
+      stored = false;
+    }
+
+    return persisted && stored;
+  }
+
+
+  @Override
+  @Transactional
+  public void deleteById(UUID entityId) {
+    // Only delete if has administration authorities
+    final Media entity = getRepository().findById(entityId);
+
+    if (entity == null) {
+      throw this.createEntityNotFoundException(entityId);
+    }
+
+    this.deleteFromRepositoryAndStorage(entity);
+  }
+
+  @Override
+  @Transactional
+  public void deleteByIdAndOwner(UUID entityId, User owner) {
+    // Only delete if has administration authorities
+    final Media entity = getRepository().findByIdAndOwner(entityId, owner);
+
+    if (entity == null) {
+      throw this.createEntityNotFoundException(entityId);
+    }
+
+    this.deleteFromRepositoryAndStorage(entity);
+  }
+
+  private void deleteFromRepositoryAndStorage(final Media entity) {
+    final Integer deleted = getRepository().deleteById(entity.getId());
+
+    if (deleted == null || deleted == 0) {
+      throw this.createEntityNotFoundException(entity.getId());
+    } else {
+      final Path mediaFolder = this.getEntityDirectory(entity);
+      StorageUtils.deleteFile(mediaFolder);
+      // If storage removal fails, the exception should trigger the rollback of persistence
+    }
+  }
+
 
   @Override
   protected boolean exists(Media entity) {

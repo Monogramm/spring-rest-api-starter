@@ -441,6 +441,48 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    */
   public ResponseEntity<D> addData(Authentication authentication, @RequestBody D dto,
       UriComponentsBuilder builder, HttpServletResponse response) {
+    final T entity = this.addEntity(authentication, dto);
+
+    final ResponseEntity<D> responseEntity;
+    if (entity != null) {
+      // Publish HATEOAS event
+      eventPublisher.publishEvent(new ResourceCreatedEvent(entity, response));
+
+      final HttpHeaders headers = new HttpHeaders();
+      headers.setLocation(
+          builder.path(this.getControllerPath() + "/{id}").buildAndExpand(dto.getId()).toUri());
+
+      final D responseDto = this.service.toDto(entity);
+      responseEntity = new ResponseEntity<>(responseDto, headers, HttpStatus.CREATED);
+    } else {
+      responseEntity = new ResponseEntity<>(HttpStatus.CONFLICT);
+    }
+
+    return responseEntity;
+  }
+
+  /**
+   * Add a {@link T}.
+   * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
+   * @param dto a {@link D} to create.
+   * 
+   * @return a result DTO
+   */
+  protected D addData(Authentication authentication, @RequestBody D dto) {
+    final T entity = this.addEntity(authentication, dto);
+
+    final D responseDto;
+    if (entity != null) {
+      responseDto = this.service.toDto(entity);
+    } else {
+      responseDto = null;
+    }
+
+    return responseDto;
+  }
+
+  private T addEntity(Authentication authentication, @RequestBody D dto) {
     final T entity = this.service.toEntity(dto);
 
     // Set creator and owner
@@ -450,22 +492,14 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
 
     final boolean added = service.add(entity);
 
-    final ResponseEntity<D> responseEntity;
+    final T response;
     if (added) {
-      // Publish HATEOAS event
-      eventPublisher.publishEvent(new ResourceCreatedEvent(entity, response));
-
-      final HttpHeaders headers = new HttpHeaders();
-      headers.setLocation(
-          builder.path(this.getControllerPath() + "/{id}").buildAndExpand(dto.getId()).toUri());
-
-      responseEntity =
-          new ResponseEntity<>(this.service.toDto(entity), headers, HttpStatus.CREATED);
+      response = entity;
     } else {
-      responseEntity = new ResponseEntity<>(HttpStatus.CONFLICT);
+      response = null;
     }
 
-    return responseEntity;
+    return response;
   }
 
   /**

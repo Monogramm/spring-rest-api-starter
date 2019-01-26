@@ -124,6 +124,8 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
     copy.setPath(PATH);
     assertNotEquals(copy, this.getEntity());
     copy.setPath((Path) null);
+    assertNotEquals(copy, this.getEntity());
+    copy.setPath(this.getEntity().getPath());
     assertEquals(copy, this.getEntity());
   }
 
@@ -305,8 +307,9 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
 
     assertNotSame(this.getEntity(), anotherEntity);
 
-    assertNotNull(this.getEntity().getName());
-    assertEquals(this.getEntity().getName(), anotherEntity.getName());
+    // Update of name is prohibited
+    assertNull(this.getEntity().getName());
+    assertNotEquals(this.getEntity().getName(), anotherEntity.getName());
   }
 
 }
