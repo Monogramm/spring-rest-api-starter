@@ -14,6 +14,7 @@ import com.monogramm.starter.persistence.media.entity.Media.MediaBuilder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ import org.junit.Test;
 public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.MediaBuilder> {
 
   private static final String DISPLAYNAME = "TEST";
-  private static final String PATH = "TEST/MYFILE.TXT";
+  private static final String PATH = UUID.randomUUID().toString();
 
   @Override
   protected MediaBuilder buildTestEntityBuilder() {
@@ -112,7 +113,7 @@ public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.Med
   public void testPathString() {
     assertEquals(this.getEntityBuilder(), this.getEntityBuilder().path((String) null));
 
-    final String path = "TEST/MYFILE.TXT";
+    final String path = UUID.randomUUID().toString();
     assertEquals(path, this.getEntityBuilder().path(path).build().getPath());
   }
 
@@ -123,7 +124,7 @@ public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.Med
   public void testPathPath() {
     assertEquals(this.getEntityBuilder(), this.getEntityBuilder().path((Path) null));
 
-    final String pathStr = "TEST/MYFILE.TXT";
+    final String pathStr = UUID.randomUUID().toString();
     final Path path = Paths.get(pathStr);
     assertEquals(path.toString(), this.getEntityBuilder().path(path).build().getPath());
   }

@@ -47,7 +47,7 @@ public class MediaReposirotyIT extends AbstractGenericRepositoryIT<Media, MediaR
   private static final String PREFIX = MediaReposirotyIT.class.getSimpleName() + "_";
 
   private static final String DISPLAYNAME = MediaReposirotyIT.class.getSimpleName();
-  private static final String PATH = "TEST/MYFILE.TXT";
+  private static final String PATH = "data/integration-test/media";
 
   private static final Path TEST_MEDIA_PATH = Paths.get(PATH);
 

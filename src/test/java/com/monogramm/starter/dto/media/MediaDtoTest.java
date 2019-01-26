@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNull;
 import com.monogramm.starter.dto.AbstractGenericDtoTest;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,7 +26,7 @@ public class MediaDtoTest extends AbstractGenericDtoTest<MediaDto> {
 
   private static final String DISPLAYNAME = "Foo";
   private static final String DESCRIPTION = "DUMMY DESCRIPTION";
-  private static final String PATH = "TEST/MYFILE.TXT";
+  private static final String PATH = UUID.randomUUID().toString();
 
   @Override
   protected MediaDto buildTestDto() {

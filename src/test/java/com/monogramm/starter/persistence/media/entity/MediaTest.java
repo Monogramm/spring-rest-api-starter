@@ -16,6 +16,7 @@ import com.monogramm.starter.persistence.AbstractGenericEntityTest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -28,7 +29,7 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
 
   private static final String DISPLAYNAME = "Foo";
   private static final String DESCRIPTION = "DUMMY DESCRIPTION";
-  private static final String PATH = "TEST/MYFILE.TXT";
+  private static final String PATH = UUID.randomUUID().toString();
 
   @Override
   protected Media buildTestEntity() {
@@ -259,7 +260,7 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
    */
   @Test
   public void testSetPathString() {
-    final String path = "TEST/MYFILE.TXT";
+    final String path = UUID.randomUUID().toString();
 
     this.getEntity().setPath(path);
 
@@ -271,7 +272,7 @@ public class MediaTest extends AbstractGenericEntityTest<Media> {
    */
   @Test
   public void testSetPathPath() {
-    final String pathStr = "TEST/MYFILE.TXT";
+    final String pathStr = UUID.randomUUID().toString();
     final Path path = Paths.get(pathStr);
 
     this.getEntity().setPath(path);
