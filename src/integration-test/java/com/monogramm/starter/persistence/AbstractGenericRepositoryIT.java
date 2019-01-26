@@ -84,15 +84,18 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
 
   @After
   public void tearDown() {
-    userRepository.delete(this.owner);
-
     for (T entity : testEntities) {
-      repository.delete(entity);
+      if (entity != null && repository.exists(entity.getId())) {
+        repository.delete(entity);
+      }
     }
+    testEntities.clear();
+
+    userRepository.delete(this.owner);
   }
 
   protected void addTestEntity(T entity) {
-    addTestEntity(entity);
+    repository.add(entity);
     testEntities.add(entity);
   }
 
