@@ -4,7 +4,6 @@
 
 package com.monogramm.starter.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.persistence.user.entity.User;
 
@@ -53,11 +52,6 @@ public class UserDto extends AbstractGenericDto {
    * Foreign key (relation) to the user\'s account role.
    */
   private UUID role;
-
-  /**
-   * The user\'s account role display name.
-   */
-  private String roleName;
 
 
   /**
@@ -192,25 +186,6 @@ public class UserDto extends AbstractGenericDto {
    */
   public final void setRole(UUID role) {
     this.role = role;
-  }
-
-  /**
-   * Get the {@link #roleName}.
-   * 
-   * @return the {@link #roleName}.
-   */
-  @JsonIgnore
-  public String getRoleName() {
-    return roleName;
-  }
-
-  /**
-   * Set the {@link #roleName}.
-   * 
-   * @param roleName the {@link #roleName} to set.
-   */
-  public void setRoleName(String roleName) {
-    this.roleName = roleName;
   }
 
   @Override

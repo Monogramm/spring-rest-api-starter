@@ -94,7 +94,6 @@ public class UserBridge extends AbstractGenericBridge<User, UserDto> {
     if (entity.getRole() != null) {
       final Role role = entity.getRole();
       dto.setRole(role.getId());
-      dto.setRoleName(role.getName());
     }
 
     return dto;
