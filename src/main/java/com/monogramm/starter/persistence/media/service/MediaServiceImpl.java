@@ -124,7 +124,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
 
     if (entity != null) {
       final Path mediaFolder = this.getEntityDirectory(entity);
-      file = StorageUtils.loadFileAsResource(mediaFolder);
+      file = StorageUtils.loadFileAsResource(mediaFolder.resolve(entity.getName()));
     } else {
       file = null;
     }

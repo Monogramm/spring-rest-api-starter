@@ -55,7 +55,7 @@ public class MediaDto extends AbstractGenericDto {
   /**
    * The resource content of this record.
    */
-  private MultipartFile resource = null;
+  private transient MultipartFile resource = null;
 
 
   /**

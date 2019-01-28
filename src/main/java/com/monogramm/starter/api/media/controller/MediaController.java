@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -277,8 +278,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
    * @throws EntityNotFoundException if no entity matches the specified unique ID
    */
   @GetMapping(value = DOWNLOAD_PATH + "/{id}")
-  @PreAuthorize(value = "hasAuthority('" + AUTH_READ + "')")
-  @PostAuthorize("hasAuthority('" + AUTH_LIST + "') || isOwner()")
+  @PreAuthorize(value = "permitAll()")
   public ResponseEntity<Resource> loadMediaById(@PathVariable @ValidUuid String id,
       HttpServletRequest request, HttpServletResponse response) {
     // Convert ID
@@ -293,7 +293,8 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
     // Try to determine file's content type
     String contentType = null;
     try {
-      contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+      final ServletContext context = request.getServletContext();
+      contentType = context.getMimeType(resource.getFile().getAbsolutePath());
     } catch (IOException ex) {
       LOG.debug("Could not determine file type.");
     }
@@ -351,7 +352,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
    * 
    *         </ul>
    */
-  @PostMapping(value = UPLOAD_PATH, consumes = "application/json")
+  @PostMapping(value = UPLOAD_PATH, consumes = "multipart/form-data")
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
   public List<MediaDto> uploadMultipleMedia(Authentication authentication,
       @RequestParam("files") MultipartFile... files) {
