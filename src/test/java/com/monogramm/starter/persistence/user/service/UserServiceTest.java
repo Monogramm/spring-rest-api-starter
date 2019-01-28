@@ -21,6 +21,9 @@ import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericServiceTest;
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.parameter.dao.IParameterRepository;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
 import com.monogramm.starter.persistence.role.dao.IRoleRepository;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
@@ -50,6 +53,8 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
 
   private IRoleRepository roleDao;
 
+  private IParameterRepository parameterDao;
+
   private char[] password;
 
   /**
@@ -58,6 +63,7 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
   @Before
   public void setUp() throws Exception {
     roleDao = mock(IRoleRepository.class);
+    parameterDao = mock(IParameterRepository.class);
     password = PASSWORD.clone();
 
     super.setUp();
@@ -70,11 +76,13 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
   public void tearDown() throws Exception {
     super.tearDown();
     Mockito.reset(roleDao);
+    Mockito.reset(parameterDao);
   }
 
   @Override
   protected UserService buildTestService() {
-    return new UserService(getMockRepository(), roleDao, getMockAuthenticationFacade());
+    return new UserService(getMockRepository(), roleDao, parameterDao,
+        getMockAuthenticationFacade());
   }
 
   @Override
@@ -171,11 +179,21 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
   }
 
   /**
-   * Test method for {@link UserService#UserService(IUserRepository, IRoleRepository)}.
+   * Test method for
+   * {@link UserService#UserService(IUserRepository, IRoleRepository, IParameterRepository, com.monogramm.starter.config.security.IAuthenticationFacade)}.
    */
   @Test(expected = IllegalArgumentException.class)
-  public void testUserServiceIRoleRepositoryNull() {
-    new UserService(getMockRepository(), null, getMockAuthenticationFacade());
+  public void testUserServiceIRoleRepositoryNullNull() {
+    new UserService(getMockRepository(), null, null, getMockAuthenticationFacade());
+  }
+
+  /**
+   * Test method for
+   * {@link UserService#UserService(IUserRepository, IRoleRepository, IParameterRepository, com.monogramm.starter.config.security.IAuthenticationFacade)}.
+   */
+  @Test(expected = IllegalArgumentException.class)
+  public void testUserServiceIRoleRepositoryRoleRepositoryNull() {
+    new UserService(getMockRepository(), roleDao, null, getMockAuthenticationFacade());
   }
 
   /**
@@ -185,6 +203,15 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
   public void testGetRoleRepository() {
     assertNotNull(getService().getRoleRepository());
     assertEquals(roleDao, getService().getRoleRepository());
+  }
+
+  /**
+   * Test method for {@link UserService#getParameterRepository()}.
+   */
+  @Test
+  public void testGetParameterRepository() {
+    assertNotNull(getService().getParameterRepository());
+    assertEquals(parameterDao, getService().getParameterRepository());
   }
 
   /**
@@ -713,6 +740,8 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     model.setMatchingPassword(PASSWORD);
 
     when(getMockRepository().exists(null, model.getUsername(), model.getEmail())).thenReturn(false);
+    when(parameterDao.findByNameIgnoreCase("DEFAULT_ROLE"))
+        .thenThrow(new ParameterNotFoundException("TEST"));
     when(roleDao.findByNameIgnoreCase("User")).thenReturn(null);
 
     getService().register(model);
@@ -721,6 +750,10 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     verify(getMockRepository(), times(1)).exists(null, model.getUsername(), model.getEmail());
     verify(getMockRepository(), times(1)).add(userArgument.capture());
     verifyNoMoreInteractions(getMockRepository());
+
+    verify(parameterDao, times(1)).findByNameIgnoreCase("DEFAULT_ROLE");
+    verifyNoMoreInteractions(parameterDao);
+
     verify(roleDao, times(1)).findByNameIgnoreCase("User");
     verifyNoMoreInteractions(roleDao);
 
@@ -745,6 +778,7 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     model.setMatchingPassword(PASSWORD);
 
     when(getMockRepository().exists(null, model.getUsername(), model.getEmail())).thenReturn(true);
+    when(parameterDao.findByNameIgnoreCase("DEFAULT_ROLE")).thenReturn(null);
     when(roleDao.findByNameIgnoreCase("User")).thenReturn(null);
 
     getService().register(model);
@@ -767,6 +801,7 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
     model.setMatchingPassword(PASSWORD);
 
     when(getMockRepository().exists(null, model.getUsername(), model.getEmail())).thenReturn(false);
+    when(parameterDao.findByNameIgnoreCase("DEFAULT_ROLE")).thenReturn(Parameter.builder().build());
     when(roleDao.findByNameIgnoreCase("User")).thenThrow(new RoleNotFoundException());
 
     getService().register(model);

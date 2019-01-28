@@ -5,6 +5,9 @@ import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
+import com.monogramm.starter.persistence.parameter.dao.IParameterRepository;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
 import com.monogramm.starter.persistence.role.dao.IRoleRepository;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
@@ -34,27 +37,35 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
    */
   private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
-  public static final String DEFAULT_ROLE = InitialDataLoader.USER_ROLE;
+  public static final String DEFAULT_ROLE = InitialDataLoader.DEFAULT_ROLE;
+  public static final String DEFAULT_ROLE_PARAMETER = InitialDataLoader.DEFAULT_ROLE_PARAMETER;
 
   private final IRoleRepository roleRepository;
+
+  private final IParameterRepository parameterRepository;
 
   /**
    * Create a {@link UserService}.
    * 
    * @param userDao the user repository.
    * @param roleDao the role repository.
+   * @param parameterDao the parameter repository.
    * @param authenticationFacade a facade to retrieve the authentication object.
    * 
    * @throws IllegalArgumentException if {@code roleDao} is {@code null}.
    */
   @Autowired
   public UserService(final IUserRepository userDao, final IRoleRepository roleDao,
-      IAuthenticationFacade authenticationFacade) {
+      IParameterRepository parameterDao, IAuthenticationFacade authenticationFacade) {
     super(userDao, userDao, new UserBridge(userDao, roleDao), authenticationFacade);
     if (roleDao == null) {
       throw new IllegalArgumentException("Role repository cannot be null.");
     }
     this.roleRepository = roleDao;
+    if (parameterDao == null) {
+      throw new IllegalArgumentException("Parameter repository cannot be null.");
+    }
+    this.parameterRepository = parameterDao;
   }
 
   /**
@@ -64,6 +75,15 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
    */
   protected final IRoleRepository getRoleRepository() {
     return roleRepository;
+  }
+
+  /**
+   * Get the {@link #parameterRepository}.
+   * 
+   * @return the {@link #parameterRepository}.
+   */
+  protected final IParameterRepository getParameterRepository() {
+    return parameterRepository;
   }
 
   @Override
@@ -209,9 +229,20 @@ public class UserService extends AbstractGenericService<User, UserDto> implement
      * TODO Add password strengths and rules.
      * http://www.baeldung.com/registration-password-strength-and-rules
      */
+
+    Parameter defaultRoleParameter = null;
+    try {
+      defaultRoleParameter = parameterRepository.findByNameIgnoreCase(DEFAULT_ROLE_PARAMETER);
+    } catch (ParameterNotFoundException e) {
+      LOG.warn("Default role parameter not found. Using initial default role", e);
+    }
+    if (defaultRoleParameter == null) {
+      defaultRoleParameter = Parameter.builder(DEFAULT_ROLE_PARAMETER, DEFAULT_ROLE).build();
+    }
+
     final Role defaultRole;
     try {
-      defaultRole = roleRepository.findByNameIgnoreCase(DEFAULT_ROLE);
+      defaultRole = roleRepository.findByNameIgnoreCase(defaultRoleParameter.getValue());
     } catch (RoleNotFoundException e) {
       LOG.error("Default role not found", e);
       throw e;

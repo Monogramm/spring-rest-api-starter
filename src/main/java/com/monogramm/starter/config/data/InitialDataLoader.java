@@ -5,6 +5,7 @@
 package com.monogramm.starter.config.data;
 
 import com.github.madmath03.password.Passwords;
+import com.monogramm.starter.api.media.controller.MediaController;
 import com.monogramm.starter.api.parameter.controller.ParameterController;
 import com.monogramm.starter.api.permission.controller.PermissionController;
 import com.monogramm.starter.api.role.controller.RoleController;
@@ -50,6 +51,9 @@ public class InitialDataLoader extends AbstractDataLoader {
   public static final String SUPPORT_ROLE = "Support";
   public static final String ADMIN_ROLE = "Admin";
 
+  public static final String DEFAULT_ROLE = USER_ROLE;
+  public static final String DEFAULT_ROLE_PARAMETER = "DEFAULT_ROLE";
+
   public static final String SAMPLE_DEMO_NAME = "demo";
   public static final String SAMPLE_DEMO_EMAIL = "demo@";
   public static final char[] SAMPLE_DEMO_PASSWORD = {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
@@ -65,6 +69,7 @@ public class InitialDataLoader extends AbstractDataLoader {
   private Type typeType;
   private Type permissionType;
   private Type parameterType;
+  private Type mediaType;
 
   private Role adminRole;
   private Role supportRole;
@@ -122,31 +127,44 @@ public class InitialDataLoader extends AbstractDataLoader {
   }
 
   private boolean initDefaultTypes() {
+    boolean typesCreated = true;
+
     if (this.userType == null) {
       this.userType = this.createType(UserController.TYPE);
+      typesCreated &= this.userType != null;
     }
 
     if (this.roleType == null) {
       this.roleType = this.createType(RoleController.TYPE);
+      typesCreated &= this.roleType != null;
     }
 
     if (this.typeType == null) {
       this.typeType = this.createType(TypeController.TYPE);
+      typesCreated &= this.typeType != null;
     }
 
     if (this.permissionType == null) {
       this.permissionType = this.createType(PermissionController.TYPE);
+      typesCreated &= this.permissionType != null;
     }
 
     if (this.parameterType == null) {
       this.parameterType = this.createType(ParameterController.TYPE);
+      typesCreated &= this.parameterType != null;
     }
 
-    return this.userType != null && this.roleType != null && this.typeType != null
-        && this.permissionType != null && this.parameterType != null;
+    if (this.mediaType == null) {
+      this.mediaType = this.createType(MediaController.TYPE);
+      typesCreated &= this.mediaType != null;
+    }
+
+    return typesCreated;
   }
 
   private boolean initDefaultRoles() {
+    boolean rolesCreated = true;
+
     if (this.adminRole == null) {
       this.adminRole = this.createRole(ADMIN_ROLE);
       this.addAllPermissions(userType, adminRole);
@@ -154,6 +172,9 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.addAllPermissions(typeType, adminRole);
       this.addAllPermissions(permissionType, adminRole);
       this.addAllPermissions(parameterType, adminRole);
+      this.addAllPermissions(mediaType, adminRole);
+
+      rolesCreated &= this.adminRole != null;
     }
 
     if (this.supportRole == null) {
@@ -165,15 +186,21 @@ public class InitialDataLoader extends AbstractDataLoader {
       this.addAllPermissions(typeType, supportOperations, supportRole);
       this.addAllPermissions(permissionType, supportOperations, supportRole);
       this.addAllPermissions(parameterType, supportOperations, supportRole);
+      this.addAllPermissions(mediaType, supportRole);
+
+      rolesCreated &= this.supportRole != null;
     }
 
     if (this.userRole == null) {
       this.userRole = this.createRole(USER_ROLE);
       this.addPermission(userType, GenericOperation.READ, userRole);
       this.addPermission(userType, GenericOperation.UPDATE, userRole);
+      this.addPermission(mediaType, GenericOperation.READ, userRole);
+
+      rolesCreated &= this.userRole != null;
     }
 
-    return this.adminRole != null && this.supportRole != null && this.userRole != null;
+    return rolesCreated;
   }
 
   private boolean initDefaultPermissions() {
@@ -190,11 +217,14 @@ public class InitialDataLoader extends AbstractDataLoader {
   private boolean initDefaultParameters() {
     // XXX Create a parameter containing the application version?
 
+    // Parameter for default role on registration
+    final Parameter defaultRole = this.createParameter(DEFAULT_ROLE_PARAMETER, DEFAULT_ROLE);
+
     // Parameter to disable user registration at will
     final Parameter regsitrationEnabled =
         this.createParameter(UserController.REGISTRATION_ENABLED, Boolean.TRUE);
 
-    return regsitrationEnabled != null;
+    return defaultRole != null && regsitrationEnabled != null;
   }
 
   private boolean initDefaultUsers() {
