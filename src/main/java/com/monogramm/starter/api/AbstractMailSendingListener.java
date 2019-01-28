@@ -97,7 +97,7 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
     email.setFrom(env.getProperty("application.email.no_reply"));
 
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Sending email to " + user.getEmail() + ": " + email);
+      LOG.debug("Sending email to {}: {}", user.getEmail(), email);
     }
 
     mailSender.send(email);
