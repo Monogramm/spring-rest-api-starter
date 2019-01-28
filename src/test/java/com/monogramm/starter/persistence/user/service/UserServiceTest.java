@@ -802,7 +802,7 @@ public class UserServiceTest extends AbstractGenericServiceTest<User, UserDto, U
 
     when(getMockRepository().exists(null, model.getUsername(), model.getEmail())).thenReturn(false);
     when(parameterDao.findByNameIgnoreCase("DEFAULT_ROLE")).thenReturn(Parameter.builder().build());
-    when(roleDao.findByNameIgnoreCase("User")).thenThrow(new RoleNotFoundException());
+    when(roleDao.findByNameIgnoreCase(null)).thenThrow(new RoleNotFoundException());
 
     getService().register(model);
   }

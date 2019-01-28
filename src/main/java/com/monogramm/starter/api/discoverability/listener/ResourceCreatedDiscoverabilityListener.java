@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Listener that is triggered when a resource is fired.
@@ -41,13 +42,19 @@ public class ResourceCreatedDiscoverabilityListener
     final HttpServletResponse response = resourceCreatedEvent.getResponse();
     final UUID idOfNewResource = resourceCreatedEvent.getIdOfNewResource();
 
-    this.addLinkHeaderOnResourceCreation(response, idOfNewResource);
+    addLinkHeaderOnResourceCreation(response, idOfNewResource);
   }
 
-  private void addLinkHeaderOnResourceCreation(final HttpServletResponse response,
+  protected static void addLinkHeaderOnResourceCreation(final HttpServletResponse response,
       final UUID idOfNewResource) {
-    final URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{idOfNewResource}")
-        .buildAndExpand(idOfNewResource).toUri();
+    final UriComponentsBuilder uriBuilder = ServletUriComponentsBuilder.fromCurrentRequestUri();
+
+    addLinkHeaderOnResourceCreation(uriBuilder, response, idOfNewResource);
+  }
+
+  protected static void addLinkHeaderOnResourceCreation(final UriComponentsBuilder uriBuilder,
+      final HttpServletResponse response, final UUID idOfNewResource) {
+    final URI uri = uriBuilder.path("/{idOfNewResource}").buildAndExpand(idOfNewResource).toUri();
 
     response.setHeader(HttpHeaders.LOCATION, uri.toASCIIString());
   }
