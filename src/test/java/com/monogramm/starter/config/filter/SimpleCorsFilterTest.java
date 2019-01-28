@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.monogramm.starter.config.filter.SimpleCorsFilter.AccessControlAllowHeaders;
+
 import java.io.IOException;
 
 import javax.servlet.FilterChain;
@@ -99,14 +101,14 @@ public class SimpleCorsFilterTest {
     this.filter.doFilter(request, response, chain);
 
 
-    verify(response, times(1)).setHeader("Access-Control-Allow-Origin", "*");
+    verify(response, times(1)).setHeader("Access-Control-Allow-Origin",
+        SimpleCorsFilter.ACCESS_CONTROL_ALLOW_ORIGIN);
     verify(response, times(1)).setHeader("Access-Control-Allow-Methods",
-        "OPTIONS, HEAD, GET, POST, PUT, DELETE");
-    verify(response, times(1)).setHeader("Access-Control-Max-Age", "3600");
+        SimpleCorsFilter.ACCESS_CONTROL_ALLOW_METHODS_LIST);
+    verify(response, times(1)).setHeader("Access-Control-Max-Age",
+        SimpleCorsFilter.ACCESS_CONTROL_MAX_AGE);
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
-        "Content-Type, x-requested-with, Authorization, "
-            + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
-            + "X-Custom-Start-At, X-Custom-End-At");
+        AccessControlAllowHeaders.getAllHeaders());
 
     verify(response, times(1)).setStatus(HttpServletResponse.SC_OK);
 
@@ -134,14 +136,14 @@ public class SimpleCorsFilterTest {
     this.filter.doFilter(request, response, chain);
 
 
-    verify(response, times(1)).setHeader("Access-Control-Allow-Origin", "*");
+    verify(response, times(1)).setHeader("Access-Control-Allow-Origin",
+        SimpleCorsFilter.ACCESS_CONTROL_ALLOW_ORIGIN);
     verify(response, times(1)).setHeader("Access-Control-Allow-Methods",
-        "OPTIONS, HEAD, GET, POST, PUT, DELETE");
-    verify(response, times(1)).setHeader("Access-Control-Max-Age", "3600");
+        SimpleCorsFilter.ACCESS_CONTROL_ALLOW_METHODS_LIST);
+    verify(response, times(1)).setHeader("Access-Control-Max-Age",
+        SimpleCorsFilter.ACCESS_CONTROL_MAX_AGE);
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
-        "Content-Type, x-requested-with, Authorization, "
-            + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
-            + "X-Custom-Start-At, X-Custom-End-At");
+        AccessControlAllowHeaders.getAllHeaders());
 
     verify(request, times(1)).getMethod();
 
@@ -166,14 +168,14 @@ public class SimpleCorsFilterTest {
     this.filter.doFilter(null, response, chain);
 
 
-    verify(response, times(1)).setHeader("Access-Control-Allow-Origin", "*");
+    verify(response, times(1)).setHeader("Access-Control-Allow-Origin",
+        SimpleCorsFilter.ACCESS_CONTROL_ALLOW_ORIGIN);
     verify(response, times(1)).setHeader("Access-Control-Allow-Methods",
-        "OPTIONS, HEAD, GET, POST, PUT, DELETE");
-    verify(response, times(1)).setHeader("Access-Control-Max-Age", "3600");
+        SimpleCorsFilter.ACCESS_CONTROL_ALLOW_METHODS_LIST);
+    verify(response, times(1)).setHeader("Access-Control-Max-Age",
+        SimpleCorsFilter.ACCESS_CONTROL_MAX_AGE);
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
-        "Content-Type, x-requested-with, Authorization, "
-            + "X-Custom-Filter, X-Custom-Sort, X-Custom-Size, "
-            + "X-Custom-Start-At, X-Custom-End-At");
+        AccessControlAllowHeaders.getAllHeaders());
 
     verify(chain, times(1)).doFilter(null, response);
 
