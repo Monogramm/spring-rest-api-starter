@@ -6,7 +6,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.permission.PermissionDto;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class PermissionController extends AbstractGenericController<Permission, 
    */
   @Autowired
   public PermissionController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IPermissionService permissionService) {
+      PermissionService permissionService) {
     super(messageSource, eventPublisher, permissionService);
   }
 
@@ -129,8 +129,8 @@ public class PermissionController extends AbstractGenericController<Permission, 
   }
 
   @Override
-  protected IPermissionService getService() {
-    return (IPermissionService) super.getService();
+  protected PermissionService getService() {
+    return (PermissionService) super.getService();
   }
 
   @Override

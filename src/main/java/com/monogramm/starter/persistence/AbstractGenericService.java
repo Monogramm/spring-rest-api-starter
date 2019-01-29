@@ -6,7 +6,7 @@ package com.monogramm.starter.persistence;
 
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.AbstractGenericDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
 
   private final GenericRepository<T> repository;
 
-  private final IUserRepository userRepository;
+  private final UserRepository userRepository;
 
   private final AbstractGenericBridge<T, D> bridge;
 
@@ -52,7 +52,7 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
    * @throws IllegalArgumentException if {@code repository} or {@code bridge} is {@code null}.
    */
   protected AbstractGenericService(final GenericRepository<T> repository,
-      final IUserRepository userRepository, final AbstractGenericBridge<T, D> bridge,
+      final UserRepository userRepository, final AbstractGenericBridge<T, D> bridge,
       final IAuthenticationFacade authenticationFacade) {
     super();
     if (repository == null || userRepository == null || bridge == null
@@ -108,7 +108,7 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
    * 
    * @return the {@link #userRepository}.
    */
-  protected final IUserRepository getUserRepository() {
+  protected final UserRepository getUserRepository() {
     return userRepository;
   }
 

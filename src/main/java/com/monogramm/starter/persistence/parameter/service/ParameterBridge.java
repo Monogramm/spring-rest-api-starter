@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.parameter.service;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.AbstractParameterBridge;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 /**
  * ParameterBridge.
@@ -29,7 +29,7 @@ public class ParameterBridge extends AbstractParameterBridge<Parameter, Paramete
    * 
    * @param userRepository repository to lookup users.
    */
-  public ParameterBridge(IUserRepository userRepository) {
+  public ParameterBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.type.service;
 import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.type.entity.Type;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 /**
  * Bridge to convert a {@link TypeDto} to a {@link Type} and vice versa.
@@ -36,7 +36,7 @@ public class TypeBridge extends AbstractGenericBridge<Type, TypeDto> {
    * 
    * @param userRepository repository to lookup users.
    */
-  public TypeBridge(IUserRepository userRepository) {
+  public TypeBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

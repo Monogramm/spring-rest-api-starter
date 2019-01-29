@@ -10,7 +10,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -108,7 +108,7 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
    */
   @Autowired
   public ParameterController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IParameterService parameterService) {
+      ParameterService parameterService) {
     super(messageSource, eventPublisher, parameterService);
   }
 
@@ -132,8 +132,8 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   }
 
   @Override
-  protected IParameterService getService() {
-    return (IParameterService) super.getService();
+  protected ParameterService getService() {
+    return (ParameterService) super.getService();
   }
 
   @Override

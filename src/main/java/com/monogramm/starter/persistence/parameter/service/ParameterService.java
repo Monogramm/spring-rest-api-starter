@@ -4,72 +4,30 @@
 
 package com.monogramm.starter.persistence.parameter.service;
 
-import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.parameter.ParameterDto;
-import com.monogramm.starter.persistence.AbstractGenericService;
-import com.monogramm.starter.persistence.EntityNotFoundException;
-import com.monogramm.starter.persistence.parameter.dao.IParameterRepository;
+import com.monogramm.starter.persistence.GenericService;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
-
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link Parameter} service.
+ * {@link Parameter} service interface.
  * 
  * @author madmath03
  */
-@Service
-public class ParameterService extends AbstractGenericService<Parameter, ParameterDto>
-    implements IParameterService {
+public interface ParameterService extends GenericService<Parameter, ParameterDto> {
+
+  @Override
+  ParameterBridge getBridge();
 
   /**
-   * Create a {@link ParameterService}.
+   * Find an parameter through its name while ignoring case.
    * 
-   * @param repository the entity repository.
-   * @param userRepository the user repository.
-   * @param authenticationFacade a facade to retrieve the authentication object.
+   * @param name the name to search.
+   * 
+   * @return the parameter matching the name.
+   * 
+   * @throws ParameterNotFoundException if no parameter matches the name in the repository.
    */
-  @Autowired
-  public ParameterService(IParameterRepository repository, IUserRepository userRepository,
-      IAuthenticationFacade authenticationFacade) {
-    super(repository, userRepository, new ParameterBridge(userRepository), authenticationFacade);
-  }
-
-  @Override
-  protected IParameterRepository getRepository() {
-    return (IParameterRepository) super.getRepository();
-  }
-
-  @Override
-  public ParameterBridge getBridge() {
-    return (ParameterBridge) super.getBridge();
-  }
-
-  @Override
-  protected boolean exists(Parameter entity) {
-    return getRepository().exists(entity.getId(), entity.getName());
-  }
-
-  @Override
-  protected EntityNotFoundException createEntityNotFoundException(Parameter entity) {
-    return new ParameterNotFoundException("Following parameter not found:" + entity);
-  }
-
-  @Override
-  protected EntityNotFoundException createEntityNotFoundException(UUID entityId) {
-    return new ParameterNotFoundException("No parameter for ID=" + entityId);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public Parameter findByName(String name) {
-    return getRepository().findByNameIgnoreCase(name);
-  }
+  Parameter findByName(final String name);
 
 }

@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 
 import java.util.Locale;
 
@@ -36,7 +36,7 @@ import org.springframework.mail.javamail.JavaMailSender;
  */
 public class RegistrationListenerTest {
 
-  private IVerificationTokenService verificationService;
+  private VerificationTokenService verificationService;
 
   private MessageSource messages;
 
@@ -51,7 +51,7 @@ public class RegistrationListenerTest {
    */
   @Before
   public void setUp() throws Exception {
-    verificationService = mock(IVerificationTokenService.class);
+    verificationService = mock(VerificationTokenService.class);
     assertNotNull(verificationService);
 
     messages = mock(MessageSource.class);
@@ -81,7 +81,7 @@ public class RegistrationListenerTest {
 
   /**
    * Test method for
-   * {@link RegistrationListener#RegistrationListener(IVerificationTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link RegistrationListener#RegistrationListener(VerificationTokenService, MessageSource, JavaMailSender, Environment)}.
    */
   @Test
   public void testRegistrationListener() {
@@ -90,7 +90,7 @@ public class RegistrationListenerTest {
 
   /**
    * Test method for
-   * {@link RegistrationListener#RegistrationListener(IVerificationTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link RegistrationListener#RegistrationListener(VerificationTokenService, MessageSource, JavaMailSender, Environment)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testRegistrationListenerNullTokenService() {
@@ -99,7 +99,7 @@ public class RegistrationListenerTest {
 
   /**
    * Test method for
-   * {@link RegistrationListener#RegistrationListener(IVerificationTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link RegistrationListener#RegistrationListener(VerificationTokenService, MessageSource, JavaMailSender, Environment)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testRegistrationListenerNullMessageSource() {
@@ -108,7 +108,7 @@ public class RegistrationListenerTest {
 
   /**
    * Test method for
-   * {@link RegistrationListener#RegistrationListener(IVerificationTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link RegistrationListener#RegistrationListener(VerificationTokenService, MessageSource, JavaMailSender, Environment)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testRegistrationListenerNullJavaMailSender() {
@@ -117,7 +117,7 @@ public class RegistrationListenerTest {
 
   /**
    * Test method for
-   * {@link RegistrationListener#RegistrationListener(IVerificationTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link RegistrationListener#RegistrationListener(VerificationTokenService, MessageSource, JavaMailSender, Environment)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testRegistrationListenerNullEnvironment() {

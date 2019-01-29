@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import com.github.madmath03.password.Passwords;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericBridgeTest;
-import com.monogramm.starter.persistence.role.dao.IRoleRepository;
+import com.monogramm.starter.persistence.role.dao.RoleRepository;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.user.entity.User;
 
@@ -37,14 +37,14 @@ import org.mockito.Mockito;
  */
 public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, UserBridge> {
 
-  private IRoleRepository roleRepository;
+  private RoleRepository roleRepository;
 
   /**
    * Get the {@link #roleRepository}.
    * 
    * @return the {@link #roleRepository}.
    */
-  protected final IRoleRepository getRoleRepository() {
+  protected final RoleRepository getRoleRepository() {
     return roleRepository;
   }
 
@@ -62,7 +62,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
   public void setUp() throws Exception {
     super.setUp();
 
-    roleRepository = mock(IRoleRepository.class);
+    roleRepository = mock(RoleRepository.class);
   }
 
   /*
@@ -90,7 +90,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
 
   /**
    * Test method for
-   * {@link UserBridge#UserBridge(com.monogramm.starter.persistence.user.dao.IUserRepository, com.monogramm.starter.persistence.role.dao.IRoleRepository)}.
+   * {@link UserBridge#UserBridge(com.monogramm.starter.persistence.user.dao.UserRepository, com.monogramm.starter.persistence.role.dao.RoleRepository)}.
    */
   @Test
   public void testUserBridgeIUserRepositoryIRoleRepository() {
@@ -103,7 +103,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
 
   /**
    * Test method for
-   * {@link UserBridge#UserBridge(com.monogramm.starter.persistence.user.dao.IUserRepository, com.monogramm.starter.persistence.role.dao.IRoleRepository)}.
+   * {@link UserBridge#UserBridge(com.monogramm.starter.persistence.user.dao.UserRepository, com.monogramm.starter.persistence.role.dao.RoleRepository)}.
    */
   @Test
   public void testUserBridgeIUserRepositoryNull() {
@@ -115,7 +115,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
 
   /**
    * Test method for
-   * {@link UserBridge#UserBridge(com.monogramm.starter.persistence.user.dao.IUserRepository, com.monogramm.starter.persistence.role.dao.IRoleRepository)}.
+   * {@link UserBridge#UserBridge(com.monogramm.starter.persistence.user.dao.UserRepository, com.monogramm.starter.persistence.role.dao.RoleRepository)}.
    */
   @Test
   public void testUserBridgeNullNull() {
@@ -325,7 +325,7 @@ public class UserBridgeTest extends AbstractGenericBridgeTest<User, UserDto, Use
 
   /**
    * Test method for
-   * {@link UserBridge#setRoleRepository(com.monogramm.starter.persistence.role.dao.IRoleRepository)}.
+   * {@link UserBridge#setRoleRepository(com.monogramm.starter.persistence.role.dao.RoleRepository)}.
    */
   @Test
   public void testSetRoleRepository() {

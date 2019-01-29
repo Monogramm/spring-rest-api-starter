@@ -16,7 +16,7 @@ import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.net.URISyntaxException;
@@ -77,7 +77,7 @@ public class ParameterControllerFullIT extends AbstractControllerFullIT {
   protected static final Object DUMMY_VALUE = 42;
 
   @Autowired
-  private IParameterService parameterService;
+  private ParameterService parameterService;
 
   private User testCreatedBy;
   private User testOwner;

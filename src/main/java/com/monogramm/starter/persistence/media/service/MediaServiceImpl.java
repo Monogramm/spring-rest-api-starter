@@ -12,7 +12,7 @@ import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.exception.MediaStorageException;
 import com.monogramm.starter.persistence.media.properties.FileStorageProperties;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.io.InputStream;
@@ -46,7 +46,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
    * @param storageProperties storage properties
    */
   @Autowired
-  public MediaServiceImpl(MediaRepository repository, IUserRepository userRepository,
+  public MediaServiceImpl(MediaRepository repository, UserRepository userRepository,
       IAuthenticationFacade authenticationFacade, final FileStorageProperties storageProperties) {
     super(repository, userRepository, new MediaBridge(userRepository), authenticationFacade);
 

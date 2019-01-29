@@ -21,8 +21,8 @@ import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.PasswordResetTokenService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 
 import java.io.IOException;
@@ -114,10 +114,10 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   private String accessToken;
 
   @Autowired
-  private IVerificationTokenService verificationService;
+  private VerificationTokenService verificationService;
 
   @Autowired
-  private IPasswordResetTokenService passwordResetTokenService;
+  private PasswordResetTokenService passwordResetTokenService;
 
   @Rule
   public SmtpServerRule smtpServerRule = new SmtpServerRule(2525);

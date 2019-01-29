@@ -6,7 +6,7 @@ package com.monogramm.starter.persistence.user.service;
 
 import com.monogramm.starter.dto.user.VerificationTokenDto;
 import com.monogramm.starter.persistence.AbstractTokenBridgeTest;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 
 /**
@@ -23,7 +23,7 @@ public class VerificationTokenBridgeTest extends
   }
 
   @Override
-  protected VerificationTokenBridge buildTestBridge(IUserRepository userRepository) {
+  protected VerificationTokenBridge buildTestBridge(UserRepository userRepository) {
     return new VerificationTokenBridge(userRepository);
   }
 

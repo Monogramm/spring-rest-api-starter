@@ -7,7 +7,7 @@ package com.monogramm.starter.config;
 import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 import com.monogramm.starter.config.component.CustomPasswordEncoder;
 import com.monogramm.starter.config.component.CustomTokenEnhancer;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.user.service.UserService;
 import com.monogramm.starter.utils.JwtUtils;
 
 import java.util.Arrays;
@@ -65,7 +65,7 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
   private AuthenticationManager authenticationManager;
 
   @Autowired
-  private IUserService userService;
+  private UserService userService;
 
   @Override
   public void configure(final AuthorizationServerSecurityConfigurer oauthServer) throws Exception {

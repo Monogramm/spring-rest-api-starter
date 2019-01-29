@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.media.service;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.media.entity.Media;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 import java.io.IOException;
 
@@ -49,7 +49,7 @@ public class MediaBridge extends AbstractGenericBridge<Media, MediaDto> {
    * @param userRepository repository to lookup users.
    */
   @Autowired
-  public MediaBridge(IUserRepository userRepository) {
+  public MediaBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

@@ -6,10 +6,10 @@ package com.monogramm.starter.persistence.role.service;
 
 import com.monogramm.starter.dto.role.RoleDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
-import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
+import com.monogramm.starter.persistence.permission.dao.PermissionRepository;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.role.entity.Role;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author madmath03
  */
 public class RoleBridge extends AbstractGenericBridge<Role, RoleDto> {
-  private IPermissionRepository permissionRepository;
+  private PermissionRepository permissionRepository;
 
   /**
    * Create a {@link RoleBridge}.
@@ -46,7 +46,7 @@ public class RoleBridge extends AbstractGenericBridge<Role, RoleDto> {
    * @param permissionRepository repository to lookup permissions.
    */
   @Autowired
-  public RoleBridge(IUserRepository userRepository, IPermissionRepository permissionRepository) {
+  public RoleBridge(UserRepository userRepository, PermissionRepository permissionRepository) {
     super(userRepository);
     this.permissionRepository = permissionRepository;
   }
@@ -111,7 +111,7 @@ public class RoleBridge extends AbstractGenericBridge<Role, RoleDto> {
    * 
    * @return the {@link #permissionRepository}.
    */
-  public final IPermissionRepository getPermissionRepository() {
+  public final PermissionRepository getPermissionRepository() {
     return permissionRepository;
   }
 
@@ -120,7 +120,7 @@ public class RoleBridge extends AbstractGenericBridge<Role, RoleDto> {
    * 
    * @param permissionRepository the {@link #permissionRepository} to set.
    */
-  public final void setPermissionRepository(IPermissionRepository permissionRepository) {
+  public final void setPermissionRepository(PermissionRepository permissionRepository) {
     this.permissionRepository = permissionRepository;
   }
 

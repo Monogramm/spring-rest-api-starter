@@ -24,8 +24,8 @@ import com.monogramm.starter.persistence.media.dao.MediaRepository;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.properties.FileStorageProperties;
-import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.permission.dao.PermissionRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.io.FileInputStream;
@@ -248,7 +248,7 @@ public class MediaServiceImplTest
 
   /**
    * Test method for
-   * {@link MediaService#MediaService(MediaRepository, IUserRepository, IPermissionRepository)}.
+   * {@link MediaService#MediaService(MediaRepository, UserRepository, PermissionRepository)}.
    */
   @Test
   public void testMediaService() {

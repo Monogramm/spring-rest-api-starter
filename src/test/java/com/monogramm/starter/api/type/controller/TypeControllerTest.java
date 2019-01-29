@@ -13,7 +13,7 @@ import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.type.entity.Type;
 import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
-import com.monogramm.starter.persistence.type.service.ITypeService;
+import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.persistence.type.service.TypeBridge;
 
 import java.util.UUID;
@@ -52,13 +52,13 @@ public class TypeControllerTest extends AbstractGenericControllerTest<Type, Type
   }
 
   @Override
-  protected ITypeService getMockService() {
-    return (ITypeService) super.getMockService();
+  protected TypeService getMockService() {
+    return (TypeService) super.getMockService();
   }
 
   @Override
-  protected ITypeService buildTestService() {
-    return mock(ITypeService.class);
+  protected TypeService buildTestService() {
+    return mock(TypeService.class);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class TypeControllerTest extends AbstractGenericControllerTest<Type, Type
   }
 
   /**
-   * Test method for {@link TypeController#TypeController(ITypeService)}.
+   * Test method for {@link TypeController#TypeController(TypeService)}.
    */
   @Test
   public void testTypeController() {

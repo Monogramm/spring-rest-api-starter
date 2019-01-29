@@ -12,15 +12,15 @@ import com.monogramm.starter.api.role.controller.RoleController;
 import com.monogramm.starter.api.type.controller.TypeController;
 import com.monogramm.starter.api.user.controller.UserController;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.permission.entity.Permission;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
 import com.monogramm.starter.persistence.role.entity.Role;
-import com.monogramm.starter.persistence.role.service.IRoleService;
+import com.monogramm.starter.persistence.role.service.RoleService;
 import com.monogramm.starter.persistence.type.entity.Type;
-import com.monogramm.starter.persistence.type.service.ITypeService;
+import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.persistence.user.entity.User;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,9 +94,9 @@ public class InitialDataLoader extends AbstractDataLoader {
    * @param parameterService the parameters service.
    */
   @Autowired
-  public InitialDataLoader(Environment env, MessageSource messageSource, IUserService userService,
-      IRoleService roleService, IPermissionService permissionService, ITypeService typeService,
-      IParameterService parameterService) {
+  public InitialDataLoader(Environment env, MessageSource messageSource, UserService userService,
+      RoleService roleService, PermissionService permissionService, TypeService typeService,
+      ParameterService parameterService) {
     super(env, messageSource, userService, roleService, permissionService, typeService,
         parameterService);
   }

@@ -14,11 +14,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
-import com.monogramm.starter.persistence.role.service.IRoleService;
-import com.monogramm.starter.persistence.type.service.ITypeService;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
+import com.monogramm.starter.persistence.role.service.RoleService;
+import com.monogramm.starter.persistence.type.service.TypeService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,11 +41,11 @@ public class InitialDataLoaderTest {
   private MessageSource messageSource;
 
 
-  private IParameterService parameterService;
-  private ITypeService typeService;
-  private IPermissionService permissionService;
-  private IRoleService roleService;
-  private IUserService userService;
+  private ParameterService parameterService;
+  private TypeService typeService;
+  private PermissionService permissionService;
+  private RoleService roleService;
+  private UserService userService;
 
 
   /**
@@ -56,11 +56,11 @@ public class InitialDataLoaderTest {
     this.env = mock(Environment.class);
     this.messageSource = mock(MessageSource.class);
 
-    this.parameterService = mock(IParameterService.class);
-    this.typeService = mock(ITypeService.class);
-    this.permissionService = mock(IPermissionService.class);
-    this.roleService = mock(IRoleService.class);
-    this.userService = mock(IUserService.class);
+    this.parameterService = mock(ParameterService.class);
+    this.typeService = mock(TypeService.class);
+    this.permissionService = mock(PermissionService.class);
+    this.roleService = mock(RoleService.class);
+    this.userService = mock(UserService.class);
 
     this.loader = new InitialDataLoader(env, messageSource, userService, roleService,
         permissionService, typeService, parameterService);

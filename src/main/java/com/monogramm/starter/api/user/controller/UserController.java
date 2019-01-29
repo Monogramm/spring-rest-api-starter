@@ -11,16 +11,16 @@ import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService;
-import com.monogramm.starter.persistence.user.service.IUserService;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.PasswordResetTokenService;
+import com.monogramm.starter.persistence.user.service.UserService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
@@ -148,11 +148,11 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   public static final String REGISTRATION_ENABLED = "REGISTRATION_ENABLED";
 
 
-  private IParameterService parameterService;
+  private ParameterService parameterService;
 
-  private IVerificationTokenService verificationTokenService;
+  private VerificationTokenService verificationTokenService;
 
-  private IPasswordResetTokenService passwordResetTokenService;
+  private PasswordResetTokenService passwordResetTokenService;
 
   /**
    * Create a {@link UserController}.
@@ -166,9 +166,9 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    */
   @Autowired
   public UserController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IUserService userService, IParameterService parameterService,
-      IVerificationTokenService verificationTokenService,
-      IPasswordResetTokenService passwordResetTokenService) {
+      UserService userService, ParameterService parameterService,
+      VerificationTokenService verificationTokenService,
+      PasswordResetTokenService passwordResetTokenService) {
     super(messageSource, eventPublisher, userService);
 
     this.parameterService = parameterService;
@@ -196,8 +196,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   @Override
-  protected IUserService getService() {
-    return (IUserService) super.getService();
+  protected UserService getService() {
+    return (UserService) super.getService();
   }
 
   @Override

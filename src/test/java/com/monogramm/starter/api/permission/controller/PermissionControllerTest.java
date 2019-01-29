@@ -13,7 +13,7 @@ import com.monogramm.starter.dto.permission.PermissionDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
 import com.monogramm.starter.persistence.permission.service.PermissionBridge;
 
 import java.util.UUID;
@@ -53,13 +53,13 @@ public class PermissionControllerTest
   }
 
   @Override
-  protected IPermissionService getMockService() {
-    return (IPermissionService) super.getMockService();
+  protected PermissionService getMockService() {
+    return (PermissionService) super.getMockService();
   }
 
   @Override
-  protected IPermissionService buildTestService() {
-    return mock(IPermissionService.class);
+  protected PermissionService buildTestService() {
+    return mock(PermissionService.class);
   }
 
   @Override
@@ -94,7 +94,7 @@ public class PermissionControllerTest
   }
 
   /**
-   * Test method for {@link PermissionController#PermissionController(IPermissionService)}.
+   * Test method for {@link PermissionController#PermissionController(PermissionService)}.
    */
   @Test
   public void testPermissionController() {

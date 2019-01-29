@@ -1,76 +1,44 @@
+/*
+ * Creation by madmath03 the 2017-11-25
+ */
+
 package com.monogramm.starter.persistence.permission.service;
 
-import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.permission.PermissionDto;
-import com.monogramm.starter.persistence.AbstractGenericService;
-import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
+import com.monogramm.starter.persistence.GenericService;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
 
 import java.util.List;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link Permission} service.
+ * {@link Permission} service interface.
  * 
  * @author madmath03
  */
-@Service
-public class PermissionService extends AbstractGenericService<Permission, PermissionDto>
-    implements IPermissionService {
+public interface PermissionService extends GenericService<Permission, PermissionDto> {
+
+  @Override
+  PermissionBridge getBridge();
 
   /**
-   * Create a {@link PermissionService}.
+   * Find all permissions by their name while ignoring case.
    * 
-   * @param permissionDao the permission repository.
-   * @param userDao the user repository.
-   * @param authenticationFacade a facade to retrieve the authentication object.
+   * @param name the name content to search.
+   * 
+   * @return the list of all the permissions matching the search.
    */
-  @Autowired
-  public PermissionService(final IPermissionRepository permissionDao, final IUserRepository userDao,
-      IAuthenticationFacade authenticationFacade) {
-    super(permissionDao, userDao, new PermissionBridge(userDao), authenticationFacade);
-  }
+  List<Permission> findAllByName(final String name);
 
-  @Override
-  protected IPermissionRepository getRepository() {
-    return (IPermissionRepository) super.getRepository();
-  }
+  /**
+   * Find an permission through its name while ignoring case.
+   * 
+   * @param name the name to search.
+   * 
+   * @return the permission matching the name.
+   * 
+   * @throws PermissionNotFoundException if no permission matches the name in the repository.
+   */
+  Permission findByName(final String name);
 
-  @Override
-  public PermissionBridge getBridge() {
-    return (PermissionBridge) super.getBridge();
-  }
-
-  @Override
-  protected boolean exists(Permission entity) {
-    return getRepository().exists(entity.getId(), entity.getName());
-  }
-
-  @Override
-  protected PermissionNotFoundException createEntityNotFoundException(Permission entity) {
-    return new PermissionNotFoundException("Following permission not found:" + entity);
-  }
-
-  @Override
-  protected PermissionNotFoundException createEntityNotFoundException(UUID entityId) {
-    return new PermissionNotFoundException("No permission for ID=" + entityId);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public Permission findByName(final String name) {
-    return getRepository().findByNameIgnoreCase(name);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public List<Permission> findAllByName(final String name) {
-    return getRepository().findAllContainingNameIgnoreCase(name);
-  }
 }

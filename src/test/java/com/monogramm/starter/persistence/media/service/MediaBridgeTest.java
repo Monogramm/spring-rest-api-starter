@@ -9,8 +9,8 @@ import static org.junit.Assert.assertNull;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericBridgeTest;
 import com.monogramm.starter.persistence.media.entity.Media;
-import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.permission.dao.PermissionRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +59,7 @@ public class MediaBridgeTest extends AbstractGenericBridgeTest<Media, MediaDto, 
   }
 
   /**
-   * Test method for {@link MediaBridge#MediaBridge(IUserRepository)}.
+   * Test method for {@link MediaBridge#MediaBridge(UserRepository)}.
    */
   @Test
   public void testMediaBridgeIUserRepository() {
@@ -69,7 +69,7 @@ public class MediaBridgeTest extends AbstractGenericBridgeTest<Media, MediaDto, 
   }
 
   /**
-   * Test method for {@link MediaBridge#MediaBridge(IUserRepository, IPermissionRepository)}.
+   * Test method for {@link MediaBridge#MediaBridge(UserRepository, PermissionRepository)}.
    */
   @Test
   public void testMediaBridgeNull() {

@@ -9,7 +9,7 @@ import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class RegistrationListener
     extends AbstractMailSendingListener<VerificationToken, OnRegistrationCompleteEvent> {
 
-  private final IVerificationTokenService verificationService;
+  private final VerificationTokenService verificationService;
 
   /**
    * Create a {@link RegistrationListener}.
@@ -44,7 +44,7 @@ public class RegistrationListener
    * @throws IllegalArgumentException if any of the parameters is {@code null}.
    */
   @Autowired
-  public RegistrationListener(IVerificationTokenService verificationService, MessageSource messages,
+  public RegistrationListener(VerificationTokenService verificationService, MessageSource messages,
       JavaMailSender mailSender, Environment env) {
     super(messages, mailSender, env);
 

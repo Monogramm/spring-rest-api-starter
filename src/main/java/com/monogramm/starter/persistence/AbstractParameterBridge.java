@@ -5,7 +5,7 @@
 package com.monogramm.starter.persistence;
 
 import com.monogramm.starter.dto.AbstractParameterDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 /**
  * AbstractParameterBridge.
@@ -28,7 +28,7 @@ public abstract class AbstractParameterBridge<T extends AbstractParameter,
    * 
    * @param userRepository repository to lookup users.
    */
-  public AbstractParameterBridge(IUserRepository userRepository) {
+  public AbstractParameterBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

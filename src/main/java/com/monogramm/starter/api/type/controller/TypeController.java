@@ -6,7 +6,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.type.entity.Type;
 import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
-import com.monogramm.starter.persistence.type.service.ITypeService;
+import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
    */
   @Autowired
   public TypeController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      ITypeService typeService) {
+      TypeService typeService) {
     super(messageSource, eventPublisher, typeService);
   }
 
@@ -128,8 +128,8 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   }
 
   @Override
-  protected ITypeService getService() {
-    return (ITypeService) super.getService();
+  protected TypeService getService() {
+    return (TypeService) super.getService();
   }
 
   @Override

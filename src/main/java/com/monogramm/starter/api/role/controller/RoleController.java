@@ -6,7 +6,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.role.RoleDto;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
-import com.monogramm.starter.persistence.role.service.IRoleService;
+import com.monogramm.starter.persistence.role.service.RoleService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
    */
   @Autowired
   public RoleController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IRoleService roleService) {
+      RoleService roleService) {
     super(messageSource, eventPublisher, roleService);
   }
 
@@ -128,8 +128,8 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   }
 
   @Override
-  protected IRoleService getService() {
-    return (IRoleService) super.getService();
+  protected RoleService getService() {
+    return (RoleService) super.getService();
   }
 
   @Override

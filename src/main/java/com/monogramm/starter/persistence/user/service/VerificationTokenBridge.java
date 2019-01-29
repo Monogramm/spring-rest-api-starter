@@ -6,7 +6,7 @@ package com.monogramm.starter.persistence.user.service;
 
 import com.monogramm.starter.dto.user.VerificationTokenDto;
 import com.monogramm.starter.persistence.AbstractTokenBridge;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class VerificationTokenBridge
    * @param userRepository repository to lookup users.
    */
   @Autowired
-  public VerificationTokenBridge(IUserRepository userRepository) {
+  public VerificationTokenBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

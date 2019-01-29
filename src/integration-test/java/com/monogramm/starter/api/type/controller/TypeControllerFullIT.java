@@ -12,7 +12,7 @@ import com.monogramm.starter.config.data.InitialDataLoader;
 import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.type.entity.Type;
 import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
-import com.monogramm.starter.persistence.type.service.ITypeService;
+import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.net.URISyntaxException;
@@ -73,7 +73,7 @@ public class TypeControllerFullIT extends AbstractControllerFullIT {
   private static final String DISPLAYNAME = TypeControllerFullIT.class.getSimpleName();
 
   @Autowired
-  private ITypeService typeService;
+  private TypeService typeService;
 
   private User testCreatedBy;
   private User testOwner;

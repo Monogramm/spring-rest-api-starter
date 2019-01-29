@@ -6,7 +6,7 @@ package com.monogramm.starter.persistence.user.service;
 
 import com.monogramm.starter.dto.user.PasswordResetTokenDto;
 import com.monogramm.starter.persistence.AbstractTokenBridgeTest;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 
 /**
@@ -23,7 +23,7 @@ public class PasswordResetTokenBridgeTest extends
   }
 
   @Override
-  protected PasswordResetTokenBridge buildTestBridge(IUserRepository userRepository) {
+  protected PasswordResetTokenBridge buildTestBridge(UserRepository userRepository) {
     return new PasswordResetTokenBridge(userRepository);
   }
 

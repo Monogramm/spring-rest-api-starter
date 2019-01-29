@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.jayway.awaitility.Awaitility;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   protected User owner;
 
   @Autowired
-  private IUserRepository userRepository;
+  private UserRepository userRepository;
 
   @Autowired
   private R repository;

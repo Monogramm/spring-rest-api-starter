@@ -7,7 +7,7 @@ package com.monogramm.starter.persistence.permission.service;
 import com.monogramm.starter.dto.permission.PermissionDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.permission.entity.Permission;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +39,7 @@ public class PermissionBridge extends AbstractGenericBridge<Permission, Permissi
    * @param userRepository repository to lookup users.
    */
   @Autowired
-  public PermissionBridge(IUserRepository userRepository) {
+  public PermissionBridge(UserRepository userRepository) {
     super(userRepository);
   }
 
