@@ -1,0 +1,21 @@
+# Autodetect text files
+* text=auto
+
+# ...Unless the name matches the following
+# overriding patterns
+
+# Definitely text files 
+*.txt text
+*.svg text
+*.md text
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.sh text eol=lf
+*.yml text eol=lf
+*.properties text eol=lf
+
+# Ensure those won't be messed up with
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.data binary
