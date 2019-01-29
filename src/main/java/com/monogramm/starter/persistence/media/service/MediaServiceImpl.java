@@ -7,11 +7,11 @@ package com.monogramm.starter.persistence.media.service;
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
-import com.monogramm.starter.persistence.media.config.FileStorageProperties;
 import com.monogramm.starter.persistence.media.dao.MediaRepository;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.exception.MediaStorageException;
+import com.monogramm.starter.persistence.media.properties.FileStorageProperties;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 

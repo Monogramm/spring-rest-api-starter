@@ -1,6 +1,6 @@
 package com.monogramm;
 
-import com.monogramm.starter.persistence.media.config.FileStorageProperties;
+import com.monogramm.starter.persistence.media.properties.FileStorageProperties;
 
 import java.io.IOException;
 import java.io.OutputStream;

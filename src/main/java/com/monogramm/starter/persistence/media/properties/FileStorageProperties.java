@@ -2,15 +2,20 @@
  * Creation by madmath03 the 2019-01-24.
  */
 
-package com.monogramm.starter.persistence.media.config;
+package com.monogramm.starter.persistence.media.properties;
+
+import com.monogramm.starter.config.properties.ApplicationProperties;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * FileStorageProperties.
+ * 
+ * @see ApplicationProperties
  * 
  * @see <a href=
  *      "https://www.callicoder.com/spring-boot-file-upload-download-rest-api-example/">Spring Boot
@@ -19,8 +24,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author madmath03
  */
 @ConfigurationProperties(prefix = "application.file")
+@Validated
 public class FileStorageProperties {
 
+  /**
+   * The Media upload directory.
+   */
   private Path uploadDir;
 
   /**
@@ -52,16 +61,16 @@ public class FileStorageProperties {
   }
 
   /**
-   * Get the {@link #uploadDir}.
+   * Get the media upload directory.
    * 
-   * @return the {@link #uploadDir}.
+   * @return the upload directory.
    */
   public Path getUploadDir() {
     return uploadDir;
   }
 
   /**
-   * Set the {@link #uploadDir}.
+   * Set the upload directory.
    * 
    * @param uploadDir the {@link #uploadDir} to set.
    */

@@ -26,7 +26,6 @@ import org.junit.Test;
 public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.MediaBuilder> {
 
   private static final String DISPLAYNAME = "TEST";
-  private static final String PATH = UUID.randomUUID().toString();
 
   @Override
   protected MediaBuilder buildTestEntityBuilder() {
@@ -52,7 +51,7 @@ public class MediaBuilderTest extends AbstractGenericEntityBuilderTest<Media.Med
    */
   @Test
   public void testGetBuilderString() {
-    Media.MediaBuilder builder = Media.builder(DISPLAYNAME, PATH);
+    Media.MediaBuilder builder = Media.builder(DISPLAYNAME);
 
     assertNotNull(builder);
 

@@ -60,24 +60,11 @@ public class Media extends AbstractGenericEntity {
    * Get a new {@link MediaBuilder}.
    * 
    * @param name the name of your record being built.
-   * @param path the path of your record being built.
    *
    * @return a new {@link MediaBuilder}.
    */
-  public static MediaBuilder builder(final String name, final String path) {
-    return new MediaBuilder(name, path);
-  }
-
-  /**
-   * Get a new {@link MediaBuilder}.
-   * 
-   * @param name the name of your record being built.
-   * @param path the path of your record being built.
-   *
-   * @return a new {@link MediaBuilder}.
-   */
-  public static MediaBuilder builder(final String name, final Path path) {
-    return new MediaBuilder(name, path);
+  public static MediaBuilder builder(final String name) {
+    return new MediaBuilder(name);
   }
 
 
@@ -340,14 +327,14 @@ public class Media extends AbstractGenericEntity {
 
     return equals;
   }
-  
+
   @Override
   protected void preInsert() {
     super.preInsert();
 
-    // Set the path as 
-    final UUID entityId = this.getId();
-    this.setPath(entityId.toString());
+    // Set the path as a unique ID
+    final UUID pathId = UUID.randomUUID();
+    this.setPath(pathId.toString());
   }
 
   /**
@@ -369,12 +356,10 @@ public class Media extends AbstractGenericEntity {
      * Create a {@link MediaBuilder}.
      * 
      * @param name the name of your record being built.
-     * @param path the path of your record being built.
      */
-    private MediaBuilder(final String name, final String path) {
+    private MediaBuilder(final String name) {
       this();
       this.name(name);
-      this.path(path);
     }
 
     /**
@@ -383,7 +368,7 @@ public class Media extends AbstractGenericEntity {
      * @param name the name of your record being built.
      * @param path the path of your record being built.
      */
-    private MediaBuilder(final String name, final Path path) {
+    private MediaBuilder(final String name, final String path) {
       this();
       this.name(name);
       this.path(path);

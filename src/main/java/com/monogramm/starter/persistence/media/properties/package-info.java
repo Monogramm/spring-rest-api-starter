@@ -3,8 +3,8 @@
  */
 
 /**
- * The <em>Medias</em> related configuration.
+ * The <em>Medias</em> related configuration properties.
  * 
  * @author madmath03
  */
-package com.monogramm.starter.persistence.media.config;
+package com.monogramm.starter.persistence.media.properties;

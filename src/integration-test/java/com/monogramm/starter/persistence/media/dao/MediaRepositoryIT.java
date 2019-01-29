@@ -33,23 +33,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link MediaReposiroty} Integration Test.
+ * {@link MediaRepository} Integration Test.
  * 
  * @author madmath03
  */
-public class MediaReposirotyIT extends AbstractGenericRepositoryIT<Media, MediaRepository> {
+public class MediaRepositoryIT extends AbstractGenericRepositoryIT<Media, MediaRepository> {
 
   /**
-   * Logger for {@link MediaReposirotyIT}.
+   * Logger for {@link MediaRepositoryIT}.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(MediaReposirotyIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MediaRepositoryIT.class);
 
-  private static final String PREFIX = MediaReposirotyIT.class.getSimpleName() + "_";
+  private static final String PREFIX = MediaRepositoryIT.class.getSimpleName() + "_";
 
-  private static final String DISPLAYNAME = MediaReposirotyIT.class.getSimpleName();
-  private static final String PATH = "data/integration-test/media";
+  private static final String DISPLAYNAME = MediaRepositoryIT.class.getSimpleName();
 
-  private static final Path TEST_MEDIA_PATH = Paths.get(PATH);
+  private static final String TEST_MEDIA_PATH_VALUE = "data/integration-test/media";
+  private static final Path TEST_MEDIA_PATH = Paths.get(TEST_MEDIA_PATH_VALUE);
 
   private Path tempDirectory;
   private Path tempFile;
@@ -121,7 +121,7 @@ public class MediaReposirotyIT extends AbstractGenericRepositoryIT<Media, MediaR
 
   @Override
   protected Media buildTestEntity() {
-    return Media.builder(DISPLAYNAME, PATH).build();
+    return Media.builder(DISPLAYNAME).build();
   }
 
   @Override
@@ -230,8 +230,8 @@ public class MediaReposirotyIT extends AbstractGenericRepositoryIT<Media, MediaR
    */
   @Test
   public void testFindByNameIgnoreCaseNonUnique() {
-    addTestEntity(Media.builder(DISPLAYNAME + "1", PATH).build());
-    addTestEntity(Media.builder(DISPLAYNAME + "2", PATH).build());
+    addTestEntity(Media.builder(DISPLAYNAME + "1").build());
+    addTestEntity(Media.builder(DISPLAYNAME + "2").build());
 
     assertNull(getRepository().findByNameIgnoreCase(DISPLAYNAME));
   }

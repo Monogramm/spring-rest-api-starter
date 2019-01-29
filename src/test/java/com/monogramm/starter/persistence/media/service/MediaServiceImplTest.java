@@ -20,10 +20,10 @@ import static org.mockito.Mockito.when;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericServiceTest;
 import com.monogramm.starter.persistence.EntityNotFoundException;
-import com.monogramm.starter.persistence.media.config.FileStorageProperties;
 import com.monogramm.starter.persistence.media.dao.MediaRepository;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
+import com.monogramm.starter.persistence.media.properties.FileStorageProperties;
 import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
 import com.monogramm.starter.persistence.user.dao.IUserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
@@ -57,9 +57,9 @@ public class MediaServiceImplTest
   private static final String PREFIX = MediaServiceImplTest.class.getSimpleName() + "_";
 
   private static final String DISPLAYNAME = MediaServiceImplTest.class.getSimpleName();
-  private static final String PATH = "data/test/media";
 
-  private static final Path TEST_MEDIA_PATH = Paths.get(PATH);
+  private static final String TEST_MEDIA_PATH_VALUE = "data/test/media";
+  private static final Path TEST_MEDIA_PATH = Paths.get(TEST_MEDIA_PATH_VALUE);
   private static final FileStorageProperties STORAGE_PROPERTIES =
       new FileStorageProperties(TEST_MEDIA_PATH);
 
@@ -92,9 +92,9 @@ public class MediaServiceImplTest
   public void tearDown() throws Exception {
     super.tearDown();
 
-    this.tempFile.toFile().delete();
+    Files.delete(tempFile);
     FileUtils.cleanDirectory(tempDirectory.toFile());
-    this.tempDirectory.toFile().delete();
+    Files.delete(tempDirectory);
 
     this.tempExistingFile.toFile().delete();
     this.tempExistingDirectory.toFile().delete();
@@ -118,7 +118,7 @@ public class MediaServiceImplTest
 
   @Override
   protected Media buildTestEntity() {
-    return Media.builder(DISPLAYNAME, PATH).id(ID).build();
+    return Media.builder(DISPLAYNAME).path(UUID.randomUUID().toString()).id(ID).build();
   }
 
   @Override

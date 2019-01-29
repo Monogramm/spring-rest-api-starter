@@ -2,7 +2,7 @@
  * Creation by madmath03 the 2019-01-26.
  */
 
-package com.monogramm.starter.api;
+package com.monogramm.starter.api.media.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -14,10 +14,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.monogramm.starter.api.AbstractGenericController;
+import com.monogramm.starter.api.AbstractGenericControllerTest;
 import com.monogramm.starter.api.media.controller.MediaController;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
-import com.monogramm.starter.persistence.media.dao.MediaReposirotyIT;
+import com.monogramm.starter.persistence.media.dao.MediaRepositoryIT;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.service.MediaBridge;
@@ -56,7 +58,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class MediaControllerTest extends AbstractGenericControllerTest<Media, MediaDto> {
 
   /**
-   * Logger for {@link MediaReposirotyIT}.
+   * Logger for {@link MediaRepositoryIT}.
    */
   private static final Logger LOG = LoggerFactory.getLogger(MediaControllerTest.class);
 
@@ -64,7 +66,6 @@ public class MediaControllerTest extends AbstractGenericControllerTest<Media, Me
 
   private static final UUID ID = UUID.randomUUID();
   private static final String DISPLAYNAME = "Foo";
-  private static final String PATH = UUID.randomUUID().toString();
 
   private Path tempDirectory;
   private Path tempFile;
@@ -155,7 +156,7 @@ public class MediaControllerTest extends AbstractGenericControllerTest<Media, Me
 
   @Override
   protected Media buildTestEntity() {
-    return Media.builder(DISPLAYNAME, PATH).id(ID).build();
+    return Media.builder(DISPLAYNAME).id(ID).build();
   }
 
   @Override
@@ -181,7 +182,7 @@ public class MediaControllerTest extends AbstractGenericControllerTest<Media, Me
 
   /**
    * Test method for
-   * {@link MediaController#loadMediaById(String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
+   * {@link MediaController#downloadMediaById(String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
    * 
    * @throws IOException
    * @throws FileNotFoundException
@@ -198,7 +199,7 @@ public class MediaControllerTest extends AbstractGenericControllerTest<Media, Me
     when(mockServletContext.getMimeType(resource.getFile().getAbsolutePath())).thenReturn(null);
 
     final ResponseEntity<Resource> actual =
-        getController().loadMediaById(id.toString(), httpMockRequest, getMockResponse());
+        getController().downloadMediaById(id.toString(), httpMockRequest, getMockResponse());
 
     verify(mockServletContext, times(1)).getMimeType(resource.getFile().getAbsolutePath());
     verifyNoMoreInteractions(mockServletContext);

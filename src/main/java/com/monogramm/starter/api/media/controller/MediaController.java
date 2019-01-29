@@ -198,14 +198,6 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
   }
 
   @Override
-  @PostMapping(value = CONTROLLER_PATH, consumes = "application/json")
-  @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
-  public ResponseEntity<MediaDto> addData(Authentication authentication, @RequestBody MediaDto dto,
-      UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.addData(authentication, dto, builder, response);
-  }
-
-  @Override
   @PutMapping(value = CONTROLLER_PATH + "/{id}", consumes = "application/json")
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<MediaDto> updateData(Authentication authentication,
@@ -279,7 +271,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
    */
   @GetMapping(value = DOWNLOAD_PATH + "/{id}")
   @PreAuthorize(value = "permitAll()")
-  public ResponseEntity<Resource> loadMediaById(@PathVariable @ValidUuid String id,
+  public ResponseEntity<Resource> downloadMediaById(@PathVariable @ValidUuid String id,
       HttpServletRequest request, HttpServletResponse response) {
     // Convert ID
     final UUID uniqueId = UUID.fromString(id);
@@ -352,7 +344,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
    * 
    *         </ul>
    */
-  @PostMapping(value = UPLOAD_PATH, consumes = "multipart/form-data")
+  @PostMapping(value = UPLOAD_PATH, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize(value = "hasAuthority('" + AUTH_CREATE + "')")
   public List<MediaDto> uploadMultipleMedia(Authentication authentication,
       @RequestParam("files") MultipartFile... files) {
