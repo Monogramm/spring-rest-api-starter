@@ -6,8 +6,10 @@ package com.monogramm.starter.dto.media;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.dto.AbstractGenericDtoTest;
 
 import java.util.Date;
@@ -170,4 +172,25 @@ public class MediaDtoTest extends AbstractGenericDtoTest<MediaDto> {
 
     assertEquals(name, this.getDto().getName());
   }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToCopyAlteredName() {
+    assertNotNull(getDto());
+
+    final MediaDto otherDto = this.buildTestDto(getDto());
+    assertNotNull(otherDto);
+
+    final String name = this.getClass().getSimpleName();
+    getDto().setName(name);
+    assertEquals(1, getDto().compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(getDto()));
+
+    otherDto.setName(name);
+    assertEquals(0, getDto().compareTo(otherDto));
+    assertEquals(0, otherDto.compareTo(getDto()));
+  }
+
 }

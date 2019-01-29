@@ -5,8 +5,10 @@
 package com.monogramm.starter.dto.permission;
 
 import com.monogramm.starter.dto.AbstractGenericDto;
+import com.monogramm.starter.dto.AbstractGenericDtoComparator;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -17,6 +19,47 @@ import java.util.Objects;
  * @author madmath03
  */
 public class PermissionDto extends AbstractGenericDto {
+
+  /**
+   * Default {@link PermissionDto} comparator.
+   * 
+   * <p>
+   * Compares {@link PermissionDto} by their name, then switch to
+   * {@link AbstractGenericDtoComparator} compare.
+   * </p>
+   * 
+   * @author madmath03
+   */
+  public static class PermissionDtoComparator extends AbstractGenericDtoComparator {
+
+    @Override
+    public int compare(AbstractGenericDto o1, AbstractGenericDto o2) {
+      final int compare;
+
+      if (o1 instanceof PermissionDto && o2 instanceof PermissionDto) {
+        final int compareName =
+            compareOnString(((PermissionDto) o1).getName(), ((PermissionDto) o2).getName());
+
+        if (compareName != 0) {
+          compare = compareName;
+        } else {
+          compare = super.compare(o1, o2);
+        }
+      } else {
+        compare = super.compare(o1, o2);
+      }
+
+      return compare;
+    }
+
+  }
+
+  /**
+   * Default {@link PermissionDto} comparator.
+   */
+  public static final Comparator<AbstractGenericDto> DEFAULT_PERMISSION_DTO_COMPARATOR =
+      new PermissionDtoComparator();
+
   /**
    * The {@code serialVersionUID}.
    */
@@ -89,6 +132,19 @@ public class PermissionDto extends AbstractGenericDto {
     }
 
     return equals;
+  }
+
+  @Override
+  public int compareTo(AbstractGenericDto other) {
+    final int compare;
+
+    if (other instanceof PermissionDto) {
+      compare = DEFAULT_PERMISSION_DTO_COMPARATOR.compare(this, other);
+    } else {
+      compare = super.compareTo(other);
+    }
+
+    return compare;
   }
 
 }

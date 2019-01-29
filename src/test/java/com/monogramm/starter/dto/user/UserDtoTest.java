@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.monogramm.starter.dto.AbstractGenericDto;
 import com.monogramm.starter.dto.AbstractGenericDtoTest;
 import com.monogramm.starter.persistence.role.dao.IRoleRepository;
 
@@ -284,4 +285,25 @@ public class UserDtoTest extends AbstractGenericDtoTest<UserDto> {
     this.getDto().setRole(id);
     assertEquals(id, this.getDto().getRole());
   }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToCopyAlteredUsername() {
+    assertNotNull(getDto());
+
+    final UserDto otherDto = this.buildTestDto(getDto());
+    assertNotNull(otherDto);
+
+    final String name = this.getClass().getSimpleName();
+    getDto().setUsername(name);
+    assertEquals(1, getDto().compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(getDto()));
+
+    otherDto.setUsername(name);
+    assertEquals(0, getDto().compareTo(otherDto));
+    assertEquals(0, otherDto.compareTo(getDto()));
+  }
+
 }

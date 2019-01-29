@@ -204,7 +204,7 @@ public abstract class AbstractParameterDtoTest<T extends AbstractParameterDto>
 
   /**
    * Test method for
-   * {@link AbstractParameterDto#AbstractGenericTokenDto(com.monogramm.starter.dto.AbstractParameterDto)}.
+   * {@link AbstractParameterDto#AbstractGenericTokenDto(com.monogramm.starter.getDto().AbstractParameterDto)}.
    */
   @Test
   public void testAbstractGenericTokenDtoAbstractGenericTokenDto() {
@@ -296,6 +296,26 @@ public abstract class AbstractParameterDtoTest<T extends AbstractParameterDto>
     final String test = "TEST";
     this.getDto().setValue(test);
     assertEquals(test, this.getDto().getValue());
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToCopyAlteredName() {
+    assertNotNull(getDto());
+
+    final T otherDto = this.buildTestDto(getDto());
+    assertNotNull(otherDto);
+
+    final String name = this.getClass().getSimpleName();
+    getDto().setName(name);
+    assertEquals(1, getDto().compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(getDto()));
+
+    otherDto.setName(name);
+    assertEquals(0, getDto().compareTo(otherDto));
+    assertEquals(0, otherDto.compareTo(getDto()));
   }
 
 }

@@ -5,8 +5,10 @@
 package com.monogramm.starter.dto.role;
 
 import com.monogramm.starter.dto.AbstractGenericDto;
+import com.monogramm.starter.dto.AbstractGenericDtoComparator;
 import com.monogramm.starter.persistence.role.entity.Role;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,6 +20,46 @@ import java.util.UUID;
  * @author madmath03
  */
 public class RoleDto extends AbstractGenericDto {
+
+  /**
+   * Default {@link RoleDto} comparator.
+   * 
+   * <p>
+   * Compares {@link RoleDto} by their name, then switch to {@link AbstractGenericDtoComparator}
+   * compare.
+   * </p>
+   * 
+   * @author madmath03
+   */
+  public static class RoleDtoComparator extends AbstractGenericDtoComparator {
+
+    @Override
+    public int compare(AbstractGenericDto o1, AbstractGenericDto o2) {
+      final int compare;
+
+      if (o1 instanceof RoleDto && o2 instanceof RoleDto) {
+        final int compareName = compareOnString(((RoleDto) o1).getName(), ((RoleDto) o2).getName());
+
+        if (compareName != 0) {
+          compare = compareName;
+        } else {
+          compare = super.compare(o1, o2);
+        }
+      } else {
+        compare = super.compare(o1, o2);
+      }
+
+      return compare;
+    }
+
+  }
+
+  /**
+   * Default {@link RoleDto} comparator.
+   */
+  public static final Comparator<AbstractGenericDto> DEFAULT_ROLE_DTO_COMPARATOR =
+      new RoleDtoComparator();
+
   /**
    * The {@code serialVersionUID}.
    */
@@ -114,6 +156,19 @@ public class RoleDto extends AbstractGenericDto {
     }
 
     return equals;
+  }
+
+  @Override
+  public int compareTo(AbstractGenericDto other) {
+    final int compare;
+
+    if (other instanceof RoleDto) {
+      compare = DEFAULT_ROLE_DTO_COMPARATOR.compare(this, other);
+    } else {
+      compare = super.compareTo(other);
+    }
+
+    return compare;
   }
 
 }

@@ -6,6 +6,7 @@ package com.monogramm.starter.dto;
 
 import com.monogramm.starter.persistence.ParameterType;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -14,6 +15,46 @@ import java.util.Objects;
  * @author madmath03
  */
 public abstract class AbstractParameterDto extends AbstractGenericDto {
+
+  /**
+   * Default {@link AbstractParameterDto} comparator.
+   * 
+   * <p>
+   * Compares {@link AbstractParameterDto} by their name, then switch to
+   * {@link AbstractGenericDtoComparator} compare.
+   * </p>
+   * 
+   * @author madmath03
+   */
+  public static class AbstractParameterDtoComparator extends AbstractGenericDtoComparator {
+
+    @Override
+    public int compare(AbstractGenericDto o1, AbstractGenericDto o2) {
+      final int compare;
+
+      if (o1 instanceof AbstractParameterDto && o2 instanceof AbstractParameterDto) {
+        final int compareName = compareOnString(((AbstractParameterDto) o1).getName(),
+            ((AbstractParameterDto) o2).getName());
+
+        if (compareName != 0) {
+          compare = compareName;
+        } else {
+          compare = super.compare(o1, o2);
+        }
+      } else {
+        compare = super.compare(o1, o2);
+      }
+
+      return compare;
+    }
+
+  }
+
+  /**
+   * Default {@link AbstractParameterDto} comparator.
+   */
+  public static final Comparator<AbstractGenericDto> DEFAULT_ABSTRACT_PARAMETER_DTO_COMPARATOR =
+      new AbstractParameterDtoComparator();
 
   /**
    * The {@code serialVersionUID}.
@@ -180,6 +221,19 @@ public abstract class AbstractParameterDto extends AbstractGenericDto {
     }
 
     return equals;
+  }
+
+  @Override
+  public int compareTo(AbstractGenericDto other) {
+    final int compare;
+
+    if (other instanceof AbstractParameterDto) {
+      compare = DEFAULT_ABSTRACT_PARAMETER_DTO_COMPARATOR.compare(this, other);
+    } else {
+      compare = super.compareTo(other);
+    }
+
+    return compare;
   }
 
 }

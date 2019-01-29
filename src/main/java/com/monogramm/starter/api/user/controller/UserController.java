@@ -238,6 +238,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<UserDto> updateData(Authentication authentication,
       @PathVariable @ValidUuid String id, @RequestBody UserDto dto) {
+    // TODO If user does not have ROLES_LIST authority, forbid role update
     return super.updateData(authentication, id, dto);
   }
 

@@ -5,8 +5,10 @@
 package com.monogramm.starter.dto.user;
 
 import com.monogramm.starter.dto.AbstractGenericDto;
+import com.monogramm.starter.dto.AbstractGenericDtoComparator;
 import com.monogramm.starter.persistence.user.entity.User;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,6 +20,47 @@ import java.util.UUID;
  * @author madmath03
  */
 public class UserDto extends AbstractGenericDto {
+
+  /**
+   * Default {@link UserDto} comparator.
+   * 
+   * <p>
+   * Compares {@link UserDto} by their name, then switch to {@link AbstractGenericDtoComparator}
+   * compare.
+   * </p>
+   * 
+   * @author madmath03
+   */
+  public static class UserDtoComparator extends AbstractGenericDtoComparator {
+
+    @Override
+    public int compare(AbstractGenericDto o1, AbstractGenericDto o2) {
+      final int compare;
+
+      if (o1 instanceof UserDto && o2 instanceof UserDto) {
+        final int compareName =
+            compareOnString(((UserDto) o1).getUsername(), ((UserDto) o2).getUsername());
+
+        if (compareName != 0) {
+          compare = compareName;
+        } else {
+          compare = super.compare(o1, o2);
+        }
+      } else {
+        compare = super.compare(o1, o2);
+      }
+
+      return compare;
+    }
+
+  }
+
+  /**
+   * Default {@link UserDto} comparator.
+   */
+  public static final Comparator<AbstractGenericDto> DEFAULT_USER_DTO_COMPARATOR =
+      new UserDtoComparator();
+
   /**
    * The {@code serialVersionUID}.
    */
@@ -217,6 +260,19 @@ public class UserDto extends AbstractGenericDto {
     }
 
     return equals;
+  }
+
+  @Override
+  public int compareTo(AbstractGenericDto other) {
+    final int compare;
+
+    if (other instanceof UserDto) {
+      compare = DEFAULT_USER_DTO_COMPARATOR.compare(this, other);
+    } else {
+      compare = super.compareTo(other);
+    }
+
+    return compare;
   }
 
 }

@@ -6,8 +6,10 @@ package com.monogramm.starter.dto.media;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.monogramm.starter.dto.AbstractGenericDto;
+import com.monogramm.starter.dto.AbstractGenericDtoComparator;
 import com.monogramm.starter.persistence.media.entity.Media;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 
@@ -21,6 +23,47 @@ import org.springframework.web.multipart.MultipartFile;
  * @author madmath03
  */
 public class MediaDto extends AbstractGenericDto {
+
+  /**
+   * Default {@link MediaDto} comparator.
+   * 
+   * <p>
+   * Compares {@link MediaDto} by their name, then switch to {@link AbstractGenericDtoComparator}
+   * compare.
+   * </p>
+   * 
+   * @author madmath03
+   */
+  public static class MediaDtoComparator extends AbstractGenericDtoComparator {
+
+    @Override
+    public int compare(AbstractGenericDto o1, AbstractGenericDto o2) {
+      final int compare;
+
+      if (o1 instanceof MediaDto && o2 instanceof MediaDto) {
+        final int compareName =
+            compareOnString(((MediaDto) o1).getName(), ((MediaDto) o2).getName());
+
+        if (compareName != 0) {
+          compare = compareName;
+        } else {
+          compare = super.compare(o1, o2);
+        }
+      } else {
+        compare = super.compare(o1, o2);
+      }
+
+      return compare;
+    }
+
+  }
+
+  /**
+   * Default {@link MediaDto} comparator.
+   */
+  public static final Comparator<AbstractGenericDto> DEFAULT_MEDIA_DTO_COMPARATOR =
+      new MediaDtoComparator();
+
   /**
    * The {@code serialVersionUID}.
    */
@@ -246,6 +289,19 @@ public class MediaDto extends AbstractGenericDto {
     }
 
     return equals;
+  }
+
+  @Override
+  public int compareTo(AbstractGenericDto other) {
+    final int compare;
+
+    if (other instanceof MediaDto) {
+      compare = DEFAULT_MEDIA_DTO_COMPARATOR.compare(this, other);
+    } else {
+      compare = super.compareTo(other);
+    }
+
+    return compare;
   }
 
 }
