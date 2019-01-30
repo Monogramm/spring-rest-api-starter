@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.config.data;
 
+import com.monogramm.starter.config.properties.DataProperties;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.GenericService;
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.env.Environment;
 
 /**
  * An abstract initial Data Loader.
@@ -68,7 +68,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
   private boolean alreadySetup = false;
 
 
-  private final Environment env;
+  private final DataProperties dataProperties;
   private final MessageSource messageSource;
 
 
@@ -91,7 +91,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
   /**
    * Create a {@link AbstractDataLoader}.
    * 
-   * @param env application environment properties.
+   * @param dataProperties application data properties.
    * @param messageSource the messages i8n source.
    * @param userService the user service.
    * @param roleService the role service.
@@ -100,11 +100,11 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * @param parameterService the parameters service.
    */
   @Autowired
-  public AbstractDataLoader(Environment env, MessageSource messageSource, UserService userService,
-      RoleService roleService, PermissionService permissionService, TypeService typeService,
-      ParameterService parameterService) {
+  public AbstractDataLoader(DataProperties dataProperties, MessageSource messageSource,
+      UserService userService, RoleService roleService, PermissionService permissionService,
+      TypeService typeService, ParameterService parameterService) {
     super();
-    this.env = env;
+    this.dataProperties = dataProperties;
     this.messageSource = messageSource;
 
     this.userService = userService;
@@ -155,7 +155,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     boolean initDone = this.initDefaultData();
 
     // Setup the demo data
-    if (initDone && "true".equalsIgnoreCase(this.env.getProperty("application.data.demo"))) {
+    if (initDone && this.dataProperties.isDemo()) {
       initDone &= this.initDemoData();
     }
 
@@ -199,12 +199,12 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
 
 
   /**
-   * Get the {@link #env}.
+   * Get the {@link #dataProperties}.
    * 
-   * @return the {@link #env}.
+   * @return the {@link #dataProperties}.
    */
-  protected Environment getEnv() {
-    return env;
+  protected DataProperties getDataProperties() {
+    return dataProperties;
   }
 
   /**

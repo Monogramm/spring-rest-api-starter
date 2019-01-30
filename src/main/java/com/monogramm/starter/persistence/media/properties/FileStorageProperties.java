@@ -10,10 +10,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * FileStorageProperties.
+ * File Storage Properties.
  * 
  * @see ApplicationProperties
  * 
@@ -23,12 +24,13 @@ import org.springframework.validation.annotation.Validated;
  * 
  * @author madmath03
  */
+@Configuration
 @ConfigurationProperties(prefix = "application.file")
 @Validated
 public class FileStorageProperties {
 
   /**
-   * The Media upload directory.
+   * {@code application.file.upload_dir} property.
    */
   private Path uploadDir;
 

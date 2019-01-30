@@ -11,6 +11,7 @@ import com.monogramm.starter.api.permission.controller.PermissionController;
 import com.monogramm.starter.api.role.controller.RoleController;
 import com.monogramm.starter.api.type.controller.TypeController;
 import com.monogramm.starter.api.user.controller.UserController;
+import com.monogramm.starter.config.properties.DataProperties;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.permission.entity.Permission;
@@ -32,7 +33,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -85,7 +85,7 @@ public class InitialDataLoader extends AbstractDataLoader {
   /**
    * Create a {@link InitialDataLoader}.
    * 
-   * @param env application environment properties.
+   * @param dataProperties application data properties.
    * @param messageSource the messages i8n source.
    * @param userService the user service.
    * @param roleService the role service.
@@ -94,10 +94,10 @@ public class InitialDataLoader extends AbstractDataLoader {
    * @param parameterService the parameters service.
    */
   @Autowired
-  public InitialDataLoader(Environment env, MessageSource messageSource, UserService userService,
-      RoleService roleService, PermissionService permissionService, TypeService typeService,
-      ParameterService parameterService) {
-    super(env, messageSource, userService, roleService, permissionService, typeService,
+  public InitialDataLoader(DataProperties dataProperties, MessageSource messageSource,
+      UserService userService, RoleService roleService, PermissionService permissionService,
+      TypeService typeService, ParameterService parameterService) {
+    super(dataProperties, messageSource, userService, roleService, permissionService, typeService,
         parameterService);
   }
 
@@ -105,8 +105,7 @@ public class InitialDataLoader extends AbstractDataLoader {
   public boolean initDefaultData() {
     boolean initDone = true;
 
-    this.defaultDomainName =
-        this.getEnv().getProperty("application.data.domain_name", "monogramm.io");
+    this.defaultDomainName = this.getDataProperties().getDomainName();
 
     // Setup the initial types
     initDone &= this.initDefaultTypes();
@@ -232,8 +231,7 @@ public class InitialDataLoader extends AbstractDataLoader {
     final char[] adminPassword;
     final boolean logPassword;
 
-    final String defaultAdminPassword =
-        this.getEnv().getProperty("application.data.admin_password");
+    final String defaultAdminPassword = this.getDataProperties().getAdminPassword();
     if (defaultAdminPassword != null && !defaultAdminPassword.isEmpty()) {
       // Use default admin password if any defined in application properties
       adminPassword = defaultAdminPassword.toCharArray();

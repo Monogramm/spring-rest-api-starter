@@ -180,11 +180,11 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
    */
   protected final void deleteMedia(final Media media) {
     try {
-      if (testEntity != null && testEntity.getId() != null) {
+      if (media != null && media.getId() != null) {
         mediaService.deleteById(testEntity.getId());
       }
     } catch (MediaNotFoundException e) {
-      LOG.trace("Media already deleted: " + testEntity, e);
+      LOG.trace("Media already deleted: " + media, e);
     }
   }
 

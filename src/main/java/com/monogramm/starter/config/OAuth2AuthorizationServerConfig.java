@@ -7,6 +7,7 @@ package com.monogramm.starter.config;
 import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
 import com.monogramm.starter.config.component.CustomPasswordEncoder;
 import com.monogramm.starter.config.component.CustomTokenEnhancer;
+import com.monogramm.starter.config.properties.ApplicationSecurityProperties;
 import com.monogramm.starter.persistence.user.service.UserService;
 import com.monogramm.starter.utils.JwtUtils;
 
@@ -59,6 +60,9 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
 
   @Autowired
   private Environment env;
+
+  @Autowired
+  private ApplicationSecurityProperties applicationSecurityProperties;
 
   @Autowired
   @Qualifier("authenticationManagerBean")
@@ -122,13 +126,15 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
     final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
 
     // Use an asymmetric key
-    boolean asymetricKeySet = JwtUtils.setPrivateKey(env, converter);
+    boolean asymetricKeySet = JwtUtils.setPrivateKey(applicationSecurityProperties.getPrivateKeyPath(),
+        applicationSecurityProperties.getPrivateKeyPassword(), applicationSecurityProperties.getPrivateKeyPair(),
+        converter);
 
     // Use symmetric key as fallback
     if (!asymetricKeySet) {
       LOG.warn("No asymetric key set. Using symmetric key for signing JWT tokens");
 
-      JwtUtils.setSigningKey(env, converter);
+      JwtUtils.setSigningKey(applicationSecurityProperties.getSigningKey(), converter);
     }
 
     converter.setAccessTokenConverter(new JwtConverter());

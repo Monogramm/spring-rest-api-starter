@@ -9,7 +9,6 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -31,18 +30,17 @@ public class JwtUtils {
   /**
    * Set the private key.
    * 
-   * @param env application environment properties.
+   * @param privateKeyPath private key path.
+   * @param privateKeyPassword private key password.
+   * @param privateKeyPair private key pair.
    * @param converter JWT access token converter
    * 
    * @return {@code true} if the private key has been set.
    */
-  public static boolean setPrivateKey(final Environment env,
-      final JwtAccessTokenConverter converter) {
+  public static boolean setPrivateKey(final String privateKeyPath, final String privateKeyPassword,
+      final String privateKeyPair, final JwtAccessTokenConverter converter) {
     boolean keySet = false;
 
-    final String privateKeyPath = env.getProperty("application.security.private-key-path");
-    final String privateKeyPassword = env.getProperty("application.security.private-key-password");
-    final String privateKeyPair = env.getProperty("application.security.private-key-pair");
     if (privateKeyPath != null && privateKeyPassword != null && privateKeyPair != null) {
       /*
        * Private key is expected to be outside of the application classpath.
@@ -57,7 +55,7 @@ public class JwtUtils {
         keySet = true;
         LOG.info("JWT verifier private key loaded.");
       } else {
-        LOG.debug("Private key file was not found at path " + privateKeyPath);
+        LOG.debug("Private key file was not found at path {}", privateKeyPath);
       }
 
     }
@@ -68,16 +66,15 @@ public class JwtUtils {
   /**
    * Set the public key.
    * 
-   * @param env application environment properties.
+   * @param publicKeyPath public key path.
    * @param converter JWT access token converter
    * 
    * @return {@code true} if the public key has been set.
    */
-  public static boolean setPublicKey(final Environment env,
+  public static boolean setPublicKey(final String publicKeyPath,
       final JwtAccessTokenConverter converter) {
     boolean keySet = false;
 
-    final String publicKeyPath = env.getProperty("application.security.public-key-path");
     if (publicKeyPath != null) {
       /*
        * Public key is expected to be outside of the application classpath.
@@ -97,10 +94,10 @@ public class JwtUtils {
           keySet = true;
           LOG.info("JWT verifier public key loaded.");
         } else {
-          LOG.debug("Empty public key read from resource " + resource.getFilename());
+          LOG.debug("Empty public key read from resource {}", resource.getFilename());
         }
       } else {
-        LOG.debug("Public key file was not found at path " + publicKeyPath);
+        LOG.debug("Public key file was not found at path {}", publicKeyPath);
       }
 
     }
@@ -130,17 +127,18 @@ public class JwtUtils {
   /**
    * Set the signing key.
    * 
-   * @param env application environment properties.
+   * @param signingKey symmetric key password.
    * @param converter JWT access token converter
    * 
    * @return {@code true} if the signing key has been set.
    */
-  public static boolean setSigningKey(final Environment env,
+  public static boolean setSigningKey(final String signingKey,
       final JwtAccessTokenConverter converter) {
     boolean keySet = false;
 
-    final String signingKey = env.getProperty("application.security.signing-key", "123");
-    converter.setSigningKey(signingKey);
+    if (signingKey != null) {
+      converter.setSigningKey(signingKey);
+    }
 
     return keySet;
   }

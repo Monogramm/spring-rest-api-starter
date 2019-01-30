@@ -176,11 +176,11 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
    */
   protected final void deleteMedia(final Media media) {
     try {
-      if (testEntity != null && testEntity.getId() != null) {
-        mediaService.deleteById(testEntity.getId());
+      if (media != null && media.getId() != null) {
+        mediaService.deleteById(media.getId());
       }
     } catch (MediaNotFoundException e) {
-      LOG.trace("Media already deleted: " + testEntity, e);
+      LOG.trace("Media already deleted: " + media, e);
     }
   }
 

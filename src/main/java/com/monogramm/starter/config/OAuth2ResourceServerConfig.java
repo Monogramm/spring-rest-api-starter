@@ -6,6 +6,7 @@ package com.monogramm.starter.config;
 
 import com.monogramm.starter.api.oauth.controller.OAuthController;
 import com.monogramm.starter.config.OAuth2GlobalSecurityConfig.JwtConverter;
+import com.monogramm.starter.config.properties.ApplicationSecurityProperties;
 import com.monogramm.starter.utils.JwtUtils;
 
 import org.slf4j.Logger;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
@@ -39,7 +39,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
   private static final Logger LOG = LoggerFactory.getLogger(OAuth2ResourceServerConfig.class);
 
   @Autowired
-  private Environment env;
+  private ApplicationSecurityProperties applicationSecurityProperties;
 
   @Override
   public void configure(ResourceServerSecurityConfigurer config) {
@@ -76,16 +76,20 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
 
     // Use an asymmetric key
-    boolean asymetricKeySet = JwtUtils.setPrivateKey(env, converter);
+    boolean asymetricKeySet =
+        JwtUtils.setPrivateKey(applicationSecurityProperties.getPrivateKeyPath(),
+            applicationSecurityProperties.getPrivateKeyPassword(),
+            applicationSecurityProperties.getPrivateKeyPair(), converter);
 
     // XXX This should not be done if the resource server and authorization server are split
-    asymetricKeySet &= JwtUtils.setPublicKey(env, converter);
+    asymetricKeySet &=
+        JwtUtils.setPublicKey(applicationSecurityProperties.getPublicKeyPath(), converter);
 
     // Use symmetric key as fallback
     if (!asymetricKeySet) {
       LOG.warn("No asymetric key set. Using symmetric key for signing JWT tokens");
 
-      JwtUtils.setSigningKey(env, converter);
+      JwtUtils.setSigningKey(applicationSecurityProperties.getSigningKey(), converter);
     }
 
     converter.setAccessTokenConverter(new JwtConverter());

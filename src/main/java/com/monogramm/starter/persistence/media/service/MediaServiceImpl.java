@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
     implements MediaService {
 
-  private final Path storageLocation;
+  private final FileStorageProperties fileProperties;
 
   /**
    * Create a {@link MediaService}.
@@ -43,17 +43,21 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
    * @param repository the media repository.
    * @param userRepository the user repository.
    * @param authenticationFacade a facade to retrieve the authentication object.
-   * @param storageProperties storage properties
+   * @param fileProperties file storage properties
    */
   @Autowired
   public MediaServiceImpl(MediaRepository repository, UserRepository userRepository,
-      IAuthenticationFacade authenticationFacade, final FileStorageProperties storageProperties) {
+      IAuthenticationFacade authenticationFacade, final FileStorageProperties fileProperties) {
     super(repository, userRepository, new MediaBridge(userRepository), authenticationFacade);
 
-    this.storageLocation = storageProperties.getUploadDir().toAbsolutePath().normalize();
+    if (fileProperties == null) {
+      throw new IllegalArgumentException("File storage properties cannot be null!");
+    }
+    this.fileProperties = fileProperties;
 
     try {
-      Files.createDirectories(this.storageLocation);
+      final Path storageLocation = this.getStorageLocation();
+      Files.createDirectories(storageLocation);
     } catch (Exception e) {
       throw new MediaStorageException(
           "Could not create the directory where the uploaded files will be stored.", e);
@@ -68,6 +72,15 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
   @Override
   public MediaBridge getBridge() {
     return (MediaBridge) super.getBridge();
+  }
+
+  /**
+   * File storage location.
+   * 
+   * @return storage location.
+   */
+  protected Path getStorageLocation() {
+    return this.fileProperties.getUploadDir().toAbsolutePath().normalize();
   }
 
 
@@ -103,6 +116,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
    * @throws NullPointerException if entity or entity UUID is {@code null}
    */
   protected Path getEntityDirectory(final Media entity) {
+    final Path storageLocation = this.getStorageLocation();
     return getEntityDirectory(entity, storageLocation);
   }
 

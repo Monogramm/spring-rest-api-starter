@@ -6,6 +6,10 @@ function generateVerifierKey() {
 	keytool -list -rfc --keystore private.jks | openssl x509 -inform pem -pubkey -noout > public.txt
 }
 
+function generateSigningKey() {
+	ssh-keygen -b 2048 -t rsa -f ./sshkey -q -N ""
+}
+
 function build {
 	mvn clean install
 }
@@ -21,7 +25,7 @@ function release {
 
 function usage {
     echo "Simple tools to help development and release"
-    echo "USAGE: $0 [ build | run | release | jks [alias password] ]"
+    echo "USAGE: $0 [ build | run | release | keys [alias password] ]"
 }
 
 
@@ -35,8 +39,9 @@ case $1 in
     release)
         release
         ;;
-    jks)
+    keys)
         generateVerifierKey "${@:2}"
+        generateSigningKey
         ;;
     *)
         usage

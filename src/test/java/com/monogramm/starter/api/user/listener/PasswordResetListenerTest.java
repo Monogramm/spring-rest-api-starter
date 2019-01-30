@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.api.user.event.OnPasswordResetEvent;
+import com.monogramm.starter.config.properties.EmailProperties;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
 import com.monogramm.starter.persistence.user.service.PasswordResetTokenService;
@@ -25,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -42,7 +42,7 @@ public class PasswordResetListenerTest {
 
   private JavaMailSender mailSender;
 
-  private Environment env;
+  private EmailProperties emailProperties;
 
   private PasswordResetListener listener;
 
@@ -60,10 +60,11 @@ public class PasswordResetListenerTest {
     mailSender = mock(JavaMailSender.class);
     assertNotNull(mailSender);
 
-    env = mock(Environment.class);
-    assertNotNull(env);
+    emailProperties = new EmailProperties();
+    assertNotNull(emailProperties);
 
-    this.listener = new PasswordResetListener(passwordResetTokenService, messages, mailSender, env);
+    this.listener =
+        new PasswordResetListener(passwordResetTokenService, messages, mailSender, emailProperties);
   }
 
   /**
@@ -74,14 +75,14 @@ public class PasswordResetListenerTest {
     Mockito.reset(passwordResetTokenService);
     Mockito.reset(messages);
     Mockito.reset(mailSender);
-    Mockito.reset(env);
+    this.emailProperties = null;
 
     this.listener = null;
   }
 
   /**
    * Test method for
-   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, EmailProperties)}.
    */
   @Test
   public void testPasswordResetListener() {
@@ -90,34 +91,34 @@ public class PasswordResetListenerTest {
 
   /**
    * Test method for
-   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, EmailProperties)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testPasswordResetListenerNullTokenService() {
-    new PasswordResetListener(null, messages, mailSender, env);
+    new PasswordResetListener(null, messages, mailSender, emailProperties);
   }
 
   /**
    * Test method for
-   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, EmailProperties)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testPasswordResetListenerNullMessageSource() {
-    new PasswordResetListener(passwordResetTokenService, null, mailSender, env);
+    new PasswordResetListener(passwordResetTokenService, null, mailSender, emailProperties);
   }
 
   /**
    * Test method for
-   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, EmailProperties)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testPasswordResetListenerNullJavaMailSender() {
-    new PasswordResetListener(passwordResetTokenService, messages, null, env);
+    new PasswordResetListener(passwordResetTokenService, messages, null, emailProperties);
   }
 
   /**
    * Test method for
-   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, Environment)}.
+   * {@link PasswordResetListener#PasswordResetListener(PasswordResetTokenService, MessageSource, JavaMailSender, EmailProperties)}.
    */
   @Test(expected = IllegalArgumentException.class)
   public void testPasswordResetListenerNullEnvironment() {
@@ -144,7 +145,8 @@ public class PasswordResetListenerTest {
     when(messages.getMessage(any(String.class), any(String[].class), any(Locale.class)))
         .thenReturn(message);
 
-    when(env.getProperty("application.email.no_reply")).thenReturn("no_replay@dummy.com");
+    this.emailProperties.setAppTitle("My App Unit Test");
+    this.emailProperties.setNoReply("no_reply@dummy.com");
 
     // Operation
     this.listener.onApplicationEvent(event);
@@ -157,10 +159,6 @@ public class PasswordResetListenerTest {
     verify(messages, times(2)).getMessage(any(String.class), any(String[].class),
         any(Locale.class));
     verifyNoMoreInteractions(passwordResetTokenService);
-
-    verify(env, times(1)).getProperty("spring.application.name");
-    verify(env, times(1)).getProperty("application.email.no_reply");
-    verifyNoMoreInteractions(env);
 
     verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
     verifyNoMoreInteractions(mailSender);

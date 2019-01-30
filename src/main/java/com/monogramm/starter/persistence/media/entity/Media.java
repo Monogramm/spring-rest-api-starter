@@ -362,18 +362,6 @@ public class Media extends AbstractGenericEntity {
       this.name(name);
     }
 
-    /**
-     * Create a {@link MediaBuilder}.
-     * 
-     * @param name the name of your record being built.
-     * @param path the path of your record being built.
-     */
-    private MediaBuilder(final String name, final String path) {
-      this();
-      this.name(name);
-      this.path(path);
-    }
-
     @Override
     protected final Media buildEntity() {
       return new Media();

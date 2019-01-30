@@ -1,21 +1,16 @@
 {"properties": [
   {
-    "name": "spring.security.debug",
-    "type": "java.lang.Boolean",
-    "description": "Enable Spring Security debug mode"
-  },
-  {
     "name": "application.name",
     "type": "java.lang.String",
     "description": "Name of the application. Defaults to Maven project artifact id"
   },
   {
-    "name": "build.version",
+    "name": "application.build_version",
     "type": "java.lang.String",
     "description": "Application version. Defaults to Maven project version"
   },
   {
-    "name": "build.timestamp",
+    "name": "application.build_timestamp",
     "type": "java.lang.String",
     "description": "Application build timestamp. Defaults to Maven project build timestamp"
   },
@@ -23,6 +18,16 @@
     "name": "application.email.no_reply",
     "type": "java.lang.String",
     "description": "Application 'reply to' email used for emails sent"
+  },
+  {
+    "name": "application.email.app_title",
+    "type": "java.lang.String",
+    "description": "Application name used at the start of email subjects"
+  },
+  {
+    "name": "application.security.debug",
+    "type": "java.lang.Boolean",
+    "description": "Enable Spring Security debug mode"
   },
   {
     "name": "application.security.public-key-path",
@@ -50,7 +55,7 @@
     "description": "The symmetric key for signing JWT tokens"
   },
   {
-    "name": "application.file.upload-dir",
+    "name": "application.file.upload_dir",
     "type": "java.nio.file.Path",
     "description": "Path to media upload directory"
   },
@@ -68,6 +73,11 @@
     "name": "application.data.admin_password",
     "type": "java.lang.String",
     "description": "The password for the default admin user. Leave empty for automatic password generation"
+  },
+  {
+    "name": "application.welcome.app_banner",
+    "type": "java.lang.String",
+    "description": "A path to a file containing a banner to display on application startup"
   },
   {
     "name": "application.welcome.ascii_art",
