@@ -4,7 +4,10 @@
 
 package com.monogramm.starter.config.filter;
 
+import com.google.common.net.HttpHeaders;
+
 import java.io.IOException;
+import java.util.function.Function;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,29 +33,61 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class SimpleCorsFilter implements Filter {
 
   /**
+   * Concatenate given values to a String of comma separated string representation.
+   * 
+   * @param values value to concatenate.
+   * 
+   * @return a list of comma separated string representation
+   */
+  protected static String listValues(Object... values) {
+    return listValues(Object::toString, values);
+  }
+
+  /**
+   * Concatenate given values to a String of comma separated string representation.
+   * 
+   * @param toString function to generate a string representation for each of the values.
+   * @param values value to concatenate.
+   * 
+   * @return a list of comma separated string representation
+   */
+  protected static <T> String listValues(Function<T, String> toString, T[] values) {
+    final StringBuilder builder = new StringBuilder();
+
+    if (values.length > 0) {
+      for (int i = 0; i < values.length - 1; i++) {
+        builder.append(toString.apply(values[i])).append(", ");
+      }
+      builder.append(toString.apply(values[values.length - 1]));
+    }
+
+    return builder.toString();
+  }
+
+  /**
    * Simple enumeration to keep track of allowed headers of the API.
    * 
    * @author madmath03
    */
   public enum AccessControlAllowHeaders {
+    /** HTTP Authorization header. **/
+    AUTHORIZATION(HttpHeaders.AUTHORIZATION),
     /** Content type. **/
-    CONTENT_TYPE("Content-Type"),
+    CONTENT_TYPE(HttpHeaders.CONTENT_TYPE),
     /** Encoding type. **/
     ENC_TYPE("enctype"),
     /** Response type. **/
     RESPONSE_TYPE("responseType"),
-    /** HTTP Authorization header. **/
-    AUTHORIZATION("Authorization"),
     /** Requested with. **/
     REQUESTED_WITH("x-requested-with"),
     /** Custom header for filtering results. **/
     CUSTOM_FILTER("X-Custom-Filter"),
-    /** Custom header for sorting results. **/
-    CUSTOM_SORT("X-Custom-Sort"),
     /** Custom header for paging results. **/
     CUSTOM_PAGE("X-Custom-Page"),
     /** Custom header for page size of paginated results. **/
-    CUSTOM_SIZE("X-Custom-Size"),;
+    CUSTOM_SIZE("X-Custom-Size"),
+    /** Custom header for sorting results. **/
+    CUSTOM_SORT("X-Custom-Sort");
 
     public final String value;
 
@@ -74,16 +109,8 @@ public class SimpleCorsFilter implements Filter {
      */
     protected static String getAllHeaders() {
       if (allHeaders == null) {
-        final StringBuilder builder = new StringBuilder();
-
         final AccessControlAllowHeaders[] headers = AccessControlAllowHeaders.values();
-        for (int i = 0; i < headers.length - 1; i++) {
-          AccessControlAllowHeaders header = headers[i];
-          builder.append(header.value).append(", ");
-        }
-        builder.append(headers[headers.length - 1].value);
-
-        allHeaders = builder.toString();
+        allHeaders = SimpleCorsFilter.listValues(header -> header.value, headers);
       }
       return allHeaders;
     }
@@ -149,11 +176,15 @@ public class SimpleCorsFilter implements Filter {
     if (response instanceof HttpServletResponse) {
       final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-      httpResponse.setHeader("Access-Control-Allow-Origin", ACCESS_CONTROL_ALLOW_ORIGIN);
-      httpResponse.setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS_LIST);
-      httpResponse.setHeader("Access-Control-Max-Age", ACCESS_CONTROL_MAX_AGE);
-      httpResponse.setHeader("Access-Control-Allow-Headers",
+      httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ACCESS_CONTROL_ALLOW_ORIGIN);
+      httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
+          ACCESS_CONTROL_ALLOW_METHODS_LIST);
+      httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE, ACCESS_CONTROL_MAX_AGE);
+      httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
           AccessControlAllowHeaders.getAllHeaders());
+
+      httpResponse.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+          listValues(HttpHeaders.LINK, HttpHeaders.LOCATION));
 
       if (request instanceof HttpServletRequest) {
         final HttpServletRequest httpRequest = (HttpServletRequest) request;

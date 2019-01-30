@@ -110,6 +110,9 @@ public class SimpleCorsFilterTest {
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
         AccessControlAllowHeaders.getAllHeaders());
 
+    verify(response, times(1)).setHeader("Access-Control-Expose-Headers",
+        "Link, Location");
+
     verify(response, times(1)).setStatus(HttpServletResponse.SC_OK);
 
     verifyNoMoreInteractions(response);
@@ -145,6 +148,9 @@ public class SimpleCorsFilterTest {
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
         AccessControlAllowHeaders.getAllHeaders());
 
+    verify(response, times(1)).setHeader("Access-Control-Expose-Headers",
+        "Link, Location");
+
     verify(request, times(1)).getMethod();
 
     verify(chain, times(1)).doFilter(request, response);
@@ -176,6 +182,9 @@ public class SimpleCorsFilterTest {
         SimpleCorsFilter.ACCESS_CONTROL_MAX_AGE);
     verify(response, times(1)).setHeader("Access-Control-Allow-Headers",
         AccessControlAllowHeaders.getAllHeaders());
+
+    verify(response, times(1)).setHeader("Access-Control-Expose-Headers",
+        "Link, Location");
 
     verify(chain, times(1)).doFilter(null, response);
 
