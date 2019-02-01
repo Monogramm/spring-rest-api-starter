@@ -145,17 +145,19 @@ public class PermissionController extends AbstractGenericController<Permission, 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<PermissionDto> getAllData() {
-    return super.getAllData();
+  public List<PermissionDto> getAllData(@RequestParam(value = SORT, required = false) String sort) {
+    return super.getAllData(sort);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<PermissionDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+  public List<PermissionDto> getAllDataPaginated(
+      @RequestParam(value = SORT, required = false) String sort,
+      @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(page, size, request, builder, response);
+    return super.getAllDataPaginated(sort, page, size, request, builder, response);
   }
 
   @Override
