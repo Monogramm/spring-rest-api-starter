@@ -11,15 +11,24 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "# ~~~~~" >>  $APP_CONFIG
 	echo "# Application Configuration" >>  $APP_CONFIG
 	echo "# ~~~~~" >>  $APP_CONFIG
-	echo "# Default domain name" >>  $APP_CONFIG
-	echo "application.data.domain_name=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
+	echo "# Email" >>  $APP_CONFIG
+	echo "application.email.app_title=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 	echo "application.email.no_reply=no_reply@${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 
 	echo "server.context-path=${APP_SERVER_CONTEXT_PATH}" >>  $APP_CONFIG
 	echo "server.port=${APP_SERVER_PORT}" >>  $APP_CONFIG
 
+	echo "# Default domain name" >>  $APP_CONFIG
+	echo "application.data.domain_name=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 	echo "# Default admin password" >>  $APP_CONFIG
 	echo "application.data.admin_password=${APP_ADMIN_PASSWORD}" >>  $APP_CONFIG
+
+	echo "# disable demo data import" >>  $APP_CONFIG
+	echo "application.data.demo=false" >>  $APP_CONFIG
+
+	echo "# Media storage directory" >>  $APP_CONFIG
+	mkdir -p /srv/app/data/media
+	echo "application.file.upload_dir=/srv/app/data/media" >>  $APP_CONFIG
 
 	echo "# Access token signing key" >>  $APP_CONFIG
 	echo "application.security.signing-key=${APP_SIGNING_KEY}" >>  $APP_CONFIG
@@ -42,12 +51,6 @@ if [ ! -f $APP_CONFIG ]; then
 		echo "application.security.private-key-password=$APP_VERIFIER_KEY_PASS" >>  $APP_CONFIG
 		echo "application.security.private-key-pair=$APP_VERIFIER_KEY_ALIAS" >>  $APP_CONFIG
 	fi
-
-	echo "# ~~~~~" >>  $APP_CONFIG
-	echo "# DEMO Configuration" >>  $APP_CONFIG
-	echo "# ~~~~~" >>  $APP_CONFIG
-	echo "# disable demo data import" >>  $APP_CONFIG
-	echo "application.data.demo=false" >>  $APP_CONFIG
 
 
 	echo "# ~~~~~" >>  $APP_CONFIG
