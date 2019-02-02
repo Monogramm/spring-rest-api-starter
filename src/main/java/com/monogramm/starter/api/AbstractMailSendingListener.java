@@ -93,7 +93,7 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
     // Send an email to user email address
     final SimpleMailMessage email = new SimpleMailMessage();
     email.setTo(user.getEmail());
-    email.setSubject(appName + " - " + subject);
+    email.setSubject("[" + appName + "] - " + subject);
     email.setText(message);
     email.setFrom(from);
 
