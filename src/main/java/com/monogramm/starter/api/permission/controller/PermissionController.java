@@ -145,7 +145,8 @@ public class PermissionController extends AbstractGenericController<Permission, 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<PermissionDto> getAllData(@RequestParam(value = SORT, required = false) String sort) {
+  public List<PermissionDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
     return super.getAllData(sort);
   }
 
@@ -153,7 +154,7 @@ public class PermissionController extends AbstractGenericController<Permission, 
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public List<PermissionDto> getAllDataPaginated(
-      @RequestParam(value = SORT, required = false) String sort,
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
       @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
@@ -182,5 +183,13 @@ public class PermissionController extends AbstractGenericController<Permission, 
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 }

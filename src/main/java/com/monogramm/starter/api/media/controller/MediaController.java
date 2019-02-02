@@ -184,7 +184,8 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<MediaDto> getAllData(@RequestParam(value = SORT, required = false) String sort) {
+  public List<MediaDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
     return super.getAllData(sort);
   }
 
@@ -192,7 +193,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
   public List<MediaDto> getAllDataPaginated(
-      @RequestParam(value = SORT, required = false) String sort,
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
       @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
@@ -213,6 +214,14 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 
 
