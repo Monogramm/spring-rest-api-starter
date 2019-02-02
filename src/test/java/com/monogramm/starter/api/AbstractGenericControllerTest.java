@@ -1012,16 +1012,9 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   /**
    * Test method for {@link AbstractGenericController#deleteData(java.lang.String)}.
    */
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testDeleteDataIdIllegal() {
-    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-    final ResponseEntity<Void> actual =
-        controller.deleteData(mockAuthentication, "this_is_not_a_UUID");
-
-    verifyNoMoreInteractions(mockService);
-
-    assertThat(actual, is(expectedResponse));
+    controller.deleteData(mockAuthentication, "this_is_not_a_UUID");
   }
 
 }
