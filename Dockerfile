@@ -61,8 +61,7 @@ COPY docker-entrypoint.sh /entrypoint.sh
 COPY ${JAR_FILE} /srv/app/app.jar
 
 RUN set -ex; \
-	chmod 755 /srv/app/app.jar \
-	chmod 755 /entrypoint.sh
+	chmod 755 /entrypoint.sh /srv/app/app.jar
 
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
