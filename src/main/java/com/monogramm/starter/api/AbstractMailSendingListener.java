@@ -87,8 +87,8 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
     final String appName = emailProperties.getAppTitle();
     final String from = emailProperties.getNoReply();
     final String subject = messages.getMessage(this.getSubjectKey(), null, locale);
-    final String message =
-        messages.getMessage(this.getMessageKey(), new String[] {token.getCode()}, locale);
+    final String message = messages.getMessage(this.getMessageKey(),
+        new Object[] {token.getCode(), appName, token.getExpiryDate()}, locale);
 
     // Send an email to user email address
     final SimpleMailMessage email = new SimpleMailMessage();
