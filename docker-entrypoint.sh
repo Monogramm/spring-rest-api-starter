@@ -180,8 +180,10 @@ else
 fi
 
 # FIXME kind of ugly... should wait dynamically until DB is up
-echo "Wait until all containers finished initializing themselves..."
-sleep 240
+if [ ! ${DB_PLATFORM} = 'h2' ]; then
+	echo "Wait until all containers finished initializing themselves..."
+	sleep 240
+fi
 
 echo "Launching application..."
 exec "$@"
