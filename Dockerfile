@@ -11,8 +11,8 @@ ENV \
 	APP_DOMAIN_NAME=company.com \
 	APP_ADMIN_PASSWORD=youshouldoverwritethiswithsomethingelse \
 	APP_SIGNING_KEY=youshouldoverwritethiswithsomethingelse \
-	APP_VERIFIER_KEY_PASS='' \
-	APP_VERIFIER_KEY_ALIAS=spring_rest_api_starter_key \
+	APP_SIGNING_KEYPAIR_PASS='' \
+	APP_SIGNING_KEYPAIR_ALIAS=spring_rest_api_starter_key \
 	APP_DEMO_DATA=false \
 	# Database configuration
 	DB_DIALECT='' \
@@ -41,8 +41,11 @@ RUN set -ex; \
 	mkdir -p /srv/app/logs; \
 	mkdir -p /srv/app/keys; \
 	mkdir -p /srv/app/config; \
-	# install openssl
-	apk add --update openssl && \
+	# install dependencies
+	apk add --update \
+		openssh-keygen \
+		openssl \
+	; \
 	rm -rf /var/cache/apk/*
 
 VOLUME /srv/app/config /srv/app/keys /srv/app/logs /srv/app/data

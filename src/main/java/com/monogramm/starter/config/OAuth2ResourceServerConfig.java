@@ -75,21 +75,33 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
   public JwtAccessTokenConverter accessTokenConverter() {
     final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
 
-    // Use an asymmetric key
-    boolean asymetricKeySet =
-        JwtUtils.setPrivateKey(applicationSecurityProperties.getPrivateKeyPath(),
-            applicationSecurityProperties.getPrivateKeyPassword(),
-            applicationSecurityProperties.getPrivateKeyPair(), converter);
+    // Use an asymmetric key pair
+    boolean asymetricKeySet = JwtUtils
+        .setVerifierKeyFromPath(applicationSecurityProperties.getVerifyingKeyPath(), converter);
 
-    // XXX This should not be done if the resource server and authorization server are split
-    asymetricKeySet &=
-        JwtUtils.setPublicKey(applicationSecurityProperties.getPublicKeyPath(), converter);
-
-    // Use symmetric key as fallback
     if (!asymetricKeySet) {
+      // Use symmetric key if no public key provided
       LOG.warn("No asymetric key set. Using symmetric key for signing JWT tokens");
 
-      JwtUtils.setSigningKey(applicationSecurityProperties.getSigningKey(), converter);
+      final String symmetricKey = applicationSecurityProperties.getSigningKey();
+      JwtUtils.setSigningKey(symmetricKey, converter);
+      JwtUtils.setVerifierKey(symmetricKey, converter);
+    } else {
+      /*
+       * XXX If the authorization and resource servers were split, the resource server would only
+       * need to define verifier key since the Authorization server would be responsible of signing
+       * the token, meaning the following should be deleted.
+       */
+      // First attempt using a Key Pair (JKS)
+      asymetricKeySet = JwtUtils.setKeyPair(applicationSecurityProperties.getKeyPairPath(),
+          applicationSecurityProperties.getKeyPairPassword(),
+          applicationSecurityProperties.getKeyPairAlias(), converter);
+
+      if (!asymetricKeySet) {
+        // Fallback to using directly a private key file
+        JwtUtils.setSigningKeyFromPath(applicationSecurityProperties.getSigningKeyPath(),
+            converter);
+      }
     }
 
     converter.setAccessTokenConverter(new JwtConverter());

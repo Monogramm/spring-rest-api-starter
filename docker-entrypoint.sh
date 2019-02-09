@@ -30,26 +30,37 @@ if [ ! -f $APP_CONFIG ]; then
 	mkdir -p /srv/app/data/media
 	echo "application.file.upload_dir=/srv/app/data/media" >>  $APP_CONFIG
 
-	echo "# Access token signing key" >>  $APP_CONFIG
-	echo "application.security.signing-key=${APP_SIGNING_KEY}" >>  $APP_CONFIG
-
-	if [ ! -z $APP_VERIFIER_KEY_PASS ]; then
+	if [ ! -z $APP_SIGNING_KEYPAIR_PASS ]; then
 		mkdir -p /srv/app/keys
 
-		echo "Generating Java Key Store for signing access tokens..."
-		keytool -genkeypair -alias $APP_VERIFIER_KEY_ALIAS -dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keyalg RSA -keypass $APP_VERIFIER_KEY_PASS -keystore /srv/app/keys/private.jks -storepass $APP_VERIFIER_KEY_PASS
+		echo "Generating RSA Java Key Store for verifying access tokens..."
+		keytool -genkeypair -alias "$APP_SIGNING_KEYPAIR_ALIAS" -dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keystore /srv/app/keys/.private.jks -keyalg RSA -keypass "$APP_SIGNING_KEYPAIR_PASS" -storepass "$APP_SIGNING_KEYPAIR_PASS"
 
-		keytool -importkeystore -srckeystore /srv/app/keys/private.jks -destkeystore /srv/app/keys/private.jks -deststoretype pkcs12
-		echo "JKS generated in /srv/app/keys/"
+		keytool -importkeystore -srckeystore /srv/app/keys/.private.jks -srcstorepass "$APP_SIGNING_KEYPAIR_PASS" -destkeystore /srv/app/keys/.private.jks -deststoretype pkcs12
+		chmod 600 /srv/app/keys/.private.jks
+		echo "RSA JKS generated in /srv/app/keys/"
 
-		keytool -list -rfc --keystore /srv/app/keys/private.jks | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
+		keytool -list -rfc --keystore /srv/app/keys/.private.jks -storepass "$APP_SIGNING_KEYPAIR_PASS" | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
 		echo "Public key extracted in /srv/app/keys/"
 
 		echo "# Access token verifier key" >>  $APP_CONFIG
-		echo "application.security.public-key-path=/srv/app/keys/public.txt" >>  $APP_CONFIG
-		echo "application.security.private-key-path=/srv/app/keys/private.jks" >>  $APP_CONFIG
-		echo "application.security.private-key-password=$APP_VERIFIER_KEY_PASS" >>  $APP_CONFIG
-		echo "application.security.private-key-pair=$APP_VERIFIER_KEY_ALIAS" >>  $APP_CONFIG
+		echo "application.security.key-pair-path=/srv/app/keys/.private.jks" >>  $APP_CONFIG
+		echo "application.security.key-pair-password=$APP_SIGNING_KEYPAIR_PASS" >>  $APP_CONFIG
+		echo "application.security.key-pair-alias=$APP_SIGNING_KEYPAIR_ALIAS" >>  $APP_CONFIG
+		echo "application.security.verifying-key-path=/srv/app/keys/public.txt" >>  $APP_CONFIG
+	elif [ -z $APP_SIGNING_KEY ]; then
+		mkdir -p /srv/app/keys
+
+		echo "Generating RSA SSH key for signing access tokens..."
+		ssh-keygen -b 2048 -m PEM -t rsa -f /srv/app/keys/.id_rsa -q -N ""
+		echo "RSA SSH key generated in /srv/app/keys/"
+
+		echo "# Access token signing key" >>  $APP_CONFIG
+		echo "application.security.signing-key-path=/srv/app/keys/.id_rsa.pub" >>  $APP_CONFIG
+		echo "application.security.verifying-key-path=/srv/app/keys/.id_rsa" >>  $APP_CONFIG
+	else
+		echo "# Access token signing key" >>  $APP_CONFIG
+		echo "application.security.signing-key=${APP_SIGNING_KEY}" >>  $APP_CONFIG
 	fi
 
 
@@ -167,6 +178,10 @@ if [ ! -f $APP_CONFIG ]; then
 else
 	echo "Configuration found."
 fi
+
+# FIXME kind of ugly... should wait dynamically until DB is up
+echo "Wait until all containers finished initializing themselves..."
+sleep 240
 
 echo "Launching application..."
 exec "$@"

@@ -125,16 +125,24 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
   public JwtAccessTokenConverter accessTokenConverter() {
     final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
 
-    // Use an asymmetric key
-    boolean asymetricKeySet = JwtUtils.setPrivateKey(applicationSecurityProperties.getPrivateKeyPath(),
-        applicationSecurityProperties.getPrivateKeyPassword(), applicationSecurityProperties.getPrivateKeyPair(),
-        converter);
+    // First attempt using a Key Pair (JKS)
+    boolean asymmetricKeySet = JwtUtils.setKeyPair(applicationSecurityProperties.getKeyPairPath(),
+        applicationSecurityProperties.getKeyPairPassword(),
+        applicationSecurityProperties.getKeyPairAlias(), converter);
+
+    if (!asymmetricKeySet) {
+      // Fallback to using directly a private key file
+      asymmetricKeySet = JwtUtils
+          .setSigningKeyFromPath(applicationSecurityProperties.getSigningKeyPath(), converter);
+    }
 
     // Use symmetric key as fallback
-    if (!asymetricKeySet) {
+    if (!asymmetricKeySet) {
       LOG.warn("No asymetric key set. Using symmetric key for signing JWT tokens");
 
-      JwtUtils.setSigningKey(applicationSecurityProperties.getSigningKey(), converter);
+      final String symmetricKey = applicationSecurityProperties.getSigningKey();
+      JwtUtils.setSigningKey(symmetricKey, converter);
+      JwtUtils.setVerifierKey(symmetricKey, converter);
     }
 
     converter.setAccessTokenConverter(new JwtConverter());

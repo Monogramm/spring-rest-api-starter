@@ -27,22 +27,26 @@ public class ApplicationSecurityProperties {
   private boolean debug = false;
 
   /**
-   * {@code application.security.public-key-path} property.
+   * {@code application.security.key-pair-path} property.
    */
-  private String publicKeyPath;
+  private String keyPairPath;
+  /**
+   * {@code application.security.key-pair-password} property.
+   */
+  private String keyPairPassword;
+  /**
+   * {@code application.security.key-pair-store-alias} property.
+   */
+  private String keyPairAlias;
 
   /**
-   * {@code application.security.private-key-path} property.
+   * {@code application.security.verifying-key-path} property.
    */
-  private String privateKeyPath;
+  private String verifyingKeyPath;
   /**
-   * {@code application.security.private-key-password} property.
+   * {@code application.security.signing-key-path} property.
    */
-  private String privateKeyPassword;
-  /**
-   * {@code application.security.private-key-pair} property.
-   */
-  private String privateKeyPair;
+  private String signingKeyPath;
 
   /**
    * {@code application.security.signing-key} property.
@@ -70,75 +74,93 @@ public class ApplicationSecurityProperties {
   }
 
   /**
-   * Get the {@link #publicKeyPath}.
+   * Get the {@link #keyPairPath}.
    * 
-   * @return the {@link #publicKeyPath}.
+   * @return the {@link #keyPairPath}.
    */
-  public String getPublicKeyPath() {
-    return publicKeyPath;
+  public String getKeyPairPath() {
+    return keyPairPath;
   }
 
   /**
-   * Set the {@link #publicKeyPath}.
+   * Set the {@link #keyPairPath}.
    * 
-   * @param publicKeyPath the {@link #publicKeyPath} to set.
+   * @param keyPairPath the {@link #keyPairPath} to set.
    */
-  public void setPublicKeyPath(String publicKeyPath) {
-    this.publicKeyPath = publicKeyPath;
+  public void setKeyPairPath(String keyPairPath) {
+    this.keyPairPath = keyPairPath;
   }
 
   /**
-   * Get the {@link #privateKeyPath}.
+   * Get the {@link #keyPairPassword}.
    * 
-   * @return the {@link #privateKeyPath}.
+   * @return the {@link #keyPairPassword}.
    */
-  public String getPrivateKeyPath() {
-    return privateKeyPath;
+  public String getKeyPairPassword() {
+    return keyPairPassword;
   }
 
   /**
-   * Set the {@link #privateKeyPath}.
+   * Set the {@link #keyPairPassword}.
    * 
-   * @param privateKeyPath the {@link #privateKeyPath} to set.
+   * @param keyPairPassword the {@link #keyPairPassword} to set.
    */
-  public void setPrivateKeyPath(String privateKeyPath) {
-    this.privateKeyPath = privateKeyPath;
+  public void setKeyPairPassword(String keyPairPassword) {
+    this.keyPairPassword = keyPairPassword;
   }
 
   /**
-   * Get the {@link #privateKeyPassword}.
+   * Get the {@link #keyPairAlias}.
    * 
-   * @return the {@link #privateKeyPassword}.
+   * @return the {@link #keyPairAlias}.
    */
-  public String getPrivateKeyPassword() {
-    return privateKeyPassword;
+  public String getKeyPairAlias() {
+    return keyPairAlias;
   }
 
   /**
-   * Set the {@link #privateKeyPassword}.
+   * Set the {@link #keyPairAlias}.
    * 
-   * @param privateKeyPassword the {@link #privateKeyPassword} to set.
+   * @param keyPairAlias the {@link #keyPairAlias} to set.
    */
-  public void setPrivateKeyPassword(String privateKeyPassword) {
-    this.privateKeyPassword = privateKeyPassword;
+  public void setKeyPairAlias(String keyPairAlias) {
+    this.keyPairAlias = keyPairAlias;
   }
 
   /**
-   * Get the {@link #privateKeyPair}.
+   * Get the {@link #verifyingKeyPath}.
    * 
-   * @return the {@link #privateKeyPair}.
+   * @return the {@link #verifyingKeyPath}.
    */
-  public String getPrivateKeyPair() {
-    return privateKeyPair;
+  public String getVerifyingKeyPath() {
+    return verifyingKeyPath;
   }
 
   /**
-   * Set the {@link #privateKeyPair}.
+   * Set the {@link #verifyingKeyPath}.
    * 
-   * @param privateKeyPair the {@link #privateKeyPair} to set.
+   * @param verifyingKeyPath the {@link #verifyingKeyPath} to set.
    */
-  public void setPrivateKeyPair(String privateKeyPair) {
-    this.privateKeyPair = privateKeyPair;
+  public void setVerifyingKeyPath(String verifyingKeyPath) {
+    this.verifyingKeyPath = verifyingKeyPath;
+  }
+
+  /**
+   * Get the {@link #signingKeyPath}.
+   * 
+   * @return the {@link #signingKeyPath}.
+   */
+  public String getSigningKeyPath() {
+    return signingKeyPath;
+  }
+
+  /**
+   * Set the {@link #signingKeyPath}.
+   * 
+   * @param signingKeyPath the {@link #signingKeyPath} to set.
+   */
+  public void setSigningKeyPath(String signingKeyPath) {
+    this.signingKeyPath = signingKeyPath;
   }
 
   /**

@@ -7,6 +7,8 @@ services:
       - "5432:5432"
     volumes:
       - /srv/spring_rest_api_starter/db/data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       - POSTGRES_DB=spring_rest_api_starter
       - POSTGRES_USER=spring_rest_api_starter
@@ -32,8 +34,8 @@ services:
       - APP_SERVER_CONTEXT_PATH=/api
       - APP_DOMAIN_NAME=company.com
       - APP_ADMIN_PASSWORD=youshouldoverwritethiswithsomethingelse
-      - APP_SIGNING_KEY=youshouldoverwritethiswithsomethingelse
-      - APP_VERIFIER_KEY_PASS=youshouldoverwritethiswithsomethingelse
+      - APP_SIGNING_KEY=
+      - APP_SIGNING_KEYPAIR_PASS=youshouldoverwritethiswithsomethingelse
       - APP_DEMO_DATA=false
       # Database configuration
       - DB_PLATFORM=postgres
