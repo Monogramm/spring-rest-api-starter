@@ -114,8 +114,8 @@
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPaths>${jacoco.ut.execution.data.file},${jacoco.it.execution.data.file}</sonar.jacoco.reportPaths>
-		<maven.site.version>3.7.1</maven.site.version>
-		<maven.project.info.reports.version>3.0.0</maven.project.info.reports.version>
+		<maven.site.version>3.6</maven.site.version>
+		<maven.project.info.reports.version>2.9</maven.project.info.reports.version>
 	</properties>
 
 	<dependencies>
