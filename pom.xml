@@ -114,7 +114,8 @@
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPaths>${jacoco.ut.execution.data.file},${jacoco.it.execution.data.file}</sonar.jacoco.reportPaths>
-		<maven.site.version>3.6</maven.site.version>
+		<maven.site.version>3.7.1</maven.site.version>
+		<maven.project.info.reports.version>3.0.0</maven.project.info.reports.version>
 	</properties>
 
 	<dependencies>
@@ -572,6 +573,11 @@
 						<skipDeploy>true</skipDeploy>
 						<generateSitemap>true</generateSitemap>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>${maven.project.info.reports.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
