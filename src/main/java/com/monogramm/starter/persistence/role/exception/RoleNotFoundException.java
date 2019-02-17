@@ -5,6 +5,7 @@
 package com.monogramm.starter.persistence.role.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.role.entity.Role;
 
 /**
  * <em>"{@link Role}  not found"</em> Exception.

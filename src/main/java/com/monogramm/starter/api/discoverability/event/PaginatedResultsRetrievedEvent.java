@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * results.
  * </p>
  * 
- * @see AbstractGenericController#getAllDataPaginated(int, int,
+ * @see AbstractGenericController#getAllDataPaginated(String, int, int,
  *      org.springframework.web.context.request.WebRequest, UriComponentsBuilder,
  *      HttpServletResponse)
  * 

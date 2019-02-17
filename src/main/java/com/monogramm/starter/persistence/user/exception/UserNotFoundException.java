@@ -5,6 +5,7 @@
 package com.monogramm.starter.persistence.user.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.user.entity.User;
 
 /**
  * <em>"{@link User}  not found"</em> Exception.

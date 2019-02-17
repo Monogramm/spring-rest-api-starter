@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * SimpleCorsFilter.
+ * Simple CORS Filter.
  * 
  * @author madmath03
  */
@@ -45,6 +45,8 @@ public class SimpleCorsFilter implements Filter {
 
   /**
    * Concatenate given values to a String of comma separated string representation.
+   * 
+   * @param <T> type of values to list
    * 
    * @param toString function to generate a string representation for each of the values.
    * @param values value to concatenate.

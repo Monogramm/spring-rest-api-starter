@@ -5,9 +5,10 @@
 package com.monogramm.starter.persistence.user.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 
 /**
- * <em>"{@link PasswordReset}  not found"</em> Exception.
+ * <em>"{@link PasswordResetToken}  not found"</em> Exception.
  * 
  * @author madmath03
  */

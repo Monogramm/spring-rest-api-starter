@@ -5,6 +5,7 @@
 package com.monogramm.starter.persistence.permission.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.permission.entity.Permission;
 
 /**
  * <em>"{@link Permission}  not found"</em> Exception.
