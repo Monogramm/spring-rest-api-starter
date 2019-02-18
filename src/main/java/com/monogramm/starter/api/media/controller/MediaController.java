@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -281,7 +283,6 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
    * @throws EntityNotFoundException if no entity matches the specified unique ID
    */
   @GetMapping(value = DOWNLOAD_PATH + "/{id}")
-  @PreAuthorize(value = "permitAll()")
   public ResponseEntity<Resource> downloadMediaById(@PathVariable @ValidUuid String id,
       HttpServletRequest request, HttpServletResponse response) {
     // Convert ID
@@ -311,7 +312,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
     return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
         .header(HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + resource.getFilename() + "\"")
-        .body(resource);
+        .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS)).body(resource);
   }
 
 

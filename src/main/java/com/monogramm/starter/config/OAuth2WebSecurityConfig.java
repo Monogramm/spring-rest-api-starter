@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.config;
 
+import com.monogramm.starter.api.media.controller.MediaController;
 import com.monogramm.starter.config.component.CustomPasswordEncoder;
 import com.monogramm.starter.config.filter.JsonToUrlEncodedAuthenticationFilter;
 import com.monogramm.starter.config.properties.ApplicationSecurityProperties;
@@ -102,7 +103,8 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   public void configure(final WebSecurity web) throws Exception {
-    web.debug(applicationSecurityProperties.isDebug());
+    web.debug(applicationSecurityProperties.isDebug()).ignoring()
+        .antMatchers(MediaController.DOWNLOAD_PATH + "/**");
   }
 
   // JDBC configuration
