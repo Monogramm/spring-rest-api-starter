@@ -1,8 +1,42 @@
 version: '2'
 
 services:
+  #backend_db: #MariaDB
+  #  image: mariadb:10
+  #  container_name: backend_db
+  #  restart: always
+  #  command: --character_set_client=utf8 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --character-set-client-handshake=FALSE
+  #  ports:
+  #    - "53306:3306"
+  #  environment:
+  #    - "MYSQL_DATABASE=spring_rest_api_starter"
+  #    - "MYSQL_USER=spring_rest_api_starter"
+  #    - "MYSQL_PASSWORD=spring_rest_api_starter_password"
+  #  volumes:
+  #    - /srv/spring_rest_api_starter/db/data:/var/lib/mysql
+  #    - /etc/localtime:/etc/localtime:ro
+  #    - /etc/timezone:/etc/timezone:ro
+
+  #backend_db: #MySQL
+  #  image: mysql:5.7
+  #  container_name: backend_db
+  #  restart: always
+  #  command: --sql_mode="" --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --character-set-client-handshake=FALSE
+  #  ports:
+  #    - "53306:3306"
+  #  environment:
+  #    - MYSQL_DATABASE=spring_rest_api_starter
+  #    - MYSQL_USER=spring_rest_api_starter
+  #    - MYSQL_PASSWORD=spring_rest_api_starter_password
+  #  volumes:
+  #    - /srv/spring_rest_api_starter/db/data:/var/lib/mysql
+  #    - /etc/localtime:/etc/localtime:ro
+  #    - /etc/timezone:/etc/timezone:ro
+
   backend_db:
     image: postgres:10-alpine
+    container_name: backend_db
+    restart: always
     ports:
       - "5432:5432"
     volumes:
@@ -20,6 +54,8 @@ services:
       dockerfile: Dockerfile
       args:
         build-arg: target/*.jar
+    container_name: backend_api
+    restart: always
     ports:
       - "8080:8080"
     depends_on:
@@ -29,6 +65,8 @@ services:
       - /srv/spring_rest_api_starter/back/keys:/srv/app/keys
       - /srv/spring_rest_api_starter/back/config:/srv/app/config
       - /srv/spring_rest_api_starter/back/data:/srv/app/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       # Application configuration
       - APP_SERVER_CONTEXT_PATH=/api
@@ -37,7 +75,24 @@ services:
       - APP_SIGNING_KEY=
       - APP_SIGNING_KEYPAIR_PASS=youshouldoverwritethiswithsomethingelse
       - APP_DEMO_DATA=false
-      # Database configuration
+      # Database configuration (H2)
+      #- DB_PLATFORM=h2
+      #- DB_NAME=spring_rest_api_starter
+      #- DB_USER=spring_rest_api_starter
+      #- DB_PASSWORD=spring_rest_api_starter_password
+      # Database configuration (MariaDB only)
+      #- DB_PLATFORM=mariadb
+      #- DB_HOST=spring_rest_api_starter_db
+      #- DB_NAME=spring_rest_api_starter
+      #- DB_USER=spring_rest_api_starter
+      #- DB_PASSWORD=spring_rest_api_starter_password
+      # Database configuration (MariaDB/MySQL)
+      #- DB_PLATFORM=mysql
+      #- DB_HOST=spring_rest_api_starter_db
+      #- DB_NAME=spring_rest_api_starter
+      #- DB_USER=spring_rest_api_starter
+      #- DB_PASSWORD=spring_rest_api_starter_password
+      # Database configuration (PostgreSQL)
       - DB_PLATFORM=postgres
       - DB_HOST=backend_db
       - DB_NAME=spring_rest_api_starter
