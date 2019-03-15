@@ -16,6 +16,10 @@ services:
   #    - /srv/spring_rest_api_starter/db/data:/var/lib/mysql
   #    - /etc/localtime:/etc/localtime:ro
   #    - /etc/timezone:/etc/timezone:ro
+  #  healthcheck:
+  #    test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+  #    timeout: 10s
+  #    retries: 5
 
   #backend_db: #MySQL
   #  image: mysql:5.7
@@ -32,6 +36,10 @@ services:
   #    - /srv/spring_rest_api_starter/db/data:/var/lib/mysql
   #    - /etc/localtime:/etc/localtime:ro
   #    - /etc/timezone:/etc/timezone:ro
+  #  healthcheck:
+  #    test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+  #    timeout: 10s
+  #    retries: 5
 
   backend_db:
     image: postgres:10-alpine
@@ -104,6 +112,7 @@ services:
       - MAIL_PROTOCOL=smtps
       - MAIL_USER=spring_rest_api_starter@company.com
       - MAIL_PASSWORD=spring_rest_api_starter_password
-      - MAIL_STARTTLS=true
+      - MAIL_SSL=true
+      - MAIL_STARTTLS=false
 
 # You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
