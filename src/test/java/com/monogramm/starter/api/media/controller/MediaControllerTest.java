@@ -19,7 +19,6 @@ import com.monogramm.starter.api.AbstractGenericControllerTest;
 import com.monogramm.starter.api.media.controller.MediaController;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
-import com.monogramm.starter.persistence.media.dao.MediaRepositoryIT;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.service.MediaBridge;
@@ -58,7 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class MediaControllerTest extends AbstractGenericControllerTest<Media, MediaDto> {
 
   /**
-   * Logger for {@link MediaRepositoryIT}.
+   * Logger for {@link MediaControllerTest}.
    */
   private static final Logger LOG = LoggerFactory.getLogger(MediaControllerTest.class);
 
