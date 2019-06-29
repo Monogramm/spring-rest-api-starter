@@ -18,6 +18,9 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "server.context-path=${APP_SERVER_CONTEXT_PATH}" >>  $APP_CONFIG
 	echo "server.port=${APP_SERVER_PORT}" >>  $APP_CONFIG
 
+	echo "spring.http.multipart.max-file-size=${APP_MAX_FILE_SIZE}" >>  $APP_CONFIG
+	echo "spring.http.multipart.max-request-size=${APP_MAX_REQUEST_SIZE}" >>  $APP_CONFIG
+
 	echo "# Default domain name" >>  $APP_CONFIG
 	echo "application.data.domain_name=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 	echo "# Default admin password" >>  $APP_CONFIG

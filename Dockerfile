@@ -8,6 +8,8 @@ ENV \
 	APP_CONFIG=/srv/app/config/application.properties \
 	APP_SERVER_CONTEXT_PATH=/api \
 	APP_SERVER_PORT=8080 \
+	APP_MAX_FILE_SIZE=20MB \
+	APP_MAX_REQUEST_SIZE=20MB \
 	APP_DOMAIN_NAME=company.com \
 	APP_ADMIN_PASSWORD=youshouldoverwritethiswithsomethingelse \
 	APP_SIGNING_KEY=youshouldoverwritethiswithsomethingelse \
