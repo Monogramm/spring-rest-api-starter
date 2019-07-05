@@ -162,6 +162,140 @@ public interface GenericService<T extends AbstractGenericEntity, D extends Abstr
   }
 
 
+  /**
+   * Find all entities from the repository owned by user.
+   * 
+   * @param owner the entities owner.
+   * 
+   * @return the list of all the entities available through the repository.
+   */
+  List<T> findAllByOwner(final User owner);
+
+  /**
+   * Returns all entities owned by user sorted by the given options.
+   * 
+   * @param sort sort conditions.
+   * @param owner the entities owner.
+   * 
+   * @return all entities sorted by the given options
+   */
+  List<T> findAllByOwner(Sort sort, final User owner);
+
+  /**
+   * Returns a {@link Page} of entities owned by user meeting the paging restriction provided in the
+   * {@code Pageable} object.
+   * 
+   * @param pageable paging conditions.
+   * @param owner the entities owner.
+   * 
+   * @return a page of entities
+   */
+  Page<T> findAllByOwner(Pageable pageable, final User owner);
+
+  /**
+   * Returns a {@link Page} of entities owned by user meeting the paging restriction. Pages are zero
+   * indexed, thus providing 0 for {@code page} will return the first page.
+   * 
+   * @param page zero-based page index.
+   * @param size the size of the page to be returned.
+   * @param owner the entities owner.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAllByOwner(int page, int size, final User owner) {
+    return this.findAllByOwner(page, size, null, owner);
+  }
+
+  /**
+   * Returns a {@link Page} of entities meeting owned by user the paging restriction with sort
+   * parameters applied. Pages are zero indexed, thus providing 0 for {@code page} will return the
+   * first page.
+   * 
+   * @param page zero-based page index.
+   * @param size the size of the page to be returned.
+   * @param sort can be {@literal null}.
+   * @param owner the entities owner.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAllByOwner(int page, int size, Sort sort, final User owner) {
+    final Pageable pageable = new PageRequest(page, size, sort);
+
+    return this.findAllByOwner(pageable, owner);
+  }
+
+  /**
+   * Find all entities from the repository owned by user.
+   * 
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return the list of all the entities available through the repository.
+   */
+  default List<T> findAllByOwner(final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.findAllByOwner(owner);
+  }
+
+  /**
+   * Returns all entities owned by user sorted by the given options.
+   * 
+   * @param sort sort conditions.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return all entities sorted by the given options
+   */
+  default List<T> findAllByOwner(Sort sort, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.findAllByOwner(sort, owner);
+  }
+
+  /**
+   * Returns a {@link Page} of entities owned by user meeting the paging restriction provided in the
+   * {@code Pageable} object.
+   * 
+   * @param pageable paging conditions.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAllByOwner(Pageable pageable, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.findAllByOwner(pageable, owner);
+  }
+
+  /**
+   * Returns a {@link Page} of entities owned by user meeting the paging restriction. Pages are zero
+   * indexed, thus providing 0 for {@code page} will return the first page.
+   * 
+   * @param page zero-based page index.
+   * @param size the size of the page to be returned.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAllByOwner(int page, int size, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.findAllByOwner(page, size, null, owner);
+  }
+
+  /**
+   * Returns a {@link Page} of entities meeting owned by user the paging restriction with sort
+   * parameters applied. Pages are zero indexed, thus providing 0 for {@code page} will return the
+   * first page.
+   * 
+   * @param page zero-based page index.
+   * @param size the size of the page to be returned.
+   * @param sort can be {@literal null}.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAllByOwner(int page, int size, Sort sort, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.findAllByOwner(page, size, null, owner);
+  }
+
+
 
   /**
    * Find an entity through its primary key.

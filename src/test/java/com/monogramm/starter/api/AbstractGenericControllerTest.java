@@ -77,6 +77,23 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   private HttpServletResponse mockResponse;
 
   /**
+   * Prepare a collection of administration authorities from the controller.
+   * 
+   * @return a collection of administration authorities.
+   */
+  protected Collection<GrantedAuthority> adminAuthorities() {
+    final String[] adminAuthorities = controller.getAdminAuthorities();
+    assertNotNull(adminAuthorities);
+
+    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
+    for (final String adminAuth : controller.getAdminAuthorities()) {
+      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
+    }
+
+    return userAuthorities;
+  }
+
+  /**
    * @throws java.lang.Exception
    */
   @BeforeClass
@@ -371,7 +388,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData(String)}.
+   * Test method for {@link AbstractGenericController#getAllData(String, Authentication)}.
    */
   @Test
   public void testGetAllData() {
@@ -382,14 +399,20 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     models.add(model);
     final List<D> results = new ArrayList<>();
     results.add(dto);
-
     final List<D> expectedResponse = results;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll(any(Sort.class))).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final String sortQuery = "createdAt,DESC;modifiedAt,DESC";
-    final List<D> actual = controller.getAllData(sortQuery);
+    final String sortQuery = "createdAt,DESC;modifiedAt;";
+    final List<D> actual = controller.getAllData(sortQuery, mockAuthentication);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
 
     verify(mockService, times(1)).findAll(any(Sort.class));
     verify(mockService, times(1)).toDto(models);
@@ -400,7 +423,42 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData(String)}.
+   * Test method for {@link AbstractGenericController#getAllData(String, Authentication)}.
+   */
+  @Test
+  public void testGetAllDataNotAdmin() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+
+    final List<T> models = new ArrayList<>();
+    models.add(model);
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+    final List<D> expectedResponse = results;
+
+    final Collection<GrantedAuthority> userAuthorities = Collections.emptyList();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    when(mockService.findAllByOwner(any(Sort.class), any(UUID.class))).thenReturn(models);
+    when(mockService.toDto(models)).thenReturn(results);
+
+    final String sortQuery = "createdAt;modifiedAt,DESC;";
+    final List<D> actual = controller.getAllData(sortQuery, mockAuthentication);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+
+    verify(mockService, times(1)).findAllByOwner(any(Sort.class), any(UUID.class));
+    verify(mockService, times(1)).toDto(models);
+    verifyNoMoreInteractions(mockService);
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#getAllData(String, Authentication)}.
    */
   @Test
   public void testGetAllDataSortNull() {
@@ -411,13 +469,20 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     models.add(model);
     final List<D> results = new ArrayList<>();
     results.add(dto);
-
     final List<D> expectedResponse = results;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final List<D> actual = controller.getAllData(null);
+    final String sortQuery = null;
+    final List<D> actual = controller.getAllData(sortQuery, mockAuthentication);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
@@ -428,7 +493,42 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData(String)}.
+   * Test method for {@link AbstractGenericController#getAllData(String, Authentication)}.
+   */
+  @Test
+  public void testGetAllDataSortNullNotAdmin() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+
+    final List<T> models = new ArrayList<>();
+    models.add(model);
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+    final List<D> expectedResponse = results;
+
+    final Collection<GrantedAuthority> userAuthorities = Collections.emptyList();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    when(mockService.findAllByOwner((UUID) null)).thenReturn(models);
+    when(mockService.toDto(models)).thenReturn(results);
+
+    final String sortQuery = null;
+    final List<D> actual = controller.getAllData(sortQuery, mockAuthentication);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+
+    verify(mockService, times(1)).findAllByOwner((UUID) null);
+    verify(mockService, times(1)).toDto(models);
+    verifyNoMoreInteractions(mockService);
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#getAllData(String, Authentication)}.
    */
   @Test
   public void testGetAllDataEmpty() {
@@ -436,10 +536,17 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final List<D> results = new ArrayList<>();
     final List<D> expectedResponse = results;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final List<D> actual = controller.getAllData(null);
+    final List<D> actual = controller.getAllData(null, mockAuthentication);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
@@ -450,7 +557,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData(String)}.
+   * Test method for {@link AbstractGenericController#getAllData(String, Authentication)}.
    */
   @Test
   public void testGetAllDataNull() {
@@ -458,10 +565,17 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final List<D> results = new ArrayList<>();
     final List<D> expectedResponse = results;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final List<D> actual = controller.getAllData(null);
+    final List<D> actual = controller.getAllData(null, mockAuthentication);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
@@ -475,7 +589,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, Authentication, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test
   public void testGetAllPaginatedData() {
@@ -490,12 +604,19 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
     final List<D> expectedResponse = results;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll(eq(page), eq(size), any(Sort.class))).thenReturn(models);
     when(mockService.toDto(models.getContent())).thenReturn(results);
 
-    final String sortQuery = "createdAt,DESC;modifiedAt,DESC";
-    final List<D> actual = controller.getAllDataPaginated(sortQuery, page, size, mockRequest,
-        uriBuilder, mockResponse);
+    final String sortQuery = "createdAt,DESC,NATIVE;modifiedAt,DESC,NULLS_FIRST";
+    final List<D> actual = controller.getAllDataPaginated(sortQuery, page, size, mockAuthentication,
+        mockRequest, uriBuilder, mockResponse);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
 
     verify(mockService, times(1)).findAll(eq(page), eq(size), any(Sort.class));
     verify(mockService, times(1)).toDto(models.getContent());
@@ -508,7 +629,47 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, Authentication, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   */
+  @Test
+  public void testGetAllPaginatedDataNotAdmin() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+    int page = 0;
+    int size = 2;
+
+    final Page<T> models = new PageImpl<T>(Collections.singletonList(model));
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+
+    final List<D> expectedResponse = results;
+
+    final Collection<GrantedAuthority> userAuthorities = Collections.emptyList();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    when(mockService.findAllByOwner(eq(page), eq(size), any(Sort.class), any(UUID.class))).thenReturn(models);
+    when(mockService.toDto(models.getContent())).thenReturn(results);
+
+    final String sortQuery = "createdAt,DESC,NULLS_LAST;modifiedAt";
+    final List<D> actual = controller.getAllDataPaginated(sortQuery, page, size, mockAuthentication,
+        mockRequest, uriBuilder, mockResponse);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+
+    verify(mockService, times(1)).findAllByOwner(eq(page), eq(size), any(Sort.class), any(UUID.class));
+    verify(mockService, times(1)).toDto(models.getContent());
+    verifyNoMoreInteractions(mockService);
+    verify(eventPublisher, times(1)).publishEvent(any());
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, Authentication, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test
   public void testGetAllPaginatedDataSortNull() {
@@ -523,11 +684,19 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
     final List<D> expectedResponse = results;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll(page, size)).thenReturn(models);
     when(mockService.toDto(models.getContent())).thenReturn(results);
 
-    final List<D> actual =
-        controller.getAllDataPaginated(null, page, size, mockRequest, uriBuilder, mockResponse);
+    final String sortQuery = null;
+    final List<D> actual = controller.getAllDataPaginated(sortQuery, page, size, mockAuthentication,
+        mockRequest, uriBuilder, mockResponse);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
 
     verify(mockService, times(1)).findAll(page, size);
     verify(mockService, times(1)).toDto(models.getContent());
@@ -540,7 +709,47 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, Authentication, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   */
+  @Test
+  public void testGetAllPaginatedDataSortNullNotAdmin() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+    int page = 0;
+    int size = 2;
+
+    final Page<T> models = new PageImpl<T>(Collections.singletonList(model));
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+
+    final List<D> expectedResponse = results;
+
+    final Collection<GrantedAuthority> userAuthorities = Collections.emptyList();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
+    when(mockService.findAllByOwner(page, size, (UUID) null)).thenReturn(models);
+    when(mockService.toDto(models.getContent())).thenReturn(results);
+
+    final String sortQuery = null;
+    final List<D> actual = controller.getAllDataPaginated(sortQuery, page, size, mockAuthentication,
+        mockRequest, uriBuilder, mockResponse);
+
+    verify(mockAuthentication, times(1)).getAuthorities();
+    verify(mockAuthentication, times(1)).getDetails();
+    verifyNoMoreInteractions(mockAuthentication);
+
+    verify(mockService, times(1)).findAllByOwner(page, size, (UUID) null);
+    verify(mockService, times(1)).toDto(models.getContent());
+    verifyNoMoreInteractions(mockService);
+    verify(eventPublisher, times(1)).publishEvent(any());
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, Authentication, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test(expected = PageNotFoundException.class)
   public void testGetAllDataPaginatedEmpty() {
@@ -548,14 +757,18 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     int page = 42;
     int size = 2;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll(page, size)).thenReturn(models);
 
-    controller.getAllDataPaginated(null, page, size, mockRequest, uriBuilder, mockResponse);
+    controller.getAllDataPaginated(null, page, size, mockAuthentication, mockRequest, uriBuilder,
+        mockResponse);
   }
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, Authentication, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test(expected = PageNotFoundException.class)
   public void testGetAllDataPaginatedNull() {
@@ -563,9 +776,13 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     int page = 42;
     int size = 2;
 
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
+    when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
+    when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.findAll(page, size)).thenReturn(models);
 
-    controller.getAllDataPaginated(null, page, size, mockRequest, uriBuilder, mockResponse);
+    controller.getAllDataPaginated(null, page, size, mockAuthentication, mockRequest, uriBuilder,
+        mockResponse);
   }
 
 
@@ -585,7 +802,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.toDto(model)).thenReturn(dto);
 
     final ResponseEntity<D> actualResponse =
-        controller.addData(getMockAuthentication(), dto, uriBuilder, mockResponse);
+        controller.addData(mockAuthentication, dto, uriBuilder, mockResponse);
 
     assertThat(actualResponse.getStatusCode(), is(expectedResponse.getStatusCode()));
     assertThat(actualResponse.getBody(), is(expectedResponse.getBody()));
@@ -616,7 +833,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.add(model)).thenReturn(false);
 
     final ResponseEntity<D> actualResponse =
-        controller.addData(getMockAuthentication(), dto, uriBuilder, mockResponse);
+        controller.addData(mockAuthentication, dto, uriBuilder, mockResponse);
 
     assertThat(actualResponse, is(expectedResponse));
 
@@ -636,13 +853,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(dto, HttpStatus.OK);
 
-    final String[] adminAuthorities = controller.getAdminAuthorities();
-    assertNotNull(adminAuthorities);
-    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
-    for (final String adminAuth : controller.getAdminAuthorities()) {
-      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
-    }
-
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.toEntity(dto)).thenReturn(model);
@@ -738,13 +949,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final String[] adminAuthorities = controller.getAdminAuthorities();
-    assertNotNull(adminAuthorities);
-    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
-    for (final String adminAuth : controller.getAdminAuthorities()) {
-      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
-    }
-
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.toEntity(dto)).thenReturn(model);
@@ -774,13 +979,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     final D dto = bridge.toDto(model);
     final ResponseEntity<D> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final String[] adminAuthorities = controller.getAdminAuthorities();
-    assertNotNull(adminAuthorities);
-    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
-    for (final String adminAuth : controller.getAdminAuthorities()) {
-      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
-    }
-
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     when(mockAuthentication.getDetails()).thenReturn(null);
     when(mockService.toEntity(dto)).thenReturn(model);
@@ -907,13 +1106,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testDeleteData() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
-    final String[] adminAuthorities = controller.getAdminAuthorities();
-    assertNotNull(adminAuthorities);
-    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
-    for (final String adminAuth : controller.getAdminAuthorities()) {
-      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
-    }
-
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
 
     final ResponseEntity<Void> actual =
@@ -961,13 +1154,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   public void testDeleteDataNotFoundException() {
     final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-    final String[] adminAuthorities = controller.getAdminAuthorities();
-    assertNotNull(adminAuthorities);
-    final Collection<GrantedAuthority> userAuthorities = new ArrayList<>(adminAuthorities.length);
-    for (final String adminAuth : controller.getAdminAuthorities()) {
-      userAuthorities.add(new SimpleGrantedAuthority(adminAuth));
-    }
-
+    final Collection<GrantedAuthority> userAuthorities = this.adminAuthorities();
     when(mockAuthentication.getAuthorities()).then(invocation -> userAuthorities);
     doThrow(this.buildTestEntityNotFound()).when(mockService).deleteById(RANDOM_ID);
 

@@ -142,6 +142,21 @@ public abstract class AbstractGenericService<T extends AbstractGenericEntity,
   }
 
   @Override
+  public List<T> findAllByOwner(final User owner) {
+    return repository.findAllByOwner(owner);
+  }
+
+  @Override
+  public List<T> findAllByOwner(Sort sort, final User owner) {
+    return repository.findAllByOwner(sort, owner);
+  }
+
+  @Override
+  public Page<T> findAllByOwner(Pageable pageable, final User owner) {
+    return repository.findAllByOwner(pageable, owner);
+  }
+
+  @Override
   public T findById(UUID entityId) {
     return repository.findById(entityId);
   }

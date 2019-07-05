@@ -381,6 +381,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * </p>
    * 
    * @param sortQuery sort query to be converted and passed to repository
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * 
    * @return
    *         <ul>
@@ -405,14 +406,26 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public List<D> getAllData(String sortQuery) {
+  public List<D> getAllData(String sortQuery, Authentication authentication) {
     final Sort sort = constructSort(sortQuery);
 
+    final UUID principalId = this.getPrincipalId(authentication);
+    final String[] adminAuthorities = this.getAdminAuthorities();
+
     final List<T> result;
-    if (sort != null) {
-      result = service.findAll(sort);
+    if (adminAuthorities != null && adminAuthorities.length > 0
+        && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+      if (sort != null) {
+        result = service.findAllByOwner(sort, principalId);
+      } else {
+        result = service.findAllByOwner(principalId);
+      }
     } else {
-      result = service.findAll();
+      if (sort != null) {
+        result = service.findAll(sort);
+      } else {
+        result = service.findAll();
+      }
     }
 
     return service.toDto(result);
@@ -430,6 +443,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * @param sortQuery sort query to be converted and passed to repository
    * @param page <em>Required Request parameter:</em> zero-based page index.
    * @param size <em>Required Request parameter:</em> the size of the page to be returned.
+   * @param authentication Authentication information. Should be automatically provided by Spring.
    * @param request the Web Request.
    * @param builder an URI builder to build the URI to the created {@link T} in the response.
    * @param response HTTP response.
@@ -457,15 +471,28 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public List<D> getAllDataPaginated(String sortQuery, int page, int size, WebRequest request,
-      UriComponentsBuilder builder, HttpServletResponse response) {
+  public List<D> getAllDataPaginated(String sortQuery, int page, int size,
+      Authentication authentication, WebRequest request, UriComponentsBuilder builder,
+      HttpServletResponse response) {
     final Sort sort = constructSort(sortQuery);
 
+    final UUID principalId = this.getPrincipalId(authentication);
+    final String[] adminAuthorities = this.getAdminAuthorities();
+
     final Page<T> resultPage;
-    if (sort != null) {
-      resultPage = service.findAll(page, size, sort);
+    if (adminAuthorities != null && adminAuthorities.length > 0
+        && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
+      if (sort != null) {
+        resultPage = service.findAllByOwner(page, size, sort, principalId);
+      } else {
+        resultPage = service.findAllByOwner(page, size, principalId);
+      }
     } else {
-      resultPage = service.findAll(page, size);
+      if (sort != null) {
+        resultPage = service.findAll(page, size, sort);
+      } else {
+        resultPage = service.findAll(page, size);
+      }
     }
 
     if (resultPage == null) {

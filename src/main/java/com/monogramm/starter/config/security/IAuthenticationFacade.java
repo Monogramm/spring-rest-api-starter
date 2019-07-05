@@ -51,12 +51,15 @@ public interface IAuthenticationFacade {
   static Map<?, ?> getAuthDetails(final Authentication authentication) {
     Map<?, ?> details = null;
 
-    final Object rawDetails = authentication.getDetails();
-    if (rawDetails instanceof OAuth2AuthenticationDetails) {
-      final Object decodedDetails = ((OAuth2AuthenticationDetails) rawDetails).getDecodedDetails();
+    if (authentication != null) {
+      final Object rawDetails = authentication.getDetails();
+      if (rawDetails instanceof OAuth2AuthenticationDetails) {
+        final Object decodedDetails =
+            ((OAuth2AuthenticationDetails) rawDetails).getDecodedDetails();
 
-      if (decodedDetails instanceof Map) {
-        details = (Map<?, ?>) decodedDetails;
+        if (decodedDetails instanceof Map) {
+          details = (Map<?, ?>) decodedDetails;
+        }
       }
     }
 
