@@ -7,6 +7,7 @@ package com.monogramm.starter.persistence.media.service;
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
+import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.media.dao.MediaRepository;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
@@ -170,7 +171,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
 
 
   @Override
-  @Transactional
+  @Transactional(rollbackFor = {EntityNotFoundException.class})
   public void deleteById(UUID entityId) {
     // Only delete if has administration authorities
     final Media entity = getRepository().findById(entityId);
@@ -183,7 +184,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
   }
 
   @Override
-  @Transactional
+  @Transactional(rollbackFor = {EntityNotFoundException.class})
   public void deleteByIdAndOwner(UUID entityId, User owner) {
     // Only delete if has administration authorities
     final Media entity = getRepository().findByIdAndOwner(entityId, owner);
@@ -195,7 +196,13 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
     this.deleteFromRepositoryAndStorage(entity);
   }
 
-  private void deleteFromRepositoryAndStorage(final Media entity) {
+  /**
+   * Delete media from repository and storage.
+   * 
+   * @param entity {@link Media} entity to delete.
+   */
+  @Transactional(rollbackFor = {EntityNotFoundException.class})
+  public void deleteFromRepositoryAndStorage(final Media entity) {
     final Integer deleted = getRepository().deleteById(entity.getId());
 
     if (deleted == null || deleted == 0) {
