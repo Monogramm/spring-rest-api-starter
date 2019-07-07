@@ -3,7 +3,7 @@
  */
 
 /**
- * The <em>Permissions</em> DAO.
+ * The <em>Permissions</em> Data Access Objects.
  * 
  * @author madmath03
  */

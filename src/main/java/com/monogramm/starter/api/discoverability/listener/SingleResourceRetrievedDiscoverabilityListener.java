@@ -41,14 +41,19 @@ public class SingleResourceRetrievedDiscoverabilityListener
     final HttpServletResponse response = resourceRetrievedEvent.getResponse();
     final UUID idOfNewResource = resourceRetrievedEvent.getIdOfNewResource();
 
-    this.addLinkHeaderOnSingleResourceRetrieval(response, idOfNewResource);
+    addLinkHeaderOnSingleResourceRetrieval(response, idOfNewResource);
   }
 
-  private void addLinkHeaderOnSingleResourceRetrieval(final HttpServletResponse response,
+  protected static void addLinkHeaderOnSingleResourceRetrieval(final HttpServletResponse response,
       final UUID idOfNewResource) {
     final String requestUrl =
         ServletUriComponentsBuilder.fromCurrentRequestUri().build().toUri().toASCIIString();
 
+    addLinkHeaderOnSingleResourceRetrieval(requestUrl, response, idOfNewResource);
+  }
+
+  protected static void addLinkHeaderOnSingleResourceRetrieval(final String requestUrl,
+      final HttpServletResponse response, final UUID idOfNewResource) {
     final int positionOfLastSlash = requestUrl.lastIndexOf('/');
     final String uriForResourceSelf =
         requestUrl.substring(0, positionOfLastSlash) + idOfNewResource;

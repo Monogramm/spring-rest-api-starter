@@ -6,14 +6,14 @@ package com.monogramm.starter.api.user.listener;
 
 import com.monogramm.starter.api.AbstractMailSendingListener;
 import com.monogramm.starter.api.user.event.OnRegistrationCompleteEvent;
+import com.monogramm.starter.config.properties.EmailProperties;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class RegistrationListener
     extends AbstractMailSendingListener<VerificationToken, OnRegistrationCompleteEvent> {
 
-  private final IVerificationTokenService verificationService;
+  private final VerificationTokenService verificationService;
 
   /**
    * Create a {@link RegistrationListener}.
@@ -39,14 +39,14 @@ public class RegistrationListener
    * @param verificationService verification token service.
    * @param messages application messages.
    * @param mailSender mail sender.
-   * @param env application environment.
+   * @param emailProperties application email properties properties.
    * 
    * @throws IllegalArgumentException if any of the parameters is {@code null}.
    */
   @Autowired
-  public RegistrationListener(IVerificationTokenService verificationService, MessageSource messages,
-      JavaMailSender mailSender, Environment env) {
-    super(messages, mailSender, env);
+  public RegistrationListener(VerificationTokenService verificationService, MessageSource messages,
+      JavaMailSender mailSender, EmailProperties emailProperties) {
+    super(messages, mailSender, emailProperties);
 
     if (verificationService == null) {
       throw new IllegalArgumentException("Verification token service cannot be null.");
@@ -61,7 +61,7 @@ public class RegistrationListener
     // Save request to verify account
     final VerificationToken token = new VerificationToken();
     token.setUser(user);
-    
+
     if (!verificationService.add(token)) {
       throw new VerificationTokenNotFoundException();
     }

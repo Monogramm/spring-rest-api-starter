@@ -5,9 +5,10 @@
 package com.monogramm.starter.persistence.permission.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.permission.entity.Permission;
 
 /**
- * PermissionNotFoundException.
+ * <em>"{@link Permission}  not found"</em> Exception.
  * 
  * @author madmath03
  */

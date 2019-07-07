@@ -8,6 +8,7 @@ import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.utils.Jsonable;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -21,7 +22,15 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * @author madmath03
  */
-public abstract class AbstractGenericDto implements Serializable, Jsonable {
+public abstract class AbstractGenericDto
+    implements Serializable, Comparable<AbstractGenericDto>, Jsonable {
+
+  /**
+   * Default {@link AbstractGenericDto} comparator.
+   */
+  public static final Comparator<AbstractGenericDto> DEFAULT_DTO_COMPARATOR =
+      new AbstractGenericDtoComparator();
+
   /**
    * The {@code serialVersionUID}.
    */
@@ -225,6 +234,19 @@ public abstract class AbstractGenericDto implements Serializable, Jsonable {
     }
 
     return equals;
+  }
+
+  @Override
+  public int compareTo(AbstractGenericDto other) {
+    final int compare;
+
+    if (other == null) {
+      compare = 1;
+    } else {
+      compare = DEFAULT_DTO_COMPARATOR.compare(this, other);
+    }
+
+    return compare;
   }
 
 }

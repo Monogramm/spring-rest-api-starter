@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.jayway.awaitility.Awaitility;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   protected User owner;
 
   @Autowired
-  private IUserRepository userRepository;
+  private UserRepository userRepository;
 
   @Autowired
   private R repository;
@@ -72,15 +72,31 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @PersistenceContext
   private EntityManager entityManager;
 
+  private List<T> testEntities;
+
   @Before
   public void setUp() {
     this.owner = User.builder(OWNER_USERNAME, OWNER_EMAIL).build();
     userRepository.add(this.owner);
+
+    testEntities = new ArrayList<>();
   }
 
   @After
   public void tearDown() {
+    for (T entity : testEntities) {
+      if (entity != null && repository.exists(entity.getId())) {
+        repository.delete(entity);
+      }
+    }
+    testEntities.clear();
+
     userRepository.delete(this.owner);
+  }
+
+  protected void addTestEntity(T entity) {
+    repository.add(entity);
+    testEntities.add(entity);
   }
 
   /**
@@ -114,7 +130,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @Test
   public void testFindById() {
     final T model = this.buildTestEntity();
-    repository.add(model);
+    addTestEntity(model);
 
     final T actual = repository.findById(model.getId());
 
@@ -128,7 +144,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testAdd() {
     final T model = this.buildTestEntity();
 
-    repository.add(model);
+    addTestEntity(model);
 
     assertNotNull(model.getId());
     assertNotNull(model.getCreatedAt());
@@ -141,7 +157,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @Test
   public void testUpdate() {
     final T model = this.buildTestEntity();
-    repository.add(model);
+    addTestEntity(model);
 
     assertNotNull(model.getId());
     assertNotNull(model.getCreatedAt());
@@ -194,7 +210,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testUpdateByOwner() {
     final T model = this.buildTestEntity();
     model.setOwner(owner);
-    repository.add(model);
+    addTestEntity(model);
 
     assertNotNull(model.getId());
     assertNotNull(model.getCreatedAt());
@@ -239,8 +255,8 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
 
     assertNull(updatedModel);
   }
-  
-  
+
+
 
   /**
    * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
@@ -248,7 +264,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   @Test
   public void testDeleteById() {
     final T model = this.buildTestEntity();
-    repository.add(model);
+    addTestEntity(model);
 
     final Integer deleted = repository.deleteById(model.getId());
 
@@ -263,7 +279,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
     assertEquals(Integer.valueOf(0), repository.deleteById(RANDOM_ID));
   }
 
-  
+
   /**
    * Test method for {@link GenericRepository#deleteById(java.util.UUID)}.
    */
@@ -271,7 +287,7 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testDeleteByIdAndOwner() {
     final T model = this.buildTestEntity();
     model.setOwner(owner);
-    repository.add(model);
+    addTestEntity(model);
 
     final Integer deleted = repository.deleteByIdAndOwner(model.getId(), owner);
 
@@ -285,8 +301,8 @@ public abstract class AbstractGenericRepositoryIT<T extends AbstractGenericEntit
   public void testDeleteByIdAndOwnerNotFound() {
     assertEquals(Integer.valueOf(0), repository.deleteByIdAndOwner(RANDOM_ID, null));
   }
-  
-  
+
+
 
   /**
    * Test method for {@link GenericRepository#exists(java.util.UUID)}.

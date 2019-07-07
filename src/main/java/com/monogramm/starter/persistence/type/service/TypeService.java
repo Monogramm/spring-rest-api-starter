@@ -1,75 +1,40 @@
 package com.monogramm.starter.persistence.type.service;
 
-import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.type.TypeDto;
-import com.monogramm.starter.persistence.AbstractGenericService;
-import com.monogramm.starter.persistence.type.dao.ITypeRepository;
+import com.monogramm.starter.persistence.GenericService;
 import com.monogramm.starter.persistence.type.entity.Type;
 import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
 
 import java.util.List;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link Type} service.
+ * {@link Type} service interface.
  * 
  * @author madmath03
  */
-@Service
-public class TypeService extends AbstractGenericService<Type, TypeDto> implements ITypeService {
+public interface TypeService extends GenericService<Type, TypeDto> {
+
+  @Override
+  TypeBridge getBridge();
 
   /**
-   * Create a {@link TypeService}.
+   * Find all types by their name while ignoring case.
    * 
-   * @param typeDao the type repository.
-   * @param userDao the user repository.
-   * @param authenticationFacade a facade to retrieve the authentication object.
+   * @param name the name content to search.
+   * 
+   * @return the list of all the types matching the search.
    */
-  @Autowired
-  public TypeService(final ITypeRepository typeDao, final IUserRepository userDao,
-      IAuthenticationFacade authenticationFacade) {
-    super(typeDao, userDao, new TypeBridge(userDao), authenticationFacade);
-  }
+  List<Type> findAllByName(final String name);
 
-  @Override
-  protected ITypeRepository getRepository() {
-    return (ITypeRepository) super.getRepository();
-  }
+  /**
+   * Find an type through its name while ignoring case.
+   * 
+   * @param name the name to search.
+   * 
+   * @return the type matching the name.
+   * 
+   * @throws TypeNotFoundException if no type matches the name in the repository.
+   */
+  Type findByName(final String name);
 
-  @Override
-  public TypeBridge getBridge() {
-    return (TypeBridge) super.getBridge();
-  }
-
-  @Override
-  protected boolean exists(Type entity) {
-    return getRepository().exists(entity.getId(), entity.getName());
-  }
-
-  @Override
-  protected TypeNotFoundException createEntityNotFoundException(Type entity) {
-    return new TypeNotFoundException("Following type not found:" + entity);
-  }
-
-  @Override
-  protected TypeNotFoundException createEntityNotFoundException(UUID entityId) {
-    return new TypeNotFoundException("No type for ID=" + entityId);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public Type findByName(final String name) {
-    return getRepository().findByNameIgnoreCase(name);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public List<Type> findAllByName(final String name) {
-    return getRepository().findAllContainingNameIgnoreCase(name);
-  }
 }

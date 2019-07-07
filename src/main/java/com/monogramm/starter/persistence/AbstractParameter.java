@@ -27,42 +27,58 @@ public abstract class AbstractParameter extends AbstractGenericEntity {
 
   /**
    * Parameter name property.
+   * 
+   * @see #name
    */
   public static final String NAME_PROPERTY = "name";
   /**
    * Parameter name length.
+   * 
+   * @see #name
    */
-  public static final int MAX_LENGTH_NAME = 32;
+  public static final int MAX_LENGTH_NAME = 256;
 
 
   /**
    * Parameter description property.
+   * 
+   * @see #description
    */
   public static final String DESCRIPTION_PROPERTY = "description";
   /**
    * Parameter description length.
+   * 
+   * @see #description
    */
-  public static final int MAX_LENGTH_DESCRIPTION = 512;
+  public static final int MAX_LENGTH_DESCRIPTION = 2048;
 
 
   /**
    * Parameter type property.
+   * 
+   * @see #type
    */
   public static final String TYPE_PROPERTY = "type";
   /**
    * Parameter type length.
+   * 
+   * @see #type
    */
-  public static final int MAX_LENGTH_TYPE = 255;
+  public static final int MAX_LENGTH_TYPE = 256;
 
 
   /**
    * Parameter value property.
+   * 
+   * @see #value
    */
   public static final String VALUE_PROPERTY = "value";
   /**
    * Parameter value length.
+   * 
+   * @see #value
    */
-  public static final int MAX_LENGTH_VALUE = 1024;
+  public static final int MAX_LENGTH_VALUE = 2048;
 
 
   /**

@@ -13,7 +13,10 @@ import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.After;
@@ -322,6 +325,101 @@ public abstract class AbstractGenericDtoTest<T extends AbstractGenericDto> {
     } catch (Exception e) {
       fail("toString failed: " + e);
     }
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToSelf() {
+    assertNotNull(dto);
+    assertEquals(0, dto.compareTo(dto));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToNull() {
+    assertNotNull(dto);
+    assertEquals(1, dto.compareTo(null));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToCopy() {
+    assertNotNull(dto);
+
+    final T otherDto = this.buildTestDto(dto);
+    assertNotNull(otherDto);
+    assertEquals(0, dto.compareTo(otherDto));
+    assertEquals(0, otherDto.compareTo(dto));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToCopyAlteredCreatedAt() {
+    assertNotNull(dto);
+
+    final T otherDto = this.buildTestDto(dto);
+    assertNotNull(otherDto);
+
+    dto.setCreatedAt(new Date(System.currentTimeMillis() - 36_000L));
+    assertEquals(1, dto.compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(dto));
+
+    otherDto.setCreatedAt(new Date(System.currentTimeMillis() + 36_000L));
+    assertEquals(1, dto.compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(dto));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToCopyAlteredModifiedAt() {
+    assertNotNull(dto);
+
+    final T otherDto = this.buildTestDto(dto);
+    assertNotNull(otherDto);
+
+    dto.setModifiedAt(new Date(System.currentTimeMillis() - 36_000L));
+    assertEquals(1, dto.compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(dto));
+
+    otherDto.setModifiedAt(new Date(System.currentTimeMillis() + 36_000L));
+    assertEquals(1, dto.compareTo(otherDto));
+    assertEquals(-1, otherDto.compareTo(dto));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericDto#compareTo(AbstractGenericDto)}.
+   */
+  @Test
+  public void testCompareToSort() {
+    assertNotNull(dto);
+
+    final T otherDto = this.buildTestDto(dto);
+    assertNotNull(otherDto);
+
+    dto.setCreatedAt(new Date(System.currentTimeMillis() - 36_000L));
+    otherDto.setCreatedAt(new Date(System.currentTimeMillis() + 36_000L));
+
+    final List<T> list = new ArrayList<>(2);
+    list.add(dto);
+    list.add(otherDto);
+
+    assertEquals(dto, list.get(0));
+    assertEquals(otherDto, list.get(1));
+
+    Collections.sort(list);
+
+    assertEquals(otherDto, list.get(0));
+    assertEquals(dto, list.get(1));
   }
 
 }

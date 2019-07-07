@@ -57,5 +57,5 @@ nbproject/*
 .springBeans
 
 #project specific
-h2
+data
 logs

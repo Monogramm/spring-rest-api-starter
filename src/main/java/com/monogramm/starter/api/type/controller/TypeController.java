@@ -6,7 +6,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.type.TypeDto;
 import com.monogramm.starter.persistence.type.entity.Type;
 import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
-import com.monogramm.starter.persistence.type.service.ITypeService;
+import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
    */
   @Autowired
   public TypeController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      ITypeService typeService) {
+      TypeService typeService) {
     super(messageSource, eventPublisher, typeService);
   }
 
@@ -128,8 +128,8 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   }
 
   @Override
-  protected ITypeService getService() {
-    return (ITypeService) super.getService();
+  protected TypeService getService() {
+    return (TypeService) super.getService();
   }
 
   @Override
@@ -144,17 +144,20 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<TypeDto> getAllData() {
-    return super.getAllData();
+  public List<TypeDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
+    return super.getAllData(sort);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<TypeDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+  public List<TypeDto> getAllDataPaginated(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(page, size, request, builder, response);
+    return super.getAllDataPaginated(sort, page, size, request, builder, response);
   }
 
   @Override
@@ -179,5 +182,13 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 }

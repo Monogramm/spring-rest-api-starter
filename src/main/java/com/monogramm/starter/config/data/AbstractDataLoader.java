@@ -4,24 +4,25 @@
 
 package com.monogramm.starter.config.data;
 
+import com.monogramm.starter.config.properties.DataProperties;
 import com.monogramm.starter.persistence.AbstractGenericEntity;
 import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.GenericService;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
-import com.monogramm.starter.persistence.role.service.IRoleService;
+import com.monogramm.starter.persistence.role.service.RoleService;
 import com.monogramm.starter.persistence.type.entity.Type;
 import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
-import com.monogramm.starter.persistence.type.service.ITypeService;
+import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.env.Environment;
 
 /**
  * An abstract initial Data Loader.
@@ -68,15 +68,15 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
   private boolean alreadySetup = false;
 
 
-  private final Environment env;
+  private final DataProperties dataProperties;
   private final MessageSource messageSource;
 
 
-  private final IParameterService parameterService;
-  private final ITypeService typeService;
-  private final IPermissionService permissionService;
-  private final IRoleService roleService;
-  private final IUserService userService;
+  private final ParameterService parameterService;
+  private final TypeService typeService;
+  private final PermissionService permissionService;
+  private final RoleService roleService;
+  private final UserService userService;
 
 
 
@@ -91,7 +91,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
   /**
    * Create a {@link AbstractDataLoader}.
    * 
-   * @param env application environment properties.
+   * @param dataProperties application data properties.
    * @param messageSource the messages i8n source.
    * @param userService the user service.
    * @param roleService the role service.
@@ -100,11 +100,11 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * @param parameterService the parameters service.
    */
   @Autowired
-  public AbstractDataLoader(Environment env, MessageSource messageSource, IUserService userService,
-      IRoleService roleService, IPermissionService permissionService, ITypeService typeService,
-      IParameterService parameterService) {
+  public AbstractDataLoader(DataProperties dataProperties, MessageSource messageSource,
+      UserService userService, RoleService roleService, PermissionService permissionService,
+      TypeService typeService, ParameterService parameterService) {
     super();
-    this.env = env;
+    this.dataProperties = dataProperties;
     this.messageSource = messageSource;
 
     this.userService = userService;
@@ -155,7 +155,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
     boolean initDone = this.initDefaultData();
 
     // Setup the demo data
-    if (initDone && "true".equalsIgnoreCase(this.env.getProperty("application.data.demo"))) {
+    if (initDone && this.dataProperties.isDemo()) {
       initDone &= this.initDemoData();
     }
 
@@ -199,12 +199,12 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
 
 
   /**
-   * Get the {@link #env}.
+   * Get the {@link #dataProperties}.
    * 
-   * @return the {@link #env}.
+   * @return the {@link #dataProperties}.
    */
-  protected Environment getEnv() {
-    return env;
+  protected DataProperties getDataProperties() {
+    return dataProperties;
   }
 
   /**
@@ -223,7 +223,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * 
    * @return the {@link #parameterService}.
    */
-  public IParameterService getParameterService() {
+  public ParameterService getParameterService() {
     return parameterService;
   }
 
@@ -232,7 +232,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * 
    * @return the {@link #typeService}.
    */
-  protected ITypeService getTypeService() {
+  protected TypeService getTypeService() {
     return typeService;
   }
 
@@ -241,7 +241,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * 
    * @return the {@link #permissionService}.
    */
-  protected IPermissionService getPermissionService() {
+  protected PermissionService getPermissionService() {
     return permissionService;
   }
 
@@ -250,7 +250,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * 
    * @return the {@link #roleService}.
    */
-  protected IRoleService getRoleService() {
+  protected RoleService getRoleService() {
     return roleService;
   }
 
@@ -259,7 +259,7 @@ public abstract class AbstractDataLoader implements ApplicationListener<ContextR
    * 
    * @return the {@link #userService}.
    */
-  protected IUserService getUserService() {
+  protected UserService getUserService() {
     return userService;
   }
 

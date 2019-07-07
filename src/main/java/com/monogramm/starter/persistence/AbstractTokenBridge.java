@@ -5,7 +5,7 @@
 package com.monogramm.starter.persistence;
 
 import com.monogramm.starter.dto.AbstractTokenDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 /**
@@ -29,7 +29,7 @@ public abstract class AbstractTokenBridge<T extends AbstractToken,
    * 
    * @param userRepository repository to lookup users.
    */
-  public AbstractTokenBridge(IUserRepository userRepository) {
+  public AbstractTokenBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

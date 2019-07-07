@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.net.HttpHeaders;
+import com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -95,6 +96,20 @@ public class PaginatedResultsRetrievedDiscoverabilityListenerTest {
   /**
    * Test method for
    * {@link PaginatedResultsRetrievedDiscoverabilityListener#onApplicationEvent(com.monogramm.starter.api.discoverability.event.PaginatedResultsRetrievedEvent)}.
+   */
+  @Test(expected = IllegalStateException.class)
+  public void testOnApplicationEvent() {
+    // Mock
+    final PaginatedResultsRetrievedEvent event =
+        new PaginatedResultsRetrievedEvent(response, uriBuilder, page, totalPages, pageSize);
+
+    // Operation
+    this.listener.onApplicationEvent(event);
+  }
+
+  /**
+   * Test method for
+   * {@link PaginatedResultsRetrievedDiscoverabilityListener#addLinkHeaderOnPagedResourceRetrieval(String, UriComponentsBuilder, HttpServletResponse, int, int, int)}.
    */
   @Test
   public void testAddLinkHeaderOnPagedResourceRetrieval() {

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.AbstractGenericDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
 
   private GenericRepository<T> mockRepository;
 
-  private IUserRepository mockUserRepository;
+  private UserRepository mockUserRepository;
 
   private IAuthenticationFacade mockAuthenticationFacade;
 
@@ -67,7 +67,7 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
    */
   @Before
   public void setUp() throws Exception {
-    mockUserRepository = mock(IUserRepository.class);
+    mockUserRepository = mock(UserRepository.class);
     mockRepository = this.buildMockRepository();
     mockAuthenticationFacade = mock(IAuthenticationFacade.class);
 
@@ -99,7 +99,7 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
    * 
    * @return the {@link #mockUserRepository}.
    */
-  public IUserRepository getMockUserRepository() {
+  public UserRepository getMockUserRepository() {
     return mockUserRepository;
   }
 
@@ -123,7 +123,7 @@ public abstract class AbstractGenericServiceTest<T extends AbstractGenericEntity
 
   /**
    * Test method for
-   * {@link AbstractGenericService#AbstractGenericService(GenericRepository, IUserRepository, AbstractGenericBridge, IAuthenticationFacade)}.
+   * {@link AbstractGenericService#AbstractGenericService(GenericRepository, UserRepository, AbstractGenericBridge, IAuthenticationFacade)}.
    */
   @Test
   public void testAbstractGenericService() {

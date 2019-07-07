@@ -7,9 +7,9 @@ package com.monogramm.starter.persistence.user.service;
 import com.github.madmath03.password.Passwords;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
-import com.monogramm.starter.persistence.role.dao.IRoleRepository;
+import com.monogramm.starter.persistence.role.dao.RoleRepository;
 import com.monogramm.starter.persistence.role.entity.Role;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 /**
@@ -18,7 +18,7 @@ import com.monogramm.starter.persistence.user.entity.User;
  * @author madmath03
  */
 public class UserBridge extends AbstractGenericBridge<User, UserDto> {
-  private IRoleRepository roleRepository;
+  private RoleRepository roleRepository;
 
   /**
    * Create a {@link UserBridge}.
@@ -41,7 +41,7 @@ public class UserBridge extends AbstractGenericBridge<User, UserDto> {
    * @param userRepository repository to lookup users.
    * @param roleRepository repository to lookup roles.
    */
-  public UserBridge(final IUserRepository userRepository, final IRoleRepository roleRepository) {
+  public UserBridge(final UserRepository userRepository, final RoleRepository roleRepository) {
     super(userRepository);
     this.roleRepository = roleRepository;
   }
@@ -92,7 +92,8 @@ public class UserBridge extends AbstractGenericBridge<User, UserDto> {
     dto.setVerified(entity.isVerified());
 
     if (entity.getRole() != null) {
-      dto.setRole(entity.getRole().getId());
+      final Role role = entity.getRole();
+      dto.setRole(role.getId());
     }
 
     return dto;
@@ -103,7 +104,7 @@ public class UserBridge extends AbstractGenericBridge<User, UserDto> {
    * 
    * @return the {@link #roleRepository}.
    */
-  protected final IRoleRepository getRoleRepository() {
+  protected final RoleRepository getRoleRepository() {
     return roleRepository;
   }
 
@@ -112,7 +113,7 @@ public class UserBridge extends AbstractGenericBridge<User, UserDto> {
    * 
    * @param roleRepository the {@link #roleRepository} to set.
    */
-  protected final void setRoleRepository(IRoleRepository roleRepository) {
+  protected final void setRoleRepository(RoleRepository roleRepository) {
     this.roleRepository = roleRepository;
   }
 

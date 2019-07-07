@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import com.monogramm.starter.dto.AbstractParameterDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.Date;
@@ -30,7 +30,7 @@ public abstract class AbstractParameterBridgeTest<E extends AbstractParameter,
    * 
    * @return an DTO for tests.
    */
-  abstract protected B buildTestBridge(IUserRepository userRepository);
+  abstract protected B buildTestBridge(UserRepository userRepository);
 
   /**
    * Test method for {@link AbstractParameterBridge#AbstractParameterBridge()}.
@@ -43,7 +43,7 @@ public abstract class AbstractParameterBridgeTest<E extends AbstractParameter,
   }
 
   /**
-   * Test method for {@link AbstractParameterBridge#AbstractParameterBridge(IUserRepository)}.
+   * Test method for {@link AbstractParameterBridge#AbstractParameterBridge(UserRepository)}.
    */
   @Test
   public void testAbstractGenericTokenBridgeIUserRepository() {
@@ -53,7 +53,7 @@ public abstract class AbstractParameterBridgeTest<E extends AbstractParameter,
   }
 
   /**
-   * Test method for {@link AbstractParameterBridge#AbstractParameterBridge(IUserRepository)}.
+   * Test method for {@link AbstractParameterBridge#AbstractParameterBridge(UserRepository)}.
    */
   @Test
   public void testAbstractGenericTokenBridgeNull() {

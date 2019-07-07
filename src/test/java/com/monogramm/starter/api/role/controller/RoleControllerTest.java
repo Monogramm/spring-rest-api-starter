@@ -13,7 +13,7 @@ import com.monogramm.starter.dto.role.RoleDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
-import com.monogramm.starter.persistence.role.service.IRoleService;
+import com.monogramm.starter.persistence.role.service.RoleService;
 import com.monogramm.starter.persistence.role.service.RoleBridge;
 
 import java.util.UUID;
@@ -52,13 +52,13 @@ public class RoleControllerTest extends AbstractGenericControllerTest<Role, Role
   }
 
   @Override
-  protected IRoleService getMockService() {
-    return (IRoleService) super.getMockService();
+  protected RoleService getMockService() {
+    return (RoleService) super.getMockService();
   }
 
   @Override
-  protected IRoleService buildTestService() {
-    return mock(IRoleService.class);
+  protected RoleService buildTestService() {
+    return mock(RoleService.class);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class RoleControllerTest extends AbstractGenericControllerTest<Role, Role
   }
 
   /**
-   * Test method for {@link RoleController#RoleController(IRoleService)}.
+   * Test method for {@link RoleController#RoleController(RoleService)}.
    */
   @Test
   public void testRoleController() {

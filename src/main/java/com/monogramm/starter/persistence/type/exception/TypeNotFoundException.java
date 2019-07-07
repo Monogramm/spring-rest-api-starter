@@ -5,9 +5,10 @@
 package com.monogramm.starter.persistence.type.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.type.entity.Type;
 
 /**
- * TypeNotFoundException.
+ * <em>"{@link Type}  not found"</em> Exception.
  * 
  * @author madmath03
  */

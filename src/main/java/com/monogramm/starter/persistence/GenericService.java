@@ -142,7 +142,21 @@ public interface GenericService<T extends AbstractGenericEntity, D extends Abstr
    * @return a page of entities
    */
   default Page<T> findAll(int page, int size) {
-    final Pageable pageable = new PageRequest(page, size);
+    return this.findAll(page, size, null);
+  }
+
+  /**
+   * Returns a {@link Page} of entities meeting the paging restriction with sort parameters applied.
+   * Pages are zero indexed, thus providing 0 for {@code page} will return the first page.
+   * 
+   * @param page zero-based page index.
+   * @param size the size of the page to be returned.
+   * @param sort can be {@literal null}.
+   * 
+   * @return a page of entities
+   */
+  default Page<T> findAll(int page, int size, Sort sort) {
+    final Pageable pageable = new PageRequest(page, size, sort);
 
     return this.findAll(pageable);
   }

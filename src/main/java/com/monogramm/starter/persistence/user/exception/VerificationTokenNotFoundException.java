@@ -5,9 +5,10 @@
 package com.monogramm.starter.persistence.user.exception;
 
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.user.entity.VerificationToken;
 
 /**
- * VerificationTokenNotFoundException.
+ * <em>"{@link VerificationToken}  not found"</em> Exception.
  * 
  * @author madmath03
  */

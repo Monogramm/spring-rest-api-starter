@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.persistence.user.entity.User;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +54,7 @@ public class CustomTokenEnhancerTest {
   private static final String DUMMY_AUTH = "DUMMIES";
   private static final Collection<GrantedAuthority> DUMMY_AUTHORITIES = new ArrayList<>();
 
-  private IUserService userService;
+  private UserService userService;
   private CustomTokenEnhancer enhancer;
   private OAuth2Authentication oauthAuthentication;
 
@@ -104,7 +104,7 @@ public class CustomTokenEnhancerTest {
    */
   @Before
   public void setUp() throws Exception {
-    this.userService = mock(IUserService.class);
+    this.userService = mock(UserService.class);
 
     this.enhancer = new CustomTokenEnhancer(this.userService);
 

@@ -16,6 +16,7 @@ import com.monogramm.starter.persistence.GenericService;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -28,6 +29,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +68,10 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   public static final char SEP = '/';
 
   /**
+   * Sort query parameter name.
+   */
+  public static final String SORT = "sort";
+  /**
    * Page number query parameter name.
    */
   public static final String PAGE = "page";
@@ -71,6 +79,10 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * Page size query parameter name.
    */
   public static final String SIZE = "size";
+  /**
+   * Unique identifiers query parameter name.
+   */
+  public static final String IDS = "ids";
 
   /**
    * Default page size.
@@ -254,6 +266,112 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
       WebRequest request);
 
 
+  /**
+   * Sort query separator for properties.
+   * 
+   * @see AbstractGenericController#constructSortOrders(String)
+   */
+  public static final String SORT_PROP_SEP = ";";
+  /**
+   * Sort query separator for property options.
+   * 
+   * @see AbstractGenericController#constructSortOrders(String)
+   */
+  public static final String SORT_OPT_SEP = ",";
+  /**
+   * Default sort applied in listing functions when none provided.
+   */
+  public static final String DEFAULT_SORT_QUERY = "createdAt,DESC;modifiedAt,DESC";
+
+  /**
+   * Construct a list of {@code Sort.Order} from a String query.
+   * 
+   * <p>
+   * The string query is expected to be of the following form:
+   * {@code PROPERTY[,DIRECTION[,NULL_HINT]];...}.
+   * </p>
+   * 
+   * <p>
+   * For instance:
+   * </p>
+   * 
+   * <pre>
+   * property1;property2,ASC;property3,DESC,NULLS_FIRST;property4,asc,NULLS_LAST
+   * </pre>
+   * 
+   * @see AbstractGenericController#constructSortOrders(String)
+   * 
+   * @param sortQuery the sort query.
+   * 
+   * @return a {@code Sort} object or {@code null}.
+   */
+  protected static List<Sort.Order> constructSortOrders(String sortQuery) {
+    final List<Sort.Order> orders;
+
+    if (sortQuery != null && !sortQuery.isEmpty()) {
+      orders = new ArrayList<>();
+
+      final String[] propertiesWithOptions = sortQuery.split(SORT_PROP_SEP);
+      for (String propertyWithOptions : propertiesWithOptions) {
+        final Sort.Order order;
+
+        final String[] propertyOptions = propertyWithOptions.split(SORT_OPT_SEP);
+        switch (propertyOptions.length) {
+          case 1:
+            // Only property provided
+            order = new Order(propertyOptions[0]);
+            break;
+
+          case 2:
+            // Property and sort direction provided
+            order = new Order(Direction.fromString(propertyOptions[1]), propertyOptions[0]);
+            break;
+
+          case 3:
+            // Property, sort direction and null hint provided
+            order = new Order(Direction.fromString(propertyOptions[1]), propertyOptions[0],
+                Sort.NullHandling.valueOf(propertyOptions[2]));
+            break;
+
+          default:
+            LOG.debug("Invalid sort entry: {}", propertyWithOptions);
+            order = null;
+            break;
+        }
+
+        if (order != null) {
+          orders.add(order);
+        }
+      }
+
+    } else {
+      orders = null;
+    }
+
+    return orders;
+  }
+
+  /**
+   * Construct a {@code Sort} object from a String query.
+   * 
+   * @see AbstractGenericController#constructSortOrders(String)
+   * 
+   * @param sortQuery the sort query.
+   * 
+   * @return a {@code Sort} object or {@code null}.
+   */
+  protected static Sort constructSort(String sortQuery) {
+    final List<Sort.Order> orders = constructSortOrders(sortQuery);
+
+    final Sort order;
+    if (orders != null && !orders.isEmpty()) {
+      order = new Sort(orders);
+    } else {
+      order = null;
+    }
+
+    return order;
+  }
 
   /**
    * Get all available {@link T} entities.
@@ -261,6 +379,8 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * <p>
    * Returns a {@link D} JSON representation about a data array.
    * </p>
+   * 
+   * @param sortQuery sort query to be converted and passed to repository
    * 
    * @return
    *         <ul>
@@ -285,8 +405,15 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public List<D> getAllData() {
-    final List<T> result = service.findAll();
+  public List<D> getAllData(String sortQuery) {
+    final Sort sort = constructSort(sortQuery);
+
+    final List<T> result;
+    if (sort != null) {
+      result = service.findAll(sort);
+    } else {
+      result = service.findAll();
+    }
 
     return service.toDto(result);
   }
@@ -300,6 +427,7 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * Returns a {@link D} JSON representation about a data array.
    * </p>
    * 
+   * @param sortQuery sort query to be converted and passed to repository
    * @param page <em>Required Request parameter:</em> zero-based page index.
    * @param size <em>Required Request parameter:</em> the size of the page to be returned.
    * @param request the Web Request.
@@ -329,10 +457,17 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    * 
    *         </ul>
    */
-  public List<D> getAllDataPaginated(int page, int size, WebRequest request,
+  public List<D> getAllDataPaginated(String sortQuery, int page, int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
+    final Sort sort = constructSort(sortQuery);
 
-    Page<T> resultPage = service.findAll(page, size);
+    final Page<T> resultPage;
+    if (sort != null) {
+      resultPage = service.findAll(page, size, sort);
+    } else {
+      resultPage = service.findAll(page, size);
+    }
+
     if (resultPage == null) {
       throw this.buildPageNotFoundException(page, 0, request);
     } else if (page > resultPage.getTotalPages()) {
@@ -441,6 +576,48 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    */
   public ResponseEntity<D> addData(Authentication authentication, @RequestBody D dto,
       UriComponentsBuilder builder, HttpServletResponse response) {
+    final T entity = this.addEntity(authentication, dto);
+
+    final ResponseEntity<D> responseEntity;
+    if (entity != null) {
+      // Publish HATEOAS event
+      eventPublisher.publishEvent(new ResourceCreatedEvent(entity, response));
+
+      final HttpHeaders headers = new HttpHeaders();
+      headers.setLocation(
+          builder.path(this.getControllerPath() + "/{id}").buildAndExpand(dto.getId()).toUri());
+
+      final D responseDto = this.service.toDto(entity);
+      responseEntity = new ResponseEntity<>(responseDto, headers, HttpStatus.CREATED);
+    } else {
+      responseEntity = new ResponseEntity<>(HttpStatus.CONFLICT);
+    }
+
+    return responseEntity;
+  }
+
+  /**
+   * Add a {@link T}.
+   * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
+   * @param dto a {@link D} to create.
+   * 
+   * @return a result DTO
+   */
+  protected D addData(Authentication authentication, @RequestBody D dto) {
+    final T entity = this.addEntity(authentication, dto);
+
+    final D responseDto;
+    if (entity != null) {
+      responseDto = this.service.toDto(entity);
+    } else {
+      responseDto = null;
+    }
+
+    return responseDto;
+  }
+
+  private T addEntity(Authentication authentication, @RequestBody D dto) {
     final T entity = this.service.toEntity(dto);
 
     // Set creator and owner
@@ -450,22 +627,14 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
 
     final boolean added = service.add(entity);
 
-    final ResponseEntity<D> responseEntity;
+    final T response;
     if (added) {
-      // Publish HATEOAS event
-      eventPublisher.publishEvent(new ResourceCreatedEvent(entity, response));
-
-      final HttpHeaders headers = new HttpHeaders();
-      headers.setLocation(
-          builder.path(this.getControllerPath() + "/{id}").buildAndExpand(dto.getId()).toUri());
-
-      responseEntity =
-          new ResponseEntity<>(this.service.toDto(entity), headers, HttpStatus.CREATED);
+      response = entity;
     } else {
-      responseEntity = new ResponseEntity<>(HttpStatus.CONFLICT);
+      response = null;
     }
 
-    return responseEntity;
+    return response;
   }
 
   /**
@@ -625,7 +794,104 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
    */
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
+
+    // Convert ID
+    final UUID uniqueId = UUID.fromString(id);
+
     HttpStatus status;
+    final boolean deleted = this.deleteDataById(authentication, uniqueId);
+    if (deleted) {
+      status = HttpStatus.NO_CONTENT;
+    } else {
+      status = HttpStatus.NOT_FOUND;
+    }
+
+    return new ResponseEntity<>(status);
+  }
+
+  /**
+   * Delete all {@link T} by their unique identifiers.
+   * 
+   * @param authentication Authentication information. Should be automatically provided by Spring.
+   * @param ids <em>Required URL Parameter:</em> comma separated universal unique identifiers (i.e.
+   *        {@code UUID}).
+   * 
+   * @return
+   *         <ul>
+   * 
+   *         <li>
+   *         <p>
+   *         <strong>Success Response:</strong>
+   *         </p>
+   * 
+   *         <ul>
+   *         <li>
+   *         <p>
+   *         <strong>Code:</strong> <code>HttpStatus.NO_CONTENT</code>
+   *         </p>
+   *         <p>
+   *         <strong>Content:</strong> <code>null</code>
+   *         </p>
+   *         </li>
+   *         </ul>
+   * 
+   *         </li>
+   * 
+   *         <li>
+   *         <p>
+   *         <strong>Error Response:</strong>
+   *         </p>
+   * 
+   *         <ul>
+   *         <li>
+   *         <p>
+   *         <strong>Code:</strong> <code>HttpStatus.NOT_FOUND</code>
+   *         </p>
+   *         <p>
+   *         <strong>Content:</strong> <code>null</code>
+   *         </p>
+   *         </li>
+   *         </ul>
+   * 
+   *         </li>
+   * 
+   *         </ul>
+   */
+  public ResponseEntity<Void> deleteAllData(Authentication authentication, String ids) {
+    // Convert IDs
+    final String[] idArray = ids.split(",");
+    final List<UUID> uniqueIds = new ArrayList<>(idArray.length);
+    for (String id : idArray) {
+      try {
+        uniqueIds.add(UUID.fromString(id));
+      } catch (IllegalArgumentException e) {
+        LOG.debug("invalid id=" + id, e);
+      }
+    }
+
+    HttpStatus status;
+    final boolean deleted = this.deleteAllDataById(authentication, uniqueIds);
+    if (deleted) {
+      status = HttpStatus.NO_CONTENT;
+    } else {
+      status = HttpStatus.CONFLICT;
+    }
+
+    return new ResponseEntity<>(status);
+  }
+
+  private boolean deleteAllDataById(Authentication authentication, List<UUID> ids) {
+    boolean deleted = true;
+
+    for (UUID id : ids) {
+      deleted &= this.deleteDataById(authentication, id);
+    }
+
+    return deleted;
+  }
+
+  private boolean deleteDataById(Authentication authentication, UUID id) {
+    boolean deleted;
 
     try {
       // Only delete if owner or has administration authorities
@@ -634,18 +900,17 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
           && !IAuthenticationFacade.hasAnyAuthority(authentication, adminAuthorities)) {
         final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
 
-        service.deleteByIdAndOwner(UUID.fromString(id), ownerId);
+        service.deleteByIdAndOwner(id, ownerId);
       } else {
-        service.deleteById(UUID.fromString(id));
+        service.deleteById(id);
       }
 
-      status = HttpStatus.NO_CONTENT;
+      deleted = true;
     } catch (EntityNotFoundException | IllegalArgumentException e) {
       LOG.debug("deleteData(id=" + id + ")", e);
-      status = HttpStatus.NOT_FOUND;
+      deleted = false;
     }
 
-    return new ResponseEntity<>(status);
+    return deleted;
   }
-
 }

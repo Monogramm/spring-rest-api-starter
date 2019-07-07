@@ -6,14 +6,14 @@ package com.monogramm.starter.api.user.listener;
 
 import com.monogramm.starter.api.AbstractMailSendingListener;
 import com.monogramm.starter.api.user.event.OnPasswordResetEvent;
+import com.monogramm.starter.config.properties.EmailProperties;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService;
+import com.monogramm.starter.persistence.user.service.PasswordResetTokenService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class PasswordResetListener
     extends AbstractMailSendingListener<PasswordResetToken, OnPasswordResetEvent> {
 
-  private final IPasswordResetTokenService passwordResetTokenService;
+  private final PasswordResetTokenService passwordResetTokenService;
 
   /**
    * Create a {@link PasswordResetListener}.
@@ -39,14 +39,14 @@ public class PasswordResetListener
    * @param passwordResetTokenService password reset token service.
    * @param messages application messages.
    * @param mailSender mail sender.
-   * @param env application environment.
+   * @param emailProperties application email properties properties.
    * 
    * @throws IllegalArgumentException if any of the parameters is {@code null}.
    */
   @Autowired
-  public PasswordResetListener(IPasswordResetTokenService passwordResetTokenService,
-      MessageSource messages, JavaMailSender mailSender, Environment env) {
-    super(messages, mailSender, env);
+  public PasswordResetListener(PasswordResetTokenService passwordResetTokenService,
+      MessageSource messages, JavaMailSender mailSender, EmailProperties emailProperties) {
+    super(messages, mailSender, emailProperties);
 
     if (passwordResetTokenService == null) {
       throw new IllegalArgumentException("Password reset token service cannot be null.");

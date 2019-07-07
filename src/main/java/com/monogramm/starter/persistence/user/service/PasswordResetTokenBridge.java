@@ -6,7 +6,7 @@ package com.monogramm.starter.persistence.user.service;
 
 import com.monogramm.starter.dto.user.PasswordResetTokenDto;
 import com.monogramm.starter.persistence.AbstractTokenBridge;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class PasswordResetTokenBridge
    * @param userRepository repository to lookup users.
    */
   @Autowired
-  public PasswordResetTokenBridge(IUserRepository userRepository) {
+  public PasswordResetTokenBridge(UserRepository userRepository) {
     super(userRepository);
   }
 

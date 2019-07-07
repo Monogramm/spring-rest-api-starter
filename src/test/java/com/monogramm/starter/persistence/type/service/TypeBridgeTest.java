@@ -41,7 +41,7 @@ public class TypeBridgeTest extends AbstractGenericBridgeTest<Type, TypeDto, Typ
 
   /**
    * Test method for
-   * {@link TypeBridge#TypeBridge(com.monogramm.starter.persistence.user.dao.IUserRepository)}.
+   * {@link TypeBridge#TypeBridge(com.monogramm.starter.persistence.user.dao.UserRepository)}.
    */
   @Test
   public void testTypeBridgeIUserRepository() {
@@ -52,7 +52,7 @@ public class TypeBridgeTest extends AbstractGenericBridgeTest<Type, TypeDto, Typ
 
   /**
    * Test method for
-   * {@link TypeBridge#TypeBridge(com.monogramm.starter.persistence.user.dao.IUserRepository)}.
+   * {@link TypeBridge#TypeBridge(com.monogramm.starter.persistence.user.dao.UserRepository)}.
    */
   @Test
   public void testTypeBridgeNull() {

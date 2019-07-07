@@ -15,10 +15,10 @@ import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.dto.role.RoleDto;
 import com.monogramm.starter.persistence.AbstractGenericBridgeTest;
-import com.monogramm.starter.persistence.permission.dao.IPermissionRepository;
+import com.monogramm.starter.persistence.permission.dao.PermissionRepository;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.role.entity.Role;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
@@ -38,14 +38,14 @@ import org.mockito.Mockito;
  */
 public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, RoleBridge> {
 
-  private IPermissionRepository permissionRepository;
+  private PermissionRepository permissionRepository;
 
   /**
    * Get the {@link #permissionRepository}.
    * 
    * @return the {@link #permissionRepository}.
    */
-  protected final IPermissionRepository getPermissionRepository() {
+  protected final PermissionRepository getPermissionRepository() {
     return permissionRepository;
   }
 
@@ -63,7 +63,7 @@ public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, Rol
   public void setUp() throws Exception {
     super.setUp();
 
-    permissionRepository = mock(IPermissionRepository.class);
+    permissionRepository = mock(PermissionRepository.class);
   }
 
   /*
@@ -90,7 +90,7 @@ public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, Rol
   }
 
   /**
-   * Test method for {@link RoleBridge#RoleBridge(IUserRepository, IPermissionRepository)}.
+   * Test method for {@link RoleBridge#RoleBridge(UserRepository, PermissionRepository)}.
    */
   @Test
   public void testRoleBridgeIUserRepositoryIPermissionRepository() {
@@ -102,7 +102,7 @@ public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, Rol
   }
 
   /**
-   * Test method for {@link RoleBridge#RoleBridge(IUserRepository, IPermissionRepository)}.
+   * Test method for {@link RoleBridge#RoleBridge(UserRepository, PermissionRepository)}.
    */
   @Test
   public void testRoleBridgeIUserRepositoryNull() {
@@ -113,7 +113,7 @@ public class RoleBridgeTest extends AbstractGenericBridgeTest<Role, RoleDto, Rol
   }
 
   /**
-   * Test method for {@link RoleBridge#RoleBridge(IUserRepository, IPermissionRepository)}.
+   * Test method for {@link RoleBridge#RoleBridge(UserRepository, PermissionRepository)}.
    */
   @Test
   public void testRoleBridgeNullNull() {

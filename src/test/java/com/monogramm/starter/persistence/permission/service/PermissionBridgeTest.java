@@ -42,7 +42,7 @@ public class PermissionBridgeTest
 
   /**
    * Test method for
-   * {@link PermissionBridge#PermissionBridge(com.monogramm.starter.persistence.user.dao.IUserRepository)}.
+   * {@link PermissionBridge#PermissionBridge(com.monogramm.starter.persistence.user.dao.UserRepository)}.
    */
   @Test
   public void testPermissionBridgeIUserRepository() {
@@ -53,7 +53,7 @@ public class PermissionBridgeTest
 
   /**
    * Test method for
-   * {@link PermissionBridge#PermissionBridge(com.monogramm.starter.persistence.user.dao.IUserRepository)}.
+   * {@link PermissionBridge#PermissionBridge(com.monogramm.starter.persistence.user.dao.UserRepository)}.
    */
   @Test
   public void testPermissionBridgeNull() {

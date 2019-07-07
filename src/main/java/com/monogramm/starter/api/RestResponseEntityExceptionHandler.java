@@ -182,6 +182,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
   }
 
   /**
+   * Send a 501 Not Implemented in case of unsupported operation.
+   * 
+   * @param unsupportedEx a conflict exception.
+   * 
+   * @return a response describing the operation.
+   */
+  @ExceptionHandler({UnsupportedOperationException.class})
+  @ResponseBody
+  public ResponseEntity<ExceptionMessage> handleUnsupportedOperation(
+      final Exception unsupportedEx) {
+    return errorResponse(unsupportedEx, HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  /**
    * Create an error response.
    * 
    * @param throwable the throwable that was catch if any.
@@ -193,7 +207,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
       final HttpStatus status) {
     final ExceptionMessage message;
     if (null == throwable) {
-      LOG.error("Unknown error caught in RESTController " + status);
+      LOG.error("Unknown error caught in RESTController {}", status);
       message = null;
     } else {
       LOG.error("Error caught: " + throwable.getMessage(), throwable);
@@ -213,7 +227,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
    * @return a response.
    */
   protected <T> ResponseEntity<T> response(final T body, final HttpStatus status) {
-    LOG.debug("Responding with a status of " + status);
+    LOG.debug("Responding with a status of {}", status);
     return new ResponseEntity<>(body, new HttpHeaders(), status);
   }
 }

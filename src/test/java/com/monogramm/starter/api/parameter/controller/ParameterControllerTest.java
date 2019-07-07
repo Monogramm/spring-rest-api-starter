@@ -11,7 +11,7 @@ import com.monogramm.starter.api.AbstractGenericControllerTest;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.parameter.service.ParameterBridge;
 
 import java.util.UUID;
@@ -43,13 +43,13 @@ public class ParameterControllerTest
   }
 
   @Override
-  protected IParameterService getMockService() {
-    return (IParameterService) super.getMockService();
+  protected ParameterService getMockService() {
+    return (ParameterService) super.getMockService();
   }
 
   @Override
-  protected IParameterService buildTestService() {
-    return mock(IParameterService.class);
+  protected ParameterService buildTestService() {
+    return mock(ParameterService.class);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class ParameterControllerTest
   }
 
   /**
-   * Test method for {@link ParameterController#ParameterController(IParameterService)}.
+   * Test method for {@link ParameterController#ParameterController(ParameterService)}.
    */
   @Test
   public void testParameterController() {

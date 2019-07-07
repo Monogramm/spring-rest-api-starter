@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -42,6 +43,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -245,6 +247,26 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
+   * Get the {@link #mockRequest}.
+   * 
+   * @return the {@link #mockRequest}.
+   */
+  protected WebRequest getMockRequest() {
+    return mockRequest;
+  }
+
+  /**
+   * Get the {@link #mockResponse}.
+   * 
+   * @return the {@link #mockResponse}.
+   */
+  protected HttpServletResponse getMockResponse() {
+    return mockResponse;
+  }
+
+
+
+  /**
    * Test method for {@link AbstractGenericController#getService()}.
    */
   @Test
@@ -349,7 +371,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData()}.
+   * Test method for {@link AbstractGenericController#getAllData(String)}.
    */
   @Test
   public void testGetAllData() {
@@ -363,10 +385,39 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
     final List<D> expectedResponse = results;
 
+    when(mockService.findAll(any(Sort.class))).thenReturn(models);
+    when(mockService.toDto(models)).thenReturn(results);
+
+    final String sortQuery = "createdAt,DESC;modifiedAt,DESC";
+    final List<D> actual = controller.getAllData(sortQuery);
+
+    verify(mockService, times(1)).findAll(any(Sort.class));
+    verify(mockService, times(1)).toDto(models);
+    verifyNoMoreInteractions(mockService);
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for {@link AbstractGenericController#getAllData(String)}.
+   */
+  @Test
+  public void testGetAllDataSortNull() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+
+    final List<T> models = new ArrayList<>();
+    models.add(model);
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+
+    final List<D> expectedResponse = results;
+
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final List<D> actual = controller.getAllData();
+    final List<D> actual = controller.getAllData(null);
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
@@ -377,7 +428,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData()}.
+   * Test method for {@link AbstractGenericController#getAllData(String)}.
    */
   @Test
   public void testGetAllDataEmpty() {
@@ -388,7 +439,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final List<D> actual = controller.getAllData();
+    final List<D> actual = controller.getAllData(null);
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
@@ -399,7 +450,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   }
 
   /**
-   * Test method for {@link AbstractGenericController#getAllData()}.
+   * Test method for {@link AbstractGenericController#getAllData(String)}.
    */
   @Test
   public void testGetAllDataNull() {
@@ -410,7 +461,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.findAll()).thenReturn(models);
     when(mockService.toDto(models)).thenReturn(results);
 
-    final List<D> actual = controller.getAllData();
+    final List<D> actual = controller.getAllData(null);
 
     verify(mockService, times(1)).findAll();
     verify(mockService, times(1)).toDto(models);
@@ -424,10 +475,43 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test
   public void testGetAllPaginatedData() {
+    final T model = this.buildTestEntity();
+    final D dto = bridge.toDto(model);
+    int page = 0;
+    int size = 2;
+
+    final Page<T> models = new PageImpl<T>(Collections.singletonList(model));
+    final List<D> results = new ArrayList<>();
+    results.add(dto);
+
+    final List<D> expectedResponse = results;
+
+    when(mockService.findAll(eq(page), eq(size), any(Sort.class))).thenReturn(models);
+    when(mockService.toDto(models.getContent())).thenReturn(results);
+
+    final String sortQuery = "createdAt,DESC;modifiedAt,DESC";
+    final List<D> actual = controller.getAllDataPaginated(sortQuery, page, size, mockRequest,
+        uriBuilder, mockResponse);
+
+    verify(mockService, times(1)).findAll(eq(page), eq(size), any(Sort.class));
+    verify(mockService, times(1)).toDto(models.getContent());
+    verifyNoMoreInteractions(mockService);
+    verify(eventPublisher, times(1)).publishEvent(any());
+    verifyNoMoreInteractions(eventPublisher);
+
+    assertThat(actual, is(expectedResponse));
+  }
+
+  /**
+   * Test method for
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   */
+  @Test
+  public void testGetAllPaginatedDataSortNull() {
     final T model = this.buildTestEntity();
     final D dto = bridge.toDto(model);
     int page = 0;
@@ -443,7 +527,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
     when(mockService.toDto(models.getContent())).thenReturn(results);
 
     final List<D> actual =
-        controller.getAllDataPaginated(page, size, mockRequest, uriBuilder, mockResponse);
+        controller.getAllDataPaginated(null, page, size, mockRequest, uriBuilder, mockResponse);
 
     verify(mockService, times(1)).findAll(page, size);
     verify(mockService, times(1)).toDto(models.getContent());
@@ -456,7 +540,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test(expected = PageNotFoundException.class)
   public void testGetAllDataPaginatedEmpty() {
@@ -466,12 +550,12 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
     when(mockService.findAll(page, size)).thenReturn(models);
 
-    controller.getAllDataPaginated(page, size, mockRequest, uriBuilder, mockResponse);
+    controller.getAllDataPaginated(null, page, size, mockRequest, uriBuilder, mockResponse);
   }
 
   /**
    * Test method for
-   * {@link AbstractGenericController#getAllDataPaginated(int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
+   * {@link AbstractGenericController#getAllDataPaginated(String, int, int, WebRequest, UriComponentsBuilder, HttpServletResponse)}.
    */
   @Test(expected = PageNotFoundException.class)
   public void testGetAllDataPaginatedNull() {
@@ -481,7 +565,7 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
 
     when(mockService.findAll(page, size)).thenReturn(models);
 
-    controller.getAllDataPaginated(page, size, mockRequest, uriBuilder, mockResponse);
+    controller.getAllDataPaginated(null, page, size, mockRequest, uriBuilder, mockResponse);
   }
 
 
@@ -928,16 +1012,9 @@ public abstract class AbstractGenericControllerTest<T extends AbstractGenericEnt
   /**
    * Test method for {@link AbstractGenericController#deleteData(java.lang.String)}.
    */
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testDeleteDataIdIllegal() {
-    final ResponseEntity<Void> expectedResponse = new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-    final ResponseEntity<Void> actual =
-        controller.deleteData(mockAuthentication, "this_is_not_a_UUID");
-
-    verifyNoMoreInteractions(mockService);
-
-    assertThat(actual, is(expectedResponse));
+    controller.deleteData(mockAuthentication, "this_is_not_a_UUID");
   }
 
 }

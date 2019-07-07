@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "Application Docker entrypoint initialization..."
+echo "Application entrypoint initialization..."
 
 # If no config provided in volume, setup a default config from environment variables
 if [ ! -f $APP_CONFIG ]; then
@@ -11,50 +11,60 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "# ~~~~~" >>  $APP_CONFIG
 	echo "# Application Configuration" >>  $APP_CONFIG
 	echo "# ~~~~~" >>  $APP_CONFIG
-	echo "# Default domain name" >>  $APP_CONFIG
-	echo "application.data.domain_name=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
+	echo "# Email" >>  $APP_CONFIG
+	echo "application.email.app_title=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 	echo "application.email.no_reply=no_reply@${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 
 	echo "server.context-path=${APP_SERVER_CONTEXT_PATH}" >>  $APP_CONFIG
 	echo "server.port=${APP_SERVER_PORT}" >>  $APP_CONFIG
 
+	echo "spring.http.multipart.max-file-size=${APP_MAX_FILE_SIZE}" >>  $APP_CONFIG
+	echo "spring.http.multipart.max-request-size=${APP_MAX_REQUEST_SIZE}" >>  $APP_CONFIG
+
+	echo "# Default domain name" >>  $APP_CONFIG
+	echo "application.data.domain_name=${APP_DOMAIN_NAME}" >>  $APP_CONFIG
 	echo "# Default admin password" >>  $APP_CONFIG
 	echo "application.data.admin_password=${APP_ADMIN_PASSWORD}" >>  $APP_CONFIG
 
-	echo "# Access token signing key" >>  $APP_CONFIG
-	echo "application.security.signing-key=${APP_SIGNING_KEY}" >>  $APP_CONFIG
-
-	if [ ! -z $APP_VERIFIER_KEY_PASS ]; then
-		mkdir -p /srv/app/keys
-
-		echo "Generating Java Key Store for signing access tokens..."
-		keytool -genkeypair -alias $APP_VERIFIER_KEY_ALIAS \
-			-dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" \
-			-keyalg RSA -keypass $APP_VERIFIER_KEY_PASS -keystore /srv/app/keys/private.jks \
-			-storepass $APP_VERIFIER_KEY_PASS
-
-		keytool -importkeystore \
-			-srckeystore /srv/app/keys/private.jks \
-			-destkeystore /srv/app/keys/private.jks -deststoretype pkcs12
-		echo "JKS generated in /srv/app/keys/"
-
-		keytool -list -rfc --keystore /srv/app/keys/private.jks | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
-		echo "Public key extracted in /srv/app/keys/"
-
-		echo "# Access token verifier key" >>  $APP_CONFIG
-		echo "application.security.signing-key=${APP_SIGNING_KEY}" >>  $APP_CONFIG
-
-		echo "application.security.public-key-path=/srv/app/keys/public.txt" >>  $APP_CONFIG
-		echo "application.security.private-key-path=/srv/app/keys/private.jks" >>  $APP_CONFIG
-		echo "application.security.private-key-password=$APP_VERIFIER_KEY_PASS" >>  $APP_CONFIG
-		echo "application.security.private-key-pair=$APP_VERIFIER_KEY_ALIAS" >>  $APP_CONFIG
-	fi
-
-	echo "# ~~~~~" >>  $APP_CONFIG
-	echo "# DEMO Configuration" >>  $APP_CONFIG
-	echo "# ~~~~~" >>  $APP_CONFIG
 	echo "# disable demo data import" >>  $APP_CONFIG
 	echo "application.data.demo=false" >>  $APP_CONFIG
+
+	echo "# Media storage directory" >>  $APP_CONFIG
+	mkdir -p /srv/app/data/media
+	echo "application.file.upload_dir=/srv/app/data/media" >>  $APP_CONFIG
+
+	if [ ! -z $APP_SIGNING_KEYPAIR_PASS ]; then
+		mkdir -p /srv/app/keys
+
+		echo "Generating RSA Java Key Store for verifying access tokens..."
+		keytool -genkeypair -alias "$APP_SIGNING_KEYPAIR_ALIAS" -dname "CN=$APP_DOMAIN_NAME, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keystore /srv/app/keys/.private.jks -keyalg RSA -keypass "$APP_SIGNING_KEYPAIR_PASS" -storepass "$APP_SIGNING_KEYPAIR_PASS"
+
+		keytool -importkeystore -srckeystore /srv/app/keys/.private.jks -srcstorepass "$APP_SIGNING_KEYPAIR_PASS" -destkeystore /srv/app/keys/.private.jks -deststoretype pkcs12
+		chmod 600 /srv/app/keys/.private.jks
+		echo "RSA JKS generated in /srv/app/keys/"
+
+		keytool -list -rfc --keystore /srv/app/keys/.private.jks -storepass "$APP_SIGNING_KEYPAIR_PASS" | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
+		echo "Public key extracted in /srv/app/keys/"
+
+		echo "# Access token signing key" >>  $APP_CONFIG
+		echo "application.security.key-pair-path=/srv/app/keys/.private.jks" >>  $APP_CONFIG
+		echo "application.security.key-pair-password=$APP_SIGNING_KEYPAIR_PASS" >>  $APP_CONFIG
+		echo "application.security.key-pair-alias=$APP_SIGNING_KEYPAIR_ALIAS" >>  $APP_CONFIG
+		echo "application.security.verifying-key-path=/srv/app/keys/public.txt" >>  $APP_CONFIG
+	elif [ -z $APP_SIGNING_KEY ]; then
+		mkdir -p /srv/app/keys
+
+		echo "Generating RSA SSH key for signing access tokens..."
+		ssh-keygen -b 2048 -m PEM -t rsa -f /srv/app/keys/.id_rsa -q -N ""
+		echo "RSA SSH key generated in /srv/app/keys/"
+
+		echo "# Access token signing key" >>  $APP_CONFIG
+		echo "application.security.signing-key-path=/srv/app/keys/.id_rsa.pub" >>  $APP_CONFIG
+		echo "application.security.verifying-key-path=/srv/app/keys/.id_rsa" >>  $APP_CONFIG
+	else
+		echo "# Access token signing key" >>  $APP_CONFIG
+		echo "application.security.signing-key=${APP_SIGNING_KEY}" >>  $APP_CONFIG
+	fi
 
 
 	echo "# ~~~~~" >>  $APP_CONFIG
@@ -66,6 +76,8 @@ if [ ! -f $APP_CONFIG ]; then
 		echo "spring.datasource.driver-class-name=${DB_DRIVER}" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'h2' ]; then
 		echo "spring.datasource.driver-class-name=org.h2.Driver" >>  $APP_CONFIG
+	elif [ ${DB_PLATFORM} = 'mariadb' ]; then
+		echo "spring.datasource.driver-class-name=org.mariadb.jdbc.Driver" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'mysql' ]; then
 		echo "spring.datasource.driver-class-name=com.mysql.jdbc.Driver" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'postgresql' ]; then
@@ -76,6 +88,8 @@ if [ ! -f $APP_CONFIG ]; then
 		echo "spring.jpa.properties.hibernate.dialect=${DB_DIALECT}" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'h2' ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.h2.Driver" >>  $APP_CONFIG
+	elif [ ${DB_PLATFORM} = 'mariadb' ]; then
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB53Dialect" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'mysql' ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'postgresql' ]; then
@@ -84,12 +98,16 @@ if [ ! -f $APP_CONFIG ]; then
 
 	if [ ! -z $DB_STORAGE ]; then
 		echo "spring.jpa.properties.hibernate.dialect.storage_engine=${DB_STORAGE}" >>  $APP_CONFIG
+	elif [ ${DB_PLATFORM} = 'mariadb' ]; then
+		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >>  $APP_CONFIG
 	elif [ ${DB_PLATFORM} = 'mysql' ]; then
 		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >>  $APP_CONFIG
 	fi
 
 	if [ -z $DB_PORT ]; then
-		if [ ${DB_PLATFORM} = 'mysql' ]; then
+		if [ ${DB_PLATFORM} = 'mariadb' ]; then
+			DB_PORT=3306
+		elif [ ${DB_PLATFORM} = 'mysql' ]; then
 			DB_PORT=3306
 		elif [ ${DB_PLATFORM} = 'postgresql' ]; then
 			DB_PORT=5432
@@ -97,12 +115,20 @@ if [ ! -f $APP_CONFIG ]; then
 	fi
 
 	if [ ! -z $DB_HOST ]; then
-		echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
+		if [ ${DB_PLATFORM} = 'mariadb' ]; then
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull" >>  $APP_CONFIG
+		elif [ ${DB_PLATFORM} = 'mysql' ]; then
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull&verifyServerCertificate=false&useSSL=false" >>  $APP_CONFIG
+		else
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
+		fi
 	elif [ ${DB_PLATFORM} = 'h2' ]; then
 		mkdir -p /srv/app/data/h2
 
 		echo "In memory H2 database will be stored in /srv/app/data/h2"
 		echo "spring.datasource.url=jdbc:h2:file:/srv/app/data/h2/${DB_NAME}" >>  $APP_CONFIG
+	else
+		echo "spring.datasource.url=jdbc:${DB_PLATFORM}://localhost:${DB_PORT}/${DB_NAME}" >>  $APP_CONFIG
 	fi
 
 	echo "spring.datasource.username=${DB_USER}" >>  $APP_CONFIG
@@ -114,11 +140,13 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "# ~~~~~" >>  $APP_CONFIG
 	echo "spring.mail.host=${MAIL_HOST}" >>  $APP_CONFIG
 	echo "spring.mail.port=${MAIL_PORT}" >>  $APP_CONFIG
+	echo "spring.mail.username=${MAIL_USER}" >>  $APP_CONFIG
+	echo "spring.mail.password=${MAIL_PASSWORD}" >>  $APP_CONFIG
 	echo "spring.mail.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
 	echo "spring.mail.properties.mail.transport.protocol=${MAIL_PROTOCOL}" >>  $APP_CONFIG
-	echo "spring.mail.username=${SMTP_USER_NAME}" >>  $APP_CONFIG
-	echo "spring.mail.password=${SMTP_PASSWORD}" >>  $APP_CONFIG
-	echo "spring.mail.properties.mail.smtps.starttls.enable=${MAIL_STARTTLS}" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.smtp.auth=true" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.smtp.ssl.enable=${MAIL_SSL}" >>  $APP_CONFIG
+	echo "spring.mail.properties.mail.smtp.starttls.enable=${MAIL_STARTTLS}" >>  $APP_CONFIG
 
 
 	# Coming features
@@ -152,6 +180,12 @@ if [ ! -f $APP_CONFIG ]; then
 	echo "Configuration generated."
 else
 	echo "Configuration found."
+fi
+
+# FIXME kind of ugly... should wait dynamically until DB is up
+if [ ! ${DB_PLATFORM} = 'h2' ]; then
+	echo "Wait until all containers finished initializing themselves..."
+	sleep 240
 fi
 
 echo "Launching application..."

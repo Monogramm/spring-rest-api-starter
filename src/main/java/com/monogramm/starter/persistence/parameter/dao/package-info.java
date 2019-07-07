@@ -3,7 +3,7 @@
  */
 
 /**
- * The <em>Parameters</em> DAO.
+ * The <em>Parameters</em> Data Access Objects.
  * 
  * @author madmath03
  */

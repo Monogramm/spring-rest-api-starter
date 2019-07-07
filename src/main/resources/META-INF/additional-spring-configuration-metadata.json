@@ -1,74 +1,92 @@
-{
-	"properties": [
-		{
-			"name": "spring.security.debug",
-			"type": "java.lang.Boolean",
-			"description": "Enable Spring Security debug mode"
-		},
-		{
-			"name": "application.name",
-			"type": "java.lang.String",
-			"description": "Name of the application. Defaults to Maven project artifact id"
-		},
-		{
-			"name": "build.version",
-			"type": "java.lang.String",
-			"description": "Application version. Defaults to Maven project version"
-		},
-		{
-			"name": "build.timestamp",
-			"type": "java.lang.String",
-			"description": "Application build timestamp. Defaults to Maven project build timestamp"
-		},
-		{
-			"name": "application.email.no_reply",
-			"type": "java.lang.String",
-			"description": "Application 'reply to' email used for emails sent"
-		},
-		{
-			"name": "application.security.public-key-path",
-			"type": "java.lang.String",
-			"description": "The public key path to the JKS file"
-		},
-		{
-			"name": "application.security.private-key-path",
-			"type": "java.lang.String",
-			"description": "The private key path to the JKS file for signing JWT tokens"
-		},
-		{
-			"name": "application.security.private-key-password",
-			"type": "java.lang.String",
-			"description": "The private key password"
-		},
-		{
-			"name": "application.security.private-key-pair",
-			"type": "java.lang.String",
-			"description": "The private key pair (alias used when generated JKS)"
-		},
-		{
-			"name": "application.security.signing-key",
-			"type": "java.lang.String",
-			"description": "The symmetric key for signing JWT tokens"
-		},
-		{
-			"name": "application.data.demo",
-			"type": "java.lang.Boolean",
-			"description": "Enable initialization of database with some demonstration data"
-		},
-		{
-			"name": "application.data.domain_name",
-			"type": "java.lang.String",
-			"description": "The domain name used to generate default (and demo) user email addresses"
-		},
-		{
-			"name": "application.data.admin_password",
-			"type": "java.lang.String",
-			"description": "The password for the default admin user. Leave empty for automatic password generation"
-		},
-		{
-			"name": "application.welcome.ascii_art",
-			"type": "java.lang.String",
-			"description": "A welcome ASCII art to display on application startup"
-		}
-	]
-}
+{"properties": [
+  {
+    "name": "application.name",
+    "type": "java.lang.String",
+    "description": "Name of the application. Defaults to Maven project artifact id"
+  },
+  {
+    "name": "application.build_version",
+    "type": "java.lang.String",
+    "description": "Application version. Defaults to Maven project version"
+  },
+  {
+    "name": "application.build_timestamp",
+    "type": "java.lang.String",
+    "description": "Application build timestamp. Defaults to Maven project build timestamp"
+  },
+  {
+    "name": "application.email.no_reply",
+    "type": "java.lang.String",
+    "description": "Application 'reply to' email used for emails sent"
+  },
+  {
+    "name": "application.email.app_title",
+    "type": "java.lang.String",
+    "description": "Application name used at the start of email subjects"
+  },
+  {
+    "name": "application.security.debug",
+    "type": "java.lang.Boolean",
+    "description": "Enable Spring Security debug mode"
+  },
+  {
+    "name": "application.security.key-pair-path",
+    "type": "java.lang.String",
+    "description": "The key pair path to the JKS file for signing JWT tokens"
+  },
+  {
+    "name": "application.security.key-pair-password",
+    "type": "java.lang.String",
+    "description": "The key pair password"
+  },
+  {
+    "name": "application.security.key-pair-alias",
+    "type": "java.lang.String",
+    "description": "The key pair alias used when generated JKS"
+  },
+  {
+    "name": "application.security.verifying-key-path",
+    "type": "java.lang.String",
+    "description": "The verifying key path to the JKS file"
+  },
+  {
+    "name": "application.security.signing-key-path",
+    "type": "java.lang.String",
+    "description": "The signing key path for signing JWT tokens"
+  },
+  {
+    "name": "application.security.signing-key",
+    "type": "java.lang.String",
+    "description": "The symmetric key for signing JWT tokens"
+  },
+  {
+    "name": "application.file.upload_dir",
+    "type": "java.nio.file.Path",
+    "description": "Path to media upload directory"
+  },
+  {
+    "name": "application.data.demo",
+    "type": "java.lang.Boolean",
+    "description": "Enable initialization of database with some demonstration data"
+  },
+  {
+    "name": "application.data.domain_name",
+    "type": "java.lang.String",
+    "description": "The domain name used to generate default (and demo) user email addresses"
+  },
+  {
+    "name": "application.data.admin_password",
+    "type": "java.lang.String",
+    "description": "The password for the default admin user. Leave empty for automatic password generation"
+  },
+  {
+    "name": "application.welcome.app_banner",
+    "type": "java.lang.String",
+    "description": "A path to a file containing a banner to display on application startup"
+  },
+  {
+    "name": "application.welcome.ascii_art",
+    "type": "java.lang.String",
+    "description": "A welcome ASCII art to display on application startup"
+  }
+]}

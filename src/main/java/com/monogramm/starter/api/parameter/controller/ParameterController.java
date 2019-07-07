@@ -10,7 +10,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.parameter.ParameterDto;
 import com.monogramm.starter.persistence.parameter.entity.Parameter;
 import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundException;
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -108,7 +108,7 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
    */
   @Autowired
   public ParameterController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IParameterService parameterService) {
+      ParameterService parameterService) {
     super(messageSource, eventPublisher, parameterService);
   }
 
@@ -132,8 +132,8 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   }
 
   @Override
-  protected IParameterService getService() {
-    return (IParameterService) super.getService();
+  protected ParameterService getService() {
+    return (ParameterService) super.getService();
   }
 
   @Override
@@ -148,17 +148,20 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<ParameterDto> getAllData() {
-    return super.getAllData();
+  public List<ParameterDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
+    return super.getAllData(sort);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<ParameterDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+  public List<ParameterDto> getAllDataPaginated(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(page, size, request, builder, response);
+    return super.getAllDataPaginated(sort, page, size, request, builder, response);
   }
 
   @Override
@@ -183,5 +186,13 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 }

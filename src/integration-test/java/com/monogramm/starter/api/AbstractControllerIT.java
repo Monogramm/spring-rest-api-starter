@@ -14,13 +14,13 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jayway.awaitility.Awaitility;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
-import com.monogramm.starter.persistence.role.service.IRoleService;
+import com.monogramm.starter.persistence.role.service.RoleService;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,15 +84,15 @@ public abstract class AbstractControllerIT {
 
 
   @Autowired
-  private IPermissionService permissionService;
+  private PermissionService permissionService;
 
   @Autowired
-  private IRoleService roleService;
+  private RoleService roleService;
 
   private Role testRole;
 
   @Autowired
-  private IUserService userService;
+  private UserService userService;
 
   private User testUser;
 
@@ -341,7 +341,7 @@ public abstract class AbstractControllerIT {
    * 
    * @return the {@link #permissionService}.
    */
-  protected final IPermissionService getPermissionService() {
+  protected final PermissionService getPermissionService() {
     return permissionService;
   }
 
@@ -350,7 +350,7 @@ public abstract class AbstractControllerIT {
    * 
    * @return the {@link #roleService}.
    */
-  protected final IRoleService getRoleService() {
+  protected final RoleService getRoleService() {
     return roleService;
   }
 
@@ -368,7 +368,7 @@ public abstract class AbstractControllerIT {
    * 
    * @return the {@link #userService}.
    */
-  protected final IUserService getUserService() {
+  protected final UserService getUserService() {
     return userService;
   }
 

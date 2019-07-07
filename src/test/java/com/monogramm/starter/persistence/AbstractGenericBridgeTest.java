@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.dto.AbstractGenericDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.Date;
@@ -39,7 +39,7 @@ public abstract class AbstractGenericBridgeTest<E extends AbstractGenericEntity,
    */
   private B bridge;
 
-  private IUserRepository userRepository;
+  private UserRepository userRepository;
 
   /**
    * Build an empty bridge.
@@ -53,7 +53,7 @@ public abstract class AbstractGenericBridgeTest<E extends AbstractGenericEntity,
    * 
    * @return the {@link #userRepository}.
    */
-  protected final IUserRepository getUserRepository() {
+  protected final UserRepository getUserRepository() {
     return userRepository;
   }
 
@@ -75,7 +75,7 @@ public abstract class AbstractGenericBridgeTest<E extends AbstractGenericEntity,
 
     assertNotNull("The tested bridge cannot be null!", bridge);
 
-    userRepository = mock(IUserRepository.class);
+    userRepository = mock(UserRepository.class);
   }
 
   /**
@@ -98,7 +98,7 @@ public abstract class AbstractGenericBridgeTest<E extends AbstractGenericEntity,
 
   /**
    * Test method for
-   * {@link AbstractGenericBridge#AbstractGenericBridge(com.monogramm.starter.persistence.user.dao.IUserRepository)}.
+   * {@link AbstractGenericBridge#AbstractGenericBridge(com.monogramm.starter.persistence.user.dao.UserRepository)}.
    */
   public void testAbstractGenericBridgeIUserRepository(B bridge) {
     assertNotNull(bridge);
@@ -115,7 +115,7 @@ public abstract class AbstractGenericBridgeTest<E extends AbstractGenericEntity,
 
   /**
    * Test method for
-   * {@link AbstractGenericBridge#setUserRepository(com.monogramm.starter.persistence.user.dao.IUserRepository)}.
+   * {@link AbstractGenericBridge#setUserRepository(com.monogramm.starter.persistence.user.dao.UserRepository)}.
    */
   @Test
   public void testSetUserRepository() {

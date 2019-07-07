@@ -1,5 +1,7 @@
 package com.monogramm;
 
+import com.monogramm.starter.config.properties.ApplicationProperties;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -8,11 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
 
 @SpringBootApplication
+@EnableConfigurationProperties
 public class Application {
 
   /**
@@ -54,7 +57,7 @@ public class Application {
 
 
 
-  private final Environment env;
+  private final ApplicationProperties applicationProperties;
 
   /**
    * Welcome text for startup of application.
@@ -80,28 +83,29 @@ public class Application {
   /**
    * Create a {@link Application}.
    * 
-   * @param env application environment properties.
+   * @param applicationProperties application properties.
    */
   @Autowired
-  public Application(Environment env) {
+  public Application(ApplicationProperties applicationProperties) {
     super();
 
-    if (env == null) {
-      throw new IllegalArgumentException("Application environment cannot be null.");
+    if (applicationProperties == null) {
+      throw new IllegalArgumentException("Application properties cannot be null.");
     }
-    this.env = env;
+    this.applicationProperties = applicationProperties;
 
 
     final StringBuilder builder = new StringBuilder("");
 
+    // TODO Retrieve a custom banner from file (different from spring banner)
     // Display a custom ASCII art to describe the project
-    final String asciiArt = this.env.getProperty("application.welcome.ascii_art");
+    final String asciiArt = this.applicationProperties.getWelcome().getAsciiArt();
     if (asciiArt != null && !asciiArt.isEmpty()) {
       builder.append(asciiArt);
     }
 
     // Display application name
-    final String name = this.env.getProperty("application.name");
+    final String name = this.applicationProperties.getName();
     if (name != null && !"@project.artifactId@".equals(name)) {
       builder.append(" ").append(name);
 
@@ -111,7 +115,7 @@ public class Application {
     }
 
     // Display application version
-    final String version = this.env.getProperty("build.version");
+    final String version = this.applicationProperties.getBuildVersion();
     if (version != null && !"@project.version@".equals(version)) {
       builder.append(" (v").append(version).append(")");
 
@@ -121,7 +125,7 @@ public class Application {
     }
 
     // Display application build timestamp
-    final String timestamp = this.env.getProperty("build.timestamp");
+    final String timestamp = this.applicationProperties.getBuildTimestamp();
     if (timestamp != null && !"@timestamp@".equals(timestamp)) {
       builder.append(" ").append(timestamp);
 

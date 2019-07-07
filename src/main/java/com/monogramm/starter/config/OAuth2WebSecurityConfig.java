@@ -4,8 +4,10 @@
 
 package com.monogramm.starter.config;
 
+import com.monogramm.starter.api.media.controller.MediaController;
 import com.monogramm.starter.config.component.CustomPasswordEncoder;
 import com.monogramm.starter.config.filter.JsonToUrlEncodedAuthenticationFilter;
+import com.monogramm.starter.config.properties.ApplicationSecurityProperties;
 
 import javax.sql.DataSource;
 
@@ -46,6 +48,9 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private Environment env;
+
+  @Autowired
+  private ApplicationSecurityProperties applicationSecurityProperties;
 
   @Autowired
   private JsonToUrlEncodedAuthenticationFilter jsonFilter;
@@ -98,9 +103,8 @@ public class OAuth2WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   public void configure(final WebSecurity web) throws Exception {
-    final String securityDebug = env.getProperty("spring.security.debug");
-
-    web.debug("true".equalsIgnoreCase(securityDebug));
+    web.debug(applicationSecurityProperties.isDebug()).ignoring()
+        .antMatchers(MediaController.DOWNLOAD_PATH + "/**");
   }
 
   // JDBC configuration

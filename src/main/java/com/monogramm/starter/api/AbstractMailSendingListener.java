@@ -4,6 +4,7 @@
 
 package com.monogramm.starter.api;
 
+import com.monogramm.starter.config.properties.EmailProperties;
 import com.monogramm.starter.persistence.AbstractToken;
 import com.monogramm.starter.persistence.user.entity.User;
 
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -34,19 +34,19 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
 
   private final JavaMailSender mailSender;
 
-  private final Environment env;
+  private final EmailProperties emailProperties;
 
   /**
    * Create a {@link AbstractMailSendingListener}.
    * 
    * @param messages application messages.
    * @param mailSender mail sender.
-   * @param env application environment properties.
+   * @param emailProperties application email properties properties.
    * 
    * @throws IllegalArgumentException if any of the parameters is {@code null}.
    */
   protected AbstractMailSendingListener(MessageSource messages, JavaMailSender mailSender,
-      Environment env) {
+      EmailProperties emailProperties) {
     super();
 
     if (messages == null) {
@@ -59,10 +59,10 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
     }
     this.mailSender = mailSender;
 
-    if (env == null) {
-      throw new IllegalArgumentException("Application environment cannot be null.");
+    if (emailProperties == null) {
+      throw new IllegalArgumentException("Application email properties cannot be null.");
     }
-    this.env = env;
+    this.emailProperties = emailProperties;
   }
 
   protected abstract T generateToken(E event);
@@ -84,20 +84,21 @@ public abstract class AbstractMailSendingListener<T extends AbstractToken,
 
     final Locale locale = event.getLocale();
 
-    final String appName = env.getProperty("spring.application.name");
+    final String appName = emailProperties.getAppTitle();
+    final String from = emailProperties.getNoReply();
     final String subject = messages.getMessage(this.getSubjectKey(), null, locale);
-    final String message =
-        messages.getMessage(this.getMessageKey(), new String[] {token.getCode()}, locale);
+    final String message = messages.getMessage(this.getMessageKey(),
+        new Object[] {token.getCode(), appName, token.getExpiryDate()}, locale);
 
-    // Send an email to verify email address
+    // Send an email to user email address
     final SimpleMailMessage email = new SimpleMailMessage();
     email.setTo(user.getEmail());
-    email.setSubject(appName + " - " + subject);
+    email.setSubject("[" + appName + "] - " + subject);
     email.setText(message);
-    email.setFrom(env.getProperty("application.email.no_reply"));
+    email.setFrom(from);
 
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Sending email to " + user.getEmail() + ": " + email);
+      LOG.debug("Sending email to {}: {}", user.getEmail(), email);
     }
 
     mailSender.send(email);

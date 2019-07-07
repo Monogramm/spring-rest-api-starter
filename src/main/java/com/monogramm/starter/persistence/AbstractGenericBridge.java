@@ -5,7 +5,7 @@
 package com.monogramm.starter.persistence;
 
 import com.monogramm.starter.dto.AbstractGenericDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 public abstract class AbstractGenericBridge<T extends AbstractGenericEntity,
     D extends AbstractGenericDto> {
-  private IUserRepository userRepository;
+  private UserRepository userRepository;
 
   /**
    * Create a {@link AbstractGenericBridge}.
@@ -45,7 +45,7 @@ public abstract class AbstractGenericBridge<T extends AbstractGenericEntity,
    * 
    * @param userRepository repository to lookup users.
    */
-  public AbstractGenericBridge(final IUserRepository userRepository) {
+  public AbstractGenericBridge(final UserRepository userRepository) {
     super();
     this.userRepository = userRepository;
   }
@@ -55,7 +55,7 @@ public abstract class AbstractGenericBridge<T extends AbstractGenericEntity,
    * 
    * @return the {@link #userRepository}.
    */
-  protected final IUserRepository getUserRepository() {
+  protected final UserRepository getUserRepository() {
     return userRepository;
   }
 
@@ -64,7 +64,7 @@ public abstract class AbstractGenericBridge<T extends AbstractGenericEntity,
    * 
    * @param userRepository the {@link #userRepository} to set.
    */
-  protected final void setUserRepository(IUserRepository userRepository) {
+  protected final void setUserRepository(UserRepository userRepository) {
     this.userRepository = userRepository;
   }
 

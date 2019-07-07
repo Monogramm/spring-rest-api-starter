@@ -10,7 +10,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.dto.AbstractTokenDto;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.user.dao.UserRepository;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.util.Date;
@@ -31,7 +31,7 @@ public abstract class AbstractTokenBridgeTest<E extends AbstractToken, D extends
    * 
    * @return an DTO for tests.
    */
-  abstract protected B buildTestBridge(IUserRepository userRepository);
+  abstract protected B buildTestBridge(UserRepository userRepository);
 
   /**
    * Test method for {@link AbstractTokenBridge#AbstractTokenBridge()}.
@@ -44,7 +44,7 @@ public abstract class AbstractTokenBridgeTest<E extends AbstractToken, D extends
   }
 
   /**
-   * Test method for {@link AbstractTokenBridge#AbstractTokenBridge(IUserRepository)}.
+   * Test method for {@link AbstractTokenBridge#AbstractTokenBridge(UserRepository)}.
    */
   @Test
   public void testAbstractGenericTokenBridgeIUserRepository() {
@@ -54,7 +54,7 @@ public abstract class AbstractTokenBridgeTest<E extends AbstractToken, D extends
   }
 
   /**
-   * Test method for {@link AbstractTokenBridge#AbstractTokenBridge(IUserRepository)}.
+   * Test method for {@link AbstractTokenBridge#AbstractTokenBridge(UserRepository)}.
    */
   @Test
   public void testAbstractGenericTokenBridgeNull() {

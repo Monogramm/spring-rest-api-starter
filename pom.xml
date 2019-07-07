@@ -115,6 +115,7 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPaths>${jacoco.ut.execution.data.file},${jacoco.it.execution.data.file}</sonar.jacoco.reportPaths>
 		<maven.site.version>3.6</maven.site.version>
+		<maven.project.info.reports.version>2.9</maven.project.info.reports.version>
 	</properties>
 
 	<dependencies>
@@ -139,6 +140,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
 		</dependency>
 
 		<dependency>
@@ -567,6 +573,11 @@
 						<skipDeploy>true</skipDeploy>
 						<generateSitemap>true</generateSitemap>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>${maven.project.info.reports.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

@@ -10,15 +10,17 @@ import com.monogramm.starter.dto.user.PasswordResetDto;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService;
-import com.monogramm.starter.persistence.user.service.IUserService;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.PasswordResetTokenService;
+import com.monogramm.starter.persistence.user.service.UserService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
@@ -139,9 +141,18 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    */
   protected static final String[] ADMIN_AUTH = {AUTH_LIST};
 
-  private IVerificationTokenService verificationTokenService;
 
-  private IPasswordResetTokenService passwordResetTokenService;
+  /**
+   * The parameter name storing the status of the registration functionality.
+   */
+  public static final String REGISTRATION_ENABLED = "REGISTRATION_ENABLED";
+
+
+  private ParameterService parameterService;
+
+  private VerificationTokenService verificationTokenService;
+
+  private PasswordResetTokenService passwordResetTokenService;
 
   /**
    * Create a {@link UserController}.
@@ -149,15 +160,18 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * @param messageSource the i18n message source.
    * @param eventPublisher the event publisher.
    * @param userService the users service.
+   * @param parameterService the parameter service.
    * @param verificationTokenService the verification token service.
    * @param passwordResetTokenService the password reset token service.
    */
   @Autowired
   public UserController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IUserService userService, IVerificationTokenService verificationTokenService,
-      IPasswordResetTokenService passwordResetTokenService) {
+      UserService userService, ParameterService parameterService,
+      VerificationTokenService verificationTokenService,
+      PasswordResetTokenService passwordResetTokenService) {
     super(messageSource, eventPublisher, userService);
 
+    this.parameterService = parameterService;
     this.verificationTokenService = verificationTokenService;
     this.passwordResetTokenService = passwordResetTokenService;
   }
@@ -182,8 +196,8 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   }
 
   @Override
-  protected IUserService getService() {
-    return (IUserService) super.getService();
+  protected UserService getService() {
+    return (UserService) super.getService();
   }
 
   @Override
@@ -198,17 +212,20 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<UserDto> getAllData() {
-    return super.getAllData();
+  public List<UserDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
+    return super.getAllData(sort);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<UserDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+  public List<UserDto> getAllDataPaginated(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(page, size, request, builder, response);
+    return super.getAllDataPaginated(sort, page, size, request, builder, response);
   }
 
   @Override
@@ -224,6 +241,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   @PreAuthorize(value = "hasAuthority('" + AUTH_UPDATE + "')")
   public ResponseEntity<UserDto> updateData(Authentication authentication,
       @PathVariable @ValidUuid String id, @RequestBody UserDto dto) {
+    // TODO If user does not have ROLES_LIST authority, forbid role update
     return super.updateData(authentication, id, dto);
   }
 
@@ -233,6 +251,14 @@ public class UserController extends AbstractGenericController<User, UserDto> {
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 
 
@@ -469,7 +495,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
   private void sendEmailPasswordReset(final User user, WebRequest request) {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Requesting to send password reset email for user: " + user);
+      LOG.debug("Requesting to send password reset email for user: {}", user);
     }
     this.getEventPublisher().publishEvent(
         new OnPasswordResetEvent(user, request.getLocale(), request.getContextPath()));
@@ -772,11 +798,17 @@ public class UserController extends AbstractGenericController<User, UserDto> {
    * 
    * @throws EntityNotFoundException if a default entity associated to a new user account is not
    *         found.
+   * @throws UnsupportedOperationException if registration has been disabled.
    */
   @PostMapping(value = REGISTER_PATH, consumes = "application/json")
   @PreAuthorize(value = "isAnonymous()")
   public ResponseEntity<Void> register(@RequestBody @Valid RegistrationDto registration,
       WebRequest request) {
+    final Parameter regsitrationEnabled = parameterService.findByName(REGISTRATION_ENABLED);
+    if (regsitrationEnabled != null && !Boolean.parseBoolean(regsitrationEnabled.getValue())) {
+      throw new UnsupportedOperationException("Registration disabled!");
+    }
+
     LOG.debug("Registering new user...");
 
     boolean registered;
@@ -789,7 +821,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
     HttpStatus status;
     if (registered) {
       if (LOG.isDebugEnabled()) {
-        LOG.debug("New user registered: " + registration.getEmail());
+        LOG.debug("New user registered: {}", registration.getEmail());
       }
       final User user = this.getService().findByEmail(registration.getEmail());
 
@@ -900,7 +932,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
     HttpStatus status;
     if (user == null) {
       if (LOG.isDebugEnabled()) {
-        LOG.debug("No user account found matching email: " + email);
+        LOG.debug("No user account found matching email: {}", email);
       }
       /*
        * Do not alert the client that no account exists. This would allow an attacker to identify
@@ -919,7 +951,7 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
   private void sendEmailVerificationEvent(final User user, final WebRequest request) {
     if (LOG.isDebugEnabled()) {
-      LOG.debug("Requesting to send verification email for user: " + user);
+      LOG.debug("Requesting to send verification email for user: {}", user);
     }
     this.getEventPublisher().publishEvent(
         new OnRegistrationCompleteEvent(user, request.getLocale(), request.getContextPath()));
@@ -1011,21 +1043,21 @@ public class UserController extends AbstractGenericController<User, UserDto> {
           final UUID ownerId = IAuthenticationFacade.getPrincipalId(authentication);
 
           if (LOG.isDebugEnabled()) {
-            LOG.debug("Verifying owned user account: " + userId);
+            LOG.debug("Verifying owned user account: {}", userId);
           }
 
           user = this.getService().verifyByOwner(userId, ownerId);
         } else {
 
           if (LOG.isDebugEnabled()) {
-            LOG.debug("Verifying user account: " + userId);
+            LOG.debug("Verifying user account: {}", userId);
           }
           user = this.getService().verify(userId);
         }
 
       } else {
         if (LOG.isDebugEnabled()) {
-          LOG.debug("No verification token matching: " + userId + ", " + token);
+          LOG.debug("No verification token matching: {}, {}", userId, token);
         }
 
         user = null;

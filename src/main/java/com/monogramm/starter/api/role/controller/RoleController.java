@@ -6,7 +6,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.role.RoleDto;
 import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
-import com.monogramm.starter.persistence.role.service.IRoleService;
+import com.monogramm.starter.persistence.role.service.RoleService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
    */
   @Autowired
   public RoleController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IRoleService roleService) {
+      RoleService roleService) {
     super(messageSource, eventPublisher, roleService);
   }
 
@@ -128,8 +128,8 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   }
 
   @Override
-  protected IRoleService getService() {
-    return (IRoleService) super.getService();
+  protected RoleService getService() {
+    return (RoleService) super.getService();
   }
 
   @Override
@@ -144,17 +144,20 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<RoleDto> getAllData() {
-    return super.getAllData();
+  public List<RoleDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
+    return super.getAllData(sort);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<RoleDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+  public List<RoleDto> getAllDataPaginated(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(page, size, request, builder, response);
+    return super.getAllDataPaginated(sort, page, size, request, builder, response);
   }
 
   @Override
@@ -179,5 +182,13 @@ public class RoleController extends AbstractGenericController<Role, RoleDto> {
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 }

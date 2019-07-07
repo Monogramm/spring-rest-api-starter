@@ -7,7 +7,7 @@ package com.monogramm.starter.config.component;
 import com.monogramm.starter.config.OAuth2WebSecurityConfig;
 import com.monogramm.starter.dto.oauth.OAuthResponse;
 import com.monogramm.starter.persistence.user.entity.User;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +76,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
   public static final String PERMISSIONS = "authorities";
 
 
-  private IUserService userService;
+  private UserService userService;
 
   /**
    * Create a {@link CustomTokenEnhancer}.
@@ -84,7 +84,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
    * @param userService the user service.
    */
   @Autowired
-  public CustomTokenEnhancer(IUserService userService) {
+  public CustomTokenEnhancer(UserService userService) {
     super();
     this.userService = userService;
   }

@@ -9,23 +9,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
-import com.monogramm.starter.persistence.parameter.service.IParameterService;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
-import com.monogramm.starter.persistence.role.service.IRoleService;
-import com.monogramm.starter.persistence.type.service.ITypeService;
-import com.monogramm.starter.persistence.user.service.IUserService;
+import com.monogramm.starter.config.properties.DataProperties;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
+import com.monogramm.starter.persistence.role.service.RoleService;
+import com.monogramm.starter.persistence.type.service.TypeService;
+import com.monogramm.starter.persistence.user.service.UserService;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 
 /**
  * {@link InitialDataLoader} Unit Test.
@@ -37,15 +33,15 @@ public class InitialDataLoaderTest {
   private InitialDataLoader loader;
 
 
-  private Environment env;
+  private DataProperties dataProperties;
   private MessageSource messageSource;
 
 
-  private IParameterService parameterService;
-  private ITypeService typeService;
-  private IPermissionService permissionService;
-  private IRoleService roleService;
-  private IUserService userService;
+  private ParameterService parameterService;
+  private TypeService typeService;
+  private PermissionService permissionService;
+  private RoleService roleService;
+  private UserService userService;
 
 
   /**
@@ -53,16 +49,16 @@ public class InitialDataLoaderTest {
    */
   @Before
   public void setUp() throws Exception {
-    this.env = mock(Environment.class);
+    this.dataProperties = new DataProperties();
     this.messageSource = mock(MessageSource.class);
 
-    this.parameterService = mock(IParameterService.class);
-    this.typeService = mock(ITypeService.class);
-    this.permissionService = mock(IPermissionService.class);
-    this.roleService = mock(IRoleService.class);
-    this.userService = mock(IUserService.class);
+    this.parameterService = mock(ParameterService.class);
+    this.typeService = mock(TypeService.class);
+    this.permissionService = mock(PermissionService.class);
+    this.roleService = mock(RoleService.class);
+    this.userService = mock(UserService.class);
 
-    this.loader = new InitialDataLoader(env, messageSource, userService, roleService,
+    this.loader = new InitialDataLoader(dataProperties, messageSource, userService, roleService,
         permissionService, typeService, parameterService);
   }
 
@@ -71,7 +67,7 @@ public class InitialDataLoaderTest {
    */
   @After
   public void tearDown() throws Exception {
-    Mockito.reset(env);
+    this.dataProperties = null;
     Mockito.reset(messageSource);
 
     Mockito.reset(parameterService);
@@ -100,12 +96,13 @@ public class InitialDataLoaderTest {
   }
 
   /**
-   * Test method for {@link com.monogramm.starter.config.data.AbstractDataLoader#getEnv()}.
+   * Test method for
+   * {@link com.monogramm.starter.config.data.AbstractDataLoader#getDataProperties()}.
    */
   @Test
-  public void testGetEnv() {
-    assertNotNull(this.loader.getEnv());
-    assertEquals(this.env, this.loader.getEnv());
+  public void testDataProperties() {
+    assertNotNull(this.loader.getDataProperties());
+    assertEquals(this.dataProperties, this.loader.getDataProperties());
   }
 
   /**
@@ -161,14 +158,9 @@ public class InitialDataLoaderTest {
    */
   @Test
   public void testOnApplicationEvent() {
-    when(env.getProperty("application.data.demo")).thenReturn("false");
+    this.dataProperties.setDemo(false);
 
     this.loader.onApplicationEvent(null);
-
-    verify(env, times(1)).getProperty("application.data.demo");
-    verify(env, times(1)).getProperty("application.data.admin_password");
-    verify(env, times(1)).getProperty("application.data.domain_name", "monogramm.io");
-    verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());
 
@@ -183,14 +175,9 @@ public class InitialDataLoaderTest {
    */
   @Test
   public void testOnApplicationEventWithDemoData() {
-    when(env.getProperty("application.data.demo")).thenReturn("true");
+    this.dataProperties.setDemo(true);
 
     this.loader.onApplicationEvent(null);
-
-    verify(env, times(1)).getProperty("application.data.demo");
-    verify(env, times(1)).getProperty("application.data.admin_password");
-    verify(env, times(1)).getProperty("application.data.domain_name", "monogramm.io");
-    verifyNoMoreInteractions(env);
 
     assertTrue(this.loader.isAlreadySetup());
 

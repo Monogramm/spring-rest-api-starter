@@ -1,223 +1,315 @@
 package com.monogramm.starter.persistence.user.service;
 
-import com.monogramm.starter.config.data.InitialDataLoader;
-import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
-import com.monogramm.starter.persistence.AbstractGenericService;
-import com.monogramm.starter.persistence.role.dao.IRoleRepository;
-import com.monogramm.starter.persistence.role.entity.Role;
-import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
-import com.monogramm.starter.persistence.user.dao.IUserRepository;
+import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.GenericService;
 import com.monogramm.starter.persistence.user.entity.User;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
- * {@link User} service.
+ * {@link User} service interface.
  * 
  * @author madmath03
  */
-@Service
-public class UserService extends AbstractGenericService<User, UserDto> implements IUserService {
+public interface UserService extends GenericService<User, UserDto> {
+
+  @Override
+  UserBridge getBridge();
 
   /**
-   * Logger for {@link UserService}.
+   * Find all users containing the username.
+   * 
+   * @param username the username to search.
+   * 
+   * @return the list of all the users matching the search.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-
-  public static final String DEFAULT_ROLE = InitialDataLoader.USER_ROLE;
-
-  private final IRoleRepository roleRepository;
+  List<User> findAllContainingUsername(final String username);
 
   /**
-   * Create a {@link UserService}.
+   * Find all users containing the email.
    * 
-   * @param userDao the user repository.
-   * @param roleDao the role repository.
-   * @param authenticationFacade a facade to retrieve the authentication object.
+   * @param email the email content to search.
    * 
-   * @throws IllegalArgumentException if {@code roleDao} is {@code null}.
+   * @return the list of all the users matching the search.
    */
-  @Autowired
-  public UserService(final IUserRepository userDao, final IRoleRepository roleDao,
-      IAuthenticationFacade authenticationFacade) {
-    super(userDao, userDao, new UserBridge(userDao, roleDao), authenticationFacade);
-    if (roleDao == null) {
-      throw new IllegalArgumentException("Role repository cannot be null.");
-    }
-    this.roleRepository = roleDao;
+  List<User> findAllContainingEmail(final String email);
+
+  /**
+   * Find all users containing the username or email.
+   * 
+   * @param username the username content to search.
+   * @param email the email content to search.
+   * 
+   * @return the list of all the users matching the search.
+   */
+  List<User> findAllContainingUsernameOrEmail(final String username, final String email);
+
+  /**
+   * Find an user account through its username.
+   * 
+   * @param username the username to search.
+   * 
+   * @return the user account matching the username, or {@code null} if none matches.
+   * 
+   * @throws UserNotFoundException if no user matches the username in the repository.
+   */
+  User findByUsername(final String username);
+
+  /**
+   * Find an user account through its email.
+   * 
+   * @param email the email to search.
+   * 
+   * @return the user account matching the email, or {@code null} if none matches.
+   * 
+   * @throws UserNotFoundException if no user matches the email in the repository.
+   */
+  User findByEmail(final String email);
+
+  /**
+   * Find an user account through its username or email.
+   * 
+   * @param username the username to search.
+   * @param email the email to search.
+   * 
+   * @return the user account matching the username or email, or {@code null} if none matches.
+   * 
+   * @throws UserNotFoundException if no user matches the username or email in the repository.
+   */
+  User findByUsernameOrEmail(final String username, final String email);
+
+  /**
+   * Set the password of a user account.
+   * 
+   * @param userId the user account identifier.
+   * @param password the clear password to hash and set.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  User setPassword(final UUID userId, final char[] password);
+
+  /**
+   * Set the password of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setPassword(UUID, char[])} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param password the clear password to hash and set.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User setPasswordByOwner(final UUID userId, final char[] password, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.setPasswordByOwner(userId, password, owner);
   }
 
   /**
-   * Get the {@link #roleRepository}.
+   * Set the password of a user account.
    * 
-   * @return the {@link #roleRepository}.
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setPassword(UUID, char[])} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param password the clear password to hash and set.
+   * @param owner the entity identifier of the entity owner.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
    */
-  protected final IRoleRepository getRoleRepository() {
-    return roleRepository;
+  User setPasswordByOwner(final UUID userId, final char[] password, final User owner);
+
+  /**
+   * Set the active status of a user account.
+   * 
+   * @param userId the user account identifier.
+   * @param enabled the enabled status to set.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  User setEnabled(final UUID userId, final boolean enabled);
+
+  /**
+   * Set the active status of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setEnabled(UUID, boolean)} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param enabled the enabled status to set.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User setEnabledByOwner(final UUID userId, final boolean enabled, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.setEnabledByOwner(userId, enabled, owner);
   }
 
-  @Override
-  protected IUserRepository getRepository() {
-    return (IUserRepository) super.getRepository();
+  /**
+   * Set the active status of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setEnabled(UUID, boolean)} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param enabled the enabled status to set.
+   * @param owner the entity owner.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  User setEnabledByOwner(final UUID userId, final boolean enabled, final User owner);
+
+  /**
+   * Activate a user account.
+   * 
+   * <p>
+   * Simple alias to {@link #setEnabled(UUID, boolean)}.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * 
+   * @return the active user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User enable(final UUID userId) {
+    return this.setEnabled(userId, true);
   }
 
-  @Override
-  public UserBridge getBridge() {
-    return (UserBridge) super.getBridge();
+  /**
+   * Activate a user account.
+   * 
+   * <p>
+   * Simple alias to {@link #setEnabledByOwner(UUID, boolean, UUID)}.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return the active user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User enableByOwner(final UUID userId, final UUID ownerId) {
+    return this.setEnabledByOwner(userId, true, ownerId);
   }
 
-  @Override
-  protected boolean exists(User entity) {
-    return getRepository().exists(entity.getId(), entity.getUsername(), entity.getEmail());
+  /**
+   * Set the verified status of a user account.
+   * 
+   * @param userId the user account identifier.
+   * @param verified the verified status to set.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  User setVerified(final UUID userId, final boolean verified);
+
+  /**
+   * Set the verified status of a user account.
+   * 
+   * <p>
+   * Secure method to ensure you only update if you own the data by providing the authenticated user
+   * as owner. {@link #setVerified(UUID, boolean)} should be used instead if authenticated user has
+   * administration permissions.
+   * </p>
+   * 
+   * @param userId the user account identifier.
+   * @param verified the verified status to set.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User setVerifiedByOwner(final UUID userId, final boolean verified, final UUID ownerId) {
+    final User owner = User.builder().id(ownerId).build();
+    return this.setVerifiedByOwner(userId, verified, owner);
   }
 
-  @Override
-  protected UserNotFoundException createEntityNotFoundException(User entity) {
-    return new UserNotFoundException("Following user not found:" + entity);
+  /**
+   * Set the verified status of a user account.
+   * 
+   * @param userId the user account identifier.
+   * @param verified the verified status to set.
+   * @param owner the entity owner.
+   * 
+   * @return the updated user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  User setVerifiedByOwner(final UUID userId, final boolean verified, final User owner);
+
+  /**
+   * Verify a user account.
+   * 
+   * @param userId the user account identifier.
+   * 
+   * @return the verified user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User verify(final UUID userId) {
+    return this.setVerified(userId, true);
   }
 
-  @Override
-  protected UserNotFoundException createEntityNotFoundException(UUID entityId) {
-    return new UserNotFoundException("No user for ID=" + entityId);
+  /**
+   * Verify a user account.
+   * 
+   * @param userId the user account identifier.
+   * @param ownerId the entity identifier of the entity owner.
+   * 
+   * @return the verified user account.
+   * 
+   * @throws UserNotFoundException if no user account is found.
+   */
+  default User verifyByOwner(final UUID userId, final UUID ownerId) {
+    return this.setVerifiedByOwner(userId, true, ownerId);
   }
 
-  @Transactional(readOnly = true)
-  @Override
-  public List<User> findAllContainingUsername(final String username) {
-    return getRepository().findAllContainingUsernameIgnoreCase(username);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public List<User> findAllContainingEmail(final String email) {
-    return getRepository().findAllContainingEmailIgnoreCase(email);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public List<User> findAllContainingUsernameOrEmail(final String username, final String email) {
-    return getRepository().findAllContainingUsernameOrEmailIgnoreCase(username, email);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public User findByUsername(String username) {
-    return getRepository().findByUsernameIgnoreCase(username);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public User findByEmail(String email) {
-    return getRepository().findByEmailIgnoreCase(email);
-  }
-
-  @Transactional(readOnly = true)
-  @Override
-  public User findByUsernameOrEmail(String username, String email) {
-    User user;
-    try {
-      user = getRepository().findByUsernameOrEmailIgnoreCase(username, email);
-    } catch (UserNotFoundException e) {
-      LOG.debug("No user found for specified username and email", e);
-      user = null;
-    }
-    return user;
-  }
-
-  @Override
-  public User setPassword(final UUID userId, char[] password) {
-    final User updatedEntity = getRepository().setPassword(userId, password);
-
-    if (updatedEntity == null) {
-      throw this.createEntityNotFoundException(userId);
-    }
-
-    return updatedEntity;
-  }
-
-  @Override
-  public User setPasswordByOwner(UUID userId, char[] password, User owner) {
-    final User updatedEntity = getRepository().setPasswordByOwner(userId, password, owner);
-
-    if (updatedEntity == null) {
-      throw this.createEntityNotFoundException(userId);
-    }
-
-    return updatedEntity;
-  }
-
-  @Override
-  public User setEnabled(final UUID userId, boolean enabled) {
-    final User updatedEntity = getRepository().setEnabled(userId, enabled);
-
-    if (updatedEntity == null) {
-      throw this.createEntityNotFoundException(userId);
-    }
-
-    return updatedEntity;
-  }
-
-  @Override
-  public User setEnabledByOwner(UUID userId, boolean enabled, User owner) {
-    final User updatedEntity = getRepository().setEnabledByOwner(userId, enabled, owner);
-
-    if (updatedEntity == null) {
-      throw this.createEntityNotFoundException(userId);
-    }
-
-    return updatedEntity;
-  }
-
-  @Override
-  public User setVerified(final UUID userId, boolean verified) {
-    final User updatedEntity = getRepository().setVerified(userId, true);
-
-    if (updatedEntity == null) {
-      throw this.createEntityNotFoundException(userId);
-    }
-
-    return updatedEntity;
-  }
-
-  @Override
-  public User setVerifiedByOwner(UUID userId, boolean verified, User owner) {
-    final User updatedEntity = getRepository().setVerifiedByOwner(userId, true, owner);
-
-    if (updatedEntity == null) {
-      throw this.createEntityNotFoundException(userId);
-    }
-
-    return updatedEntity;
-  }
-
-  @Override
-  public boolean register(final RegistrationDto registration) {
-    final User user = User.builder(registration.getUsername(), registration.getEmail())
-        .password(registration.getPassword()).build();
-
-    /*
-     * TODO Add password strengths and rules.
-     * http://www.baeldung.com/registration-password-strength-and-rules
-     */
-    final Role defaultRole;
-    try {
-      defaultRole = roleRepository.findByNameIgnoreCase(DEFAULT_ROLE);
-    } catch (RoleNotFoundException e) {
-      LOG.error("Default role not found", e);
-      throw e;
-    }
-    user.setRole(defaultRole);
-
-    return this.add(user);
-  }
+  /**
+   * Register a new user.
+   * 
+   * <p>
+   * Add a new s
+   * </p>
+   * 
+   * @param registration a registration object describing the user to register.
+   * 
+   * @return {@code true} if the user was registered, {@code false} otherwise.
+   * 
+   * @throws EntityNotFoundException if a default entity associated to a new user account is not
+   *         found.
+   */
+  boolean register(final RegistrationDto registration);
 }

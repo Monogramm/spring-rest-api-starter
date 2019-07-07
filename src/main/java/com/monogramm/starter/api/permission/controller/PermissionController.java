@@ -6,7 +6,7 @@ import com.monogramm.starter.config.data.GenericOperation;
 import com.monogramm.starter.dto.permission.PermissionDto;
 import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
-import com.monogramm.starter.persistence.permission.service.IPermissionService;
+import com.monogramm.starter.persistence.permission.service.PermissionService;
 import com.monogramm.starter.utils.validation.ValidUuid;
 
 import java.util.List;
@@ -104,7 +104,7 @@ public class PermissionController extends AbstractGenericController<Permission, 
    */
   @Autowired
   public PermissionController(MessageSource messageSource, ApplicationEventPublisher eventPublisher,
-      IPermissionService permissionService) {
+      PermissionService permissionService) {
     super(messageSource, eventPublisher, permissionService);
   }
 
@@ -129,8 +129,8 @@ public class PermissionController extends AbstractGenericController<Permission, 
   }
 
   @Override
-  protected IPermissionService getService() {
-    return (IPermissionService) super.getService();
+  protected PermissionService getService() {
+    return (PermissionService) super.getService();
   }
 
   @Override
@@ -145,17 +145,20 @@ public class PermissionController extends AbstractGenericController<Permission, 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<PermissionDto> getAllData() {
-    return super.getAllData();
+  public List<PermissionDto> getAllData(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
+    return super.getAllData(sort);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
   @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
-  public List<PermissionDto> getAllDataPaginated(@RequestParam(value = PAGE) int page,
+  public List<PermissionDto> getAllDataPaginated(
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      @RequestParam(value = PAGE) int page,
       @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
       UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(page, size, request, builder, response);
+    return super.getAllDataPaginated(sort, page, size, request, builder, response);
   }
 
   @Override
@@ -180,5 +183,13 @@ public class PermissionController extends AbstractGenericController<Permission, 
   public ResponseEntity<Void> deleteData(Authentication authentication,
       @PathVariable @ValidUuid String id) {
     return super.deleteData(authentication, id);
+  }
+
+  @Override
+  @DeleteMapping(value = CONTROLLER_PATH, params = {IDS})
+  @PreAuthorize(value = "hasAuthority('" + AUTH_DELETE + "')")
+  public ResponseEntity<Void> deleteAllData(Authentication authentication,
+      @RequestParam(value = IDS) String ids) {
+    return super.deleteAllData(authentication, ids);
   }
 }

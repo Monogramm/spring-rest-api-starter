@@ -21,6 +21,8 @@ import com.monogramm.starter.dto.user.RegistrationDto;
 import com.monogramm.starter.dto.user.UserDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.EntityNotFoundException;
+import com.monogramm.starter.persistence.parameter.entity.Parameter;
+import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.role.exception.RoleNotFoundException;
 import com.monogramm.starter.persistence.user.entity.PasswordResetToken;
 import com.monogramm.starter.persistence.user.entity.User;
@@ -28,9 +30,9 @@ import com.monogramm.starter.persistence.user.entity.VerificationToken;
 import com.monogramm.starter.persistence.user.exception.PasswordResetTokenNotFoundException;
 import com.monogramm.starter.persistence.user.exception.UserNotFoundException;
 import com.monogramm.starter.persistence.user.exception.VerificationTokenNotFoundException;
-import com.monogramm.starter.persistence.user.service.IPasswordResetTokenService;
-import com.monogramm.starter.persistence.user.service.IUserService;
-import com.monogramm.starter.persistence.user.service.IVerificationTokenService;
+import com.monogramm.starter.persistence.user.service.PasswordResetTokenService;
+import com.monogramm.starter.persistence.user.service.UserService;
+import com.monogramm.starter.persistence.user.service.VerificationTokenService;
 import com.monogramm.starter.persistence.user.service.UserBridge;
 import com.monogramm.starter.utils.validation.PasswordConfirmationDto;
 
@@ -67,8 +69,9 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   private char[] password;
 
-  private IVerificationTokenService verificationService;
-  private IPasswordResetTokenService passwordResetTokenService;
+  private ParameterService parameterService;
+  private VerificationTokenService verificationService;
+  private PasswordResetTokenService passwordResetTokenService;
 
   private WebRequest request;
 
@@ -81,9 +84,11 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   public void setUp() throws Exception {
     password = PASSWORD.clone();
 
-    verificationService = mock(IVerificationTokenService.class);
+    parameterService = mock(ParameterService.class);
+    assertNotNull(parameterService);
+    verificationService = mock(VerificationTokenService.class);
     assertNotNull(verificationService);
-    passwordResetTokenService = mock(IPasswordResetTokenService.class);
+    passwordResetTokenService = mock(PasswordResetTokenService.class);
     assertNotNull(passwordResetTokenService);
 
     request = mock(WebRequest.class);
@@ -104,6 +109,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
     this.password = null;
 
+    Mockito.reset(parameterService);
     Mockito.reset(verificationService);
     Mockito.reset(passwordResetTokenService);
 
@@ -113,8 +119,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   @Override
-  protected IUserService getMockService() {
-    return (IUserService) super.getMockService();
+  protected UserService getMockService() {
+    return (UserService) super.getMockService();
   }
 
   @Override
@@ -123,8 +129,8 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   }
 
   @Override
-  protected IUserService buildTestService() {
-    return mock(IUserService.class);
+  protected UserService buildTestService() {
+    return mock(UserService.class);
   }
 
   @Override
@@ -135,7 +141,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
   @Override
   protected AbstractGenericController<User, UserDto> buildTestController() {
     return new UserController(getMessageSource(), getEventPublisher(), getMockService(),
-        verificationService, passwordResetTokenService);
+        parameterService, verificationService, passwordResetTokenService);
   }
 
   @Override
@@ -161,7 +167,7 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
 
   /**
    * Test method for
-   * {@link UserController#UserController(IUserService, ApplicationEventPublisher, IVerificationTokenService, IPasswordResetTokenService)}.
+   * {@link UserController#UserController(UserService, ApplicationEventPublisher, VerificationTokenService, PasswordResetTokenService)}.
    */
   @Test
   public void testUserController() {
@@ -862,6 +868,26 @@ public class UserControllerTest extends AbstractGenericControllerTest<User, User
     verify(getMockService(), times(1)).findByEmail(model.getEmail());
     verify(getMockService(), times(1)).update(user);
     verifyNoMoreInteractions(getMockService());
+  }
+
+  /**
+   * Test method for {@link UserController#register(RegisterRequest)}.
+   * 
+   * @throws EntityNotFoundException if a default entity associated to a new user account is not
+   *         found.
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void testRegisterDisabled() {
+    final RegistrationDto model = new RegistrationDto();
+    model.setUsername(USERNAME);
+    model.setEmail(EMAIL);
+    model.setPassword(PASSWORD);
+    model.setMatchingPassword(PASSWORD);
+
+    when(parameterService.findByName(UserController.REGISTRATION_ENABLED))
+        .thenReturn(Parameter.builder(UserController.REGISTRATION_ENABLED, Boolean.FALSE).build());
+
+    getController().register(model, request);
   }
 
   /**
