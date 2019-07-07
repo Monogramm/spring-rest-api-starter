@@ -33,7 +33,9 @@ dependencies {
     // Use H2 connector
     compile 'com.h2database:h2'
 
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.boot:spring-boot-starter-test') {
+	    exclude group: "com.vaadin.external.google", module:"android-json"
+	}
 }
 
 configurations.all {
