@@ -235,12 +235,12 @@ public class MediaServiceImplTest
     final User owner = User.builder().id(ownerId).build();
 
     when(getMockRepository().findByIdAndOwner(ID, owner)).thenReturn(model);
-    when(getMockRepository().deleteById(ID)).thenReturn(1);
+    when(getMockRepository().deleteByIdAndOwner(ID, owner)).thenReturn(1);
 
     getService().deleteByIdAndOwner(ID, ownerId);
 
     verify(getMockRepository(), times(1)).findByIdAndOwner(ID, owner);
-    verify(getMockRepository(), times(1)).deleteById(ID);
+    verify(getMockRepository(), times(1)).deleteByIdAndOwner(ID, owner);
     verifyNoMoreInteractions(getMockRepository());
 
     assertFalse(tempExistingDirectory.toFile().exists());
