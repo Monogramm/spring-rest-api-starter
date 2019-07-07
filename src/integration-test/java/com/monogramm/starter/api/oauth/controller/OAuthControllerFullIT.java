@@ -2,6 +2,7 @@ package com.monogramm.starter.api.oauth.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
@@ -181,7 +182,7 @@ public class OAuthControllerFullIT extends AbstractControllerFullIT {
   public void testGetTokenNotVerifiedUser() throws URISyntaxException {
     // Add user
     final User model = createUser("Bar", "bar@email.com", null, getTestRole());
-    getUserService().add(model);
+    assertTrue(getUserService().add(model));
     getUserService().setPassword(model.getId(), PASSWORD.clone());
     getUserService().setEnabled(model.getId(), true);
 

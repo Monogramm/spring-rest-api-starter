@@ -2,6 +2,8 @@ package com.monogramm.starter.api.oauth.controller;
 
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -124,9 +126,9 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
   public void testGetTokenInactiveUser() throws Exception {
     // Add user
     final User model = User.builder("Bar", "bar@email.com").build();
-    getUserService().add(model);
-    getUserService().setPassword(model.getId(), PASSWORD.clone());
-    getUserService().setEnabled(model.getId(), false);
+    assertTrue(getUserService().add(model));
+    assertNotNull(getUserService().setPassword(model.getId(), PASSWORD.clone()));
+    assertNotNull(getUserService().setEnabled(model.getId(), false));
 
     final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
@@ -149,10 +151,10 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
   public void testGetTokenNotVerifiedUser() throws Exception {
     // Add user
     final User model = User.builder("Bar", "bar@email.com").role(getTestRole()).build();
-    getUserService().add(model);
-    getUserService().setPassword(model.getId(), PASSWORD.clone());
-    getUserService().setEnabled(model.getId(), true);
-    getUserService().update(model);
+    assertTrue(getUserService().add(model));
+    assertNotNull(getUserService().setPassword(model.getId(), PASSWORD.clone()));
+    assertNotNull(getUserService().setEnabled(model.getId(), true));
+    assertNotNull(getUserService().update(model));
 
     final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
@@ -180,10 +182,10 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
   public void testGetTokenWrongPassword() throws Exception {
     // Add user
     final User model = User.builder("Bar", "bar@email.com").build();
-    getUserService().add(model);
-    getUserService().setPassword(model.getId(), PASSWORD.clone());
-    getUserService().setEnabled(model.getId(), true);
-    getUserService().verify(model.getId());
+    assertTrue(getUserService().add(model));
+    assertNotNull(getUserService().setPassword(model.getId(), PASSWORD.clone()));
+    assertNotNull(getUserService().setEnabled(model.getId(), true));
+    assertNotNull(getUserService().verify(model.getId()));
 
     final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
