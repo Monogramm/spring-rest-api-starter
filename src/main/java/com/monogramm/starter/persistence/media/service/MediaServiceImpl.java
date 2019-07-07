@@ -180,7 +180,15 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
       throw this.createEntityNotFoundException(entityId);
     }
 
-    this.deleteFromRepositoryAndStorage(entity);
+    final Integer deleted = getRepository().deleteById(entityId);
+
+    if (deleted == null || deleted == 0) {
+      throw this.createEntityNotFoundException(entityId);
+    } else {
+      final Path mediaFolder = this.getEntityDirectory(entity);
+      StorageUtils.deleteFile(mediaFolder);
+      // If storage removal fails, the exception should trigger the rollback of persistence
+    }
   }
 
   @Override
@@ -193,20 +201,10 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
       throw this.createEntityNotFoundException(entityId);
     }
 
-    this.deleteFromRepositoryAndStorage(entity);
-  }
-
-  /**
-   * Delete media from repository and storage.
-   * 
-   * @param entity {@link Media} entity to delete.
-   */
-  @Transactional(rollbackFor = {EntityNotFoundException.class})
-  public void deleteFromRepositoryAndStorage(final Media entity) {
-    final Integer deleted = getRepository().deleteById(entity.getId());
+    final Integer deleted = getRepository().deleteByIdAndOwner(entityId, owner);
 
     if (deleted == null || deleted == 0) {
-      throw this.createEntityNotFoundException(entity.getId());
+      throw this.createEntityNotFoundException(entityId);
     } else {
       final Path mediaFolder = this.getEntityDirectory(entity);
       StorageUtils.deleteFile(mediaFolder);
