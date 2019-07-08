@@ -364,6 +364,7 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
 
     for (MultipartFile file : files) {
       final MediaDto dto = this.dtoFromFile(file);
+
       dtos.add(super.addData(authentication, dto));
     }
 

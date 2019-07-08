@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 import com.monogramm.starter.api.AbstractGenericController;
 import com.monogramm.starter.api.AbstractGenericControllerTest;
-import com.monogramm.starter.api.media.controller.MediaController;
+import com.monogramm.starter.config.component.CustomTokenEnhancer;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericBridge;
 import com.monogramm.starter.persistence.media.entity.Media;
@@ -29,7 +29,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.ServletContext;
@@ -221,6 +223,52 @@ public class MediaControllerTest extends AbstractGenericControllerTest<Media, Me
    */
   @Test
   public void testUploadMultipleMedia() throws FileNotFoundException, IOException {
+    // Prepare action
+    final Media model = this.buildTestEntity();
+    final UUID userId = UUID.randomUUID();
+    final String fileName = tempFile.getFileName().toString();
+    final byte[] fileContent = IOUtils.toByteArray(new FileInputStream(this.tempFile.toFile()));
+    final MultipartFile file = new MockMultipartFile(fileName, fileContent);
+
+    final MediaDto dto = new MediaDto();
+    dto.setResource(file);
+
+    final Map<String, Object> authDetails = new HashMap<>();
+    authDetails.put(CustomTokenEnhancer.UUID, userId);
+
+    // Prepare mocks
+    when(getMockAuthentication().getDetails()).thenReturn(authDetails);
+
+    when(getMockService().toEntity(dto)).thenReturn(model);
+    when(getMockService().add(model)).thenReturn(true);
+    when(getMockService().toDto(model)).thenReturn(dto);
+
+    // Actions
+    final List<MediaDto> actualResponse =
+        getController().uploadMultipleMedia(getMockAuthentication(), file);
+
+    // Tests
+    assertNotNull(actualResponse);
+    assertTrue(actualResponse.size() == 1);
+
+    // Verify mocks
+    verify(getMockAuthentication(), times(1)).getDetails();
+    verifyNoMoreInteractions(getMockAuthentication());
+
+    verify(getMockService(), times(1)).toEntity(dto);
+    verify(getMockService(), times(1)).add(model);
+    verify(getMockService(), times(1)).toDto(model);
+    verifyNoMoreInteractions(getMockService());
+  }
+
+  /**
+   * Test method for {@link MediaController#uploadMultipleMedia(Authentication, MultipartFile...)}.
+   * 
+   * @throws IOException
+   * @throws FileNotFoundException
+   */
+  @Test
+  public void testUploadMultipleMediaNotAdded() throws FileNotFoundException, IOException {
     final Media model = this.buildTestEntity();
     final String fileName = tempFile.getFileName().toString();
     final byte[] fileContent = IOUtils.toByteArray(new FileInputStream(this.tempFile.toFile()));
