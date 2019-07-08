@@ -170,11 +170,11 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testGetUserById() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", testEntity.getId());
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-    final ResponseEntity<UserDto> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto.class);
+    final ResponseEntity<UserDto> responseEntity = getRestTemplate().exchange(url, HttpMethod.GET,
+        requestEntity, UserDto.class, testEntity.getId());
 
     final UserDto dto = responseEntity.getBody();
 
@@ -199,11 +199,11 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testGetUserByIdNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", testEntity.getId());
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-    final ResponseEntity<UserDto> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto.class);
+    final ResponseEntity<UserDto> responseEntity = getRestTemplate().exchange(url, HttpMethod.GET,
+        requestEntity, UserDto.class, testEntity.getId());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -259,11 +259,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testGetAllUsersPaginated() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final int page = 0;
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page={page}");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<UserDto[]> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto[].class);
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto[].class, page);
 
     final UserDto[] dtos = responseEntity.getBody();
 
@@ -283,11 +284,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testGetAllUsersPaginatedNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final int page = 0;
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page={page}");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
     final ResponseEntity<Object> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class);
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, Object.class, page);
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -366,15 +368,15 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testUpdateUser() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}");
 
     this.testEntity.setUsername("Bar");
     this.testDto = getUserService().toDto(this.testEntity);
 
     final HttpEntity<UserDto> requestEntity = new HttpEntity<>(this.testDto, headers);
 
-    final ResponseEntity<UserDto> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, UserDto.class);
+    final ResponseEntity<UserDto> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, UserDto.class, this.testEntity.getId());
 
     final UserDto content = responseEntity.getBody();
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -392,15 +394,15 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testUpdateUserNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}");
 
     this.testEntity.setUsername("Bar");
     this.testDto = getUserService().toDto(this.testEntity);
 
     final HttpEntity<UserDto> requestEntity = new HttpEntity<>(this.testDto, headers);
 
-    final ResponseEntity<UserDto> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, UserDto.class);
+    final ResponseEntity<UserDto> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, UserDto.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -414,12 +416,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testDeleteUser() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}");
 
     final HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.DELETE,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
   }
@@ -433,12 +435,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testDeleteUserNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}");
 
     final HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.DELETE,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -454,12 +456,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testGetUserByUsernameOrEmail() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(new Object[] {CONTROLLER_PATH, "/get"},
-        "username=" + testEntity.getUsername() + "&email=" + testEntity.getEmail());
+    final String url =
+        this.getUrl(new String[] {CONTROLLER_PATH, "/get"}, "username={username}&email={email}");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-    final ResponseEntity<UserDto> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto.class);
+    final ResponseEntity<UserDto> responseEntity = getRestTemplate().exchange(url, HttpMethod.GET,
+        requestEntity, UserDto.class, testEntity.getUsername(), testEntity.getEmail());
 
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
@@ -486,12 +488,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testGetUserByUsernameOrEmailNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH,
-        "/get?username=" + testEntity.getUsername() + "&email=" + testEntity.getEmail());
+    final String url =
+        this.getUrl(new String[] {CONTROLLER_PATH, "/get"}, "username={username}&email={email}");
     final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
-    final ResponseEntity<UserDto> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, UserDto.class);
+    final ResponseEntity<UserDto> responseEntity = getRestTemplate().exchange(url, HttpMethod.GET,
+        requestEntity, UserDto.class, testEntity.getUsername(), testEntity.getEmail());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -593,12 +595,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CHANGE_PWD_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(CHANGE_PWD_PATH, "/{id}");
 
     final HttpEntity<PasswordConfirmationDto> requestEntity = new HttpEntity<>(dto, headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
 
@@ -619,12 +621,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
 
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CHANGE_PWD_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(CHANGE_PWD_PATH, "/{id}");
 
     final HttpEntity<PasswordConfirmationDto> requestEntity = new HttpEntity<>(dto, headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -638,12 +640,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testActivate() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId(), "/activate");
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}/activate");
 
     final HttpEntity<Boolean> requestEntity = new HttpEntity<>(Boolean.FALSE, headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
 
@@ -660,12 +662,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testActivateNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId(), "/activate");
+    final String url = this.getUrl(CONTROLLER_PATH, "/{id}/activate");
 
     final HttpEntity<Boolean> requestEntity = new HttpEntity<>(Boolean.FALSE, headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
@@ -794,12 +796,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     token.setUser(this.testEntity);
     verificationService.add(token);
 
-    final String url = this.getUrl(VERIFY_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(VERIFY_PATH, "/{id}");
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(token.getCode(), headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     // FIXME This test should be rollbacked
     verificationService.deleteById(token.getId());
@@ -819,12 +821,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testVerifyNotFound() throws URISyntaxException {
     final HttpHeaders headers = getHeaders(this.accessToken);
 
-    final String url = this.getUrl(VERIFY_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(VERIFY_PATH, "/{id}");
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(DUMMY_TOKEN, headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
   }
@@ -838,12 +840,12 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
   public void testVerifyNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
-    final String url = this.getUrl(VERIFY_PATH, "/", this.testEntity.getId());
+    final String url = this.getUrl(VERIFY_PATH, "/{id}");
 
     final HttpEntity<String> requestEntity = new HttpEntity<>(DUMMY_TOKEN, headers);
 
-    final ResponseEntity<Void> responseEntity =
-        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, Void.class);
+    final ResponseEntity<Void> responseEntity = getRestTemplate().exchange(url, HttpMethod.PUT,
+        requestEntity, Void.class, this.testEntity.getId());
 
     assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
   }
