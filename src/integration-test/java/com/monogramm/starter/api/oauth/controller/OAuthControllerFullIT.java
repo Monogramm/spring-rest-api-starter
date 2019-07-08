@@ -182,7 +182,6 @@ public class OAuthControllerFullIT extends AbstractControllerFullIT {
   public void testGetTokenNotVerifiedUser() throws URISyntaxException {
     // Add user
     final User model = createUser("Bar", "bar@email.com", null, getTestRole());
-    assertTrue(getUserService().add(model));
     getUserService().setPassword(model.getId(), PASSWORD.clone());
     getUserService().setEnabled(model.getId(), true);
 
