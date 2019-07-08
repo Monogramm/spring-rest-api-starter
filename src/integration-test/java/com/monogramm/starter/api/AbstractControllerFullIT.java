@@ -101,8 +101,10 @@ public abstract class AbstractControllerFullIT extends AbstractControllerIT {
 
     final URI root =
         new URI(DEFAULT_SCHEME, null, DEFAULT_HOST, port, pathBuilder.toString(), parameters, null);
+    final String tempUrl = root.toString();
 
-    return root.toString();
+    // Restore any '{' or '}' character needed by TestRestTemplate substitution
+    return tempUrl.replaceAll("%7B", "{").replaceAll("%7D", "}");
   }
 
   /**

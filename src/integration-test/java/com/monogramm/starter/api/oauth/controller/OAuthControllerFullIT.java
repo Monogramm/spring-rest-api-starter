@@ -2,7 +2,6 @@ package com.monogramm.starter.api.oauth.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
