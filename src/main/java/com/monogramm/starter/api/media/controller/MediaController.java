@@ -367,10 +367,6 @@ public class MediaController extends AbstractGenericController<Media, MediaDto> 
     for (MultipartFile file : files) {
       final MediaDto dto = this.dtoFromFile(file);
 
-      final UUID principalId = this.getPrincipalId(authentication);
-      dto.setCreatedBy(principalId);
-      dto.setOwner(principalId);
-
       dtos.add(super.addData(authentication, dto));
     }
 

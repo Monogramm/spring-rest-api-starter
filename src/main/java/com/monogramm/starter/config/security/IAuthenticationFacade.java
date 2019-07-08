@@ -60,6 +60,9 @@ public interface IAuthenticationFacade {
         if (decodedDetails instanceof Map) {
           details = (Map<?, ?>) decodedDetails;
         }
+      } else if (rawDetails instanceof Map) {
+        // XXX Mostly for test purpose only
+        details = (Map<?, ?>) rawDetails;
       }
     }
 
@@ -129,10 +132,15 @@ public interface IAuthenticationFacade {
     if (details.containsKey(CustomTokenEnhancer.UUID)) {
       final Object idValue = details.get(CustomTokenEnhancer.UUID);
 
-      try {
-        principalId = UUID.fromString((String) idValue);
-      } catch (Exception e) {
-        principalId = null;
+      if (idValue instanceof String) {
+        try {
+          principalId = UUID.fromString((String) idValue);
+        } catch (Exception e) {
+          principalId = null;
+        }
+      } else if (idValue instanceof UUID) {
+        // XXX Mostly for test purpose only
+        principalId = (UUID) idValue;
       }
     }
 
