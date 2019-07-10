@@ -293,10 +293,10 @@ public class ParameterControllerFullIT extends AbstractControllerFullIT {
     parameterService.deleteById(content.getId());
 
     assertNotNull(content.getCreatedAt());
-    assertNull(content.getCreatedBy());
+    assertEquals(getTestUser().getId(), content.getCreatedBy());
     assertNull(content.getModifiedAt());
     assertNull(content.getModifiedBy());
-    assertNull(content.getOwner());
+    assertEquals(getTestUser().getId(), content.getOwner());
     assertEquals(model.getName(), content.getName());
 
     assertNotNull(responseEntity.getHeaders().getLocation());

@@ -281,7 +281,8 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   /**
    * Default sort applied in listing functions when none provided.
    */
-  public static final String DEFAULT_SORT_QUERY = "createdAt,DESC;modifiedAt,DESC";
+  public static final String DEFAULT_SORT_QUERY =
+      "createdAt" + SORT_OPT_SEP + "DESC" + SORT_PROP_SEP + "modifiedAt" + SORT_OPT_SEP + "DESC";
 
   /**
    * Construct a list of {@code Sort.Order} from a String query.
@@ -645,12 +646,16 @@ public abstract class AbstractGenericController<T extends AbstractGenericEntity,
   }
 
   private T addEntity(Authentication authentication, @RequestBody D dto) {
-    final T entity = this.service.toEntity(dto);
-
-    // Set creator and owner
+    // Set creator and owner to authenticated user
     final UUID principalId = this.getPrincipalId(authentication);
-    dto.setCreatedBy(principalId);
-    dto.setOwner(principalId);
+    if (dto.getCreatedBy() == null) {
+      dto.setCreatedBy(principalId);
+    }
+    if (dto.getOwner() == null) {
+      dto.setOwner(principalId);
+    }
+
+    final T entity = this.service.toEntity(dto);
 
     final boolean added = service.add(entity);
 

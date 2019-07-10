@@ -20,6 +20,7 @@ import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.service.MediaService;
+import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.io.FileInputStream;
@@ -91,9 +92,14 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
   private static final String PREFIX = MediaControllerFullIT.class.getSimpleName() + "_";
 
   private User testCreatedBy;
+  private String creatorAccessToken;
   private User testOwner;
+  private String ownerAccessToken;
+
   private Media testEntity;
   private MediaDto testDto;
+
+  private Role nonAdminRole;
 
   private String accessToken;
 
@@ -112,14 +118,23 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
     // Set up a valid user for authentication and such
     super.setUpValidUser(GenericOperation.allPermissionNames(TYPE));
 
+    // Add a non-admin role
+    final String[] nonAdminPermissions =
+        GenericOperation.allPermissionNames(TYPE, GenericOperation.READ, GenericOperation.CREATE,
+            GenericOperation.UPDATE, GenericOperation.DELETE);
+    nonAdminRole = this.createRole("Media-User", nonAdminPermissions);
+    assertNotNull(nonAdminRole);
+
     // Get an access token for later calls to API
     this.accessToken = this.getFullToken();
 
     testCreatedBy = this.createUser(DISPLAYNAME + "_Creator", DISPLAYNAME + ".creator@creation.org",
-        null, null);
+        PASSWORD, nonAdminRole);
+    this.creatorAccessToken = this.getFullToken(testCreatedBy, PASSWORD);
 
-    testOwner =
-        this.createUser(DISPLAYNAME + "_Owner", DISPLAYNAME + ".owner@creation.org", null, null);
+    testOwner = this.createUser(DISPLAYNAME + "_Owner", DISPLAYNAME + ".owner@creation.org",
+        PASSWORD, nonAdminRole);
+    this.ownerAccessToken = this.getFullToken(testOwner, PASSWORD);
 
     // Add a media
     this.tempDirectory = Files.createTempDirectory(PREFIX);
@@ -171,6 +186,9 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
 
     this.deleteUser(testOwner);
     testOwner = null;
+
+    this.deleteRole(nonAdminRole);
+    nonAdminRole = null;
   }
 
   /**
@@ -264,6 +282,50 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
    * @throws URISyntaxException if the URL could not be created.
    */
   @Test
+  public void testGetAllMediasOwner() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.ownerAccessToken);
+
+    final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<MediaDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, MediaDto[].class);
+
+    final MediaDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DISPLAYNAME.equals(a.getName())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for {@link MediaController#getAllData()}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllMediasCreator() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.creatorAccessToken);
+
+    final String url = this.getUrl(CONTROLLER_PATH);
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<MediaDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, MediaDto[].class);
+
+    final MediaDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertEquals(0, dtos.length);
+  }
+
+  /**
+   * Test method for {@link MediaController#getAllData()}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
   public void testGetAllMediasNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
@@ -298,6 +360,52 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
     assertTrue(Arrays.stream(dtos).anyMatch(a -> DISPLAYNAME.equals(a.getName())));
     assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
     assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link MediaController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllMediasPaginatedOwner() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.ownerAccessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<MediaDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, MediaDto[].class);
+
+    final MediaDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> DISPLAYNAME.equals(a.getName())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testCreatedBy.getId().equals(a.getCreatedBy())));
+    assertTrue(Arrays.stream(dtos).anyMatch(a -> testOwner.getId().equals(a.getOwner())));
+  }
+
+  /**
+   * Test method for
+   * {@link MediaController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testGetAllMediasPaginatedCreator() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.creatorAccessToken);
+
+    final String url = this.getUrl(new String[] {CONTROLLER_PATH}, "page=0");
+    final HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<MediaDto[]> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.GET, requestEntity, MediaDto[].class);
+
+    final MediaDto[] dtos = responseEntity.getBody();
+
+    assertNotNull(dtos);
+    assertEquals(0, dtos.length);
   }
 
   /**
@@ -351,6 +459,54 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
    * @throws URISyntaxException if the URL could not be created.
    */
   @Test
+  public void testUpdateMediaOwner() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.ownerAccessToken);
+
+    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+
+    this.testEntity.setStartDate(new Date());
+    this.testDto = mediaService.toDto(this.testEntity);
+
+    final HttpEntity<MediaDto> requestEntity = new HttpEntity<>(this.testDto, headers);
+
+    final ResponseEntity<MediaDto> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, MediaDto.class);
+
+    final MediaDto content = responseEntity.getBody();
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertNotNull(content);
+    assertEquals(this.testDto, content);
+    assertEquals(this.testDto.getName(), content.getName());
+  }
+
+  /**
+   * Test method for {@link MediaController#updateData(String, Media)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testUpdateMediaCreator() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.creatorAccessToken);
+
+    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+
+    this.testEntity.setStartDate(new Date());
+    this.testDto = mediaService.toDto(this.testEntity);
+
+    final HttpEntity<MediaDto> requestEntity = new HttpEntity<>(this.testDto, headers);
+
+    final ResponseEntity<MediaDto> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.PUT, requestEntity, MediaDto.class);
+
+    assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for {@link MediaController#updateData(String, Media)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
   public void testUpdateMediaNoAuthorization() throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
@@ -384,6 +540,44 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
         getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
 
     assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for {@link MediaController#deleteData(java.lang.String)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testDeleteMediaOwner() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.ownerAccessToken);
+
+    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+
+    final HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Void> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
+
+    assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+  }
+
+  /**
+   * Test method for {@link MediaController#deleteData(java.lang.String)}.
+   * 
+   * @throws URISyntaxException if the URL could not be created.
+   */
+  @Test
+  public void testDeleteMediaCreator() throws URISyntaxException {
+    final HttpHeaders headers = getHeaders(this.creatorAccessToken);
+
+    final String url = this.getUrl(CONTROLLER_PATH, "/", this.testEntity.getId());
+
+    final HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+    final ResponseEntity<Void> responseEntity =
+        getRestTemplate().exchange(url, HttpMethod.DELETE, requestEntity, Void.class);
+
+    assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
   }
 
   /**
