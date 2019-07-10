@@ -98,6 +98,12 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
    */
   protected static final String[] ADMIN_AUTH = {AUTH_LIST};
 
+  /**
+   * Default sort applied in listing functions when none provided.
+   */
+  public static final String DEFAULT_SORT_QUERY =
+      "name" + SORT_OPT_SEP + "ASC" + SORT_PROP_SEP + AbstractGenericController.DEFAULT_SORT_QUERY;
+
 
   /**
    * Create a {@link ParameterController}.
@@ -147,21 +153,23 @@ public class ParameterController extends AbstractGenericController<Parameter, Pa
 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
-  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  @PreAuthorize(value = "hasAnyAuthority('" + AUTH_LIST + "', '" + AUTH_READ + "')")
   public List<ParameterDto> getAllData(
-      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
-    return super.getAllData(sort);
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      Authentication authentication) {
+    return super.getAllData(sort, authentication);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
-  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  @PreAuthorize(value = "hasAnyAuthority('" + AUTH_LIST + "', '" + AUTH_READ + "')")
   public List<ParameterDto> getAllDataPaginated(
       @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
       @RequestParam(value = PAGE) int page,
-      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
-      UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(sort, page, size, request, builder, response);
+      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size,
+      Authentication authentication, WebRequest request, UriComponentsBuilder builder,
+      HttpServletResponse response) {
+    return super.getAllDataPaginated(sort, page, size, authentication, request, builder, response);
   }
 
   @Override

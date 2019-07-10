@@ -299,6 +299,9 @@ public abstract class AbstractControllerIT {
   protected final void deleteRole(final Role role) {
     try {
       if (role != null && role.getId() != null) {
+        for (User user : role.getUsers()) {
+          this.deleteUser(user);
+        }
         roleService.deleteById(role.getId());
       }
     } catch (RoleNotFoundException e) {

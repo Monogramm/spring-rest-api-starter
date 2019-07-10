@@ -11,6 +11,7 @@ import com.monogramm.starter.api.oauth.controller.RevokeTokenEndpoint;
 import com.monogramm.starter.config.component.CustomTokenEnhancer;
 import com.monogramm.starter.dto.oauth.OAuthRequest;
 import com.monogramm.starter.dto.oauth.OAuthResponse;
+import com.monogramm.starter.persistence.user.entity.User;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -126,9 +127,13 @@ public abstract class AbstractControllerFullIT extends AbstractControllerIT {
    * @see OAuthResponse
    * @see CustomTokenEnhancer
    * 
+   * @param user user to authenticate
+   * @param password user password
+   * 
    * @throws URISyntaxException if the OAuth2 token request URL could not be created.
    */
-  protected ResponseEntity<OAuthResponse> getFullTokenResponse() throws URISyntaxException {
+  protected ResponseEntity<OAuthResponse> getFullTokenResponse(User user, char[] password)
+      throws URISyntaxException {
     final HttpHeaders headers = getHeaders();
 
     headers.add("Authorization", "Basic " + CLIENT_BASIC_AUTH_TOKEN);
@@ -136,9 +141,9 @@ public abstract class AbstractControllerFullIT extends AbstractControllerIT {
     final String url = this.getUrl(TOKEN_PATH);
 
     final OAuthRequest objAuth = new OAuthRequest();
-    objAuth.setUsername(getTestUser().getEmail());
-    objAuth.setEmail(getTestUser().getEmail());
-    objAuth.setPassword(PASSWORD.clone());
+    objAuth.setUsername(user.getEmail());
+    objAuth.setEmail(user.getEmail());
+    objAuth.setPassword(password.clone());
     objAuth.setGrantType(PASSWORD_GRANT_TYPE);
     objAuth.setClientId(CLIENT_ID);
     objAuth.setClientSecret(CLIENT_SECRET);
@@ -147,6 +152,45 @@ public abstract class AbstractControllerFullIT extends AbstractControllerIT {
 
 
     return restTemplate.exchange(url, HttpMethod.POST, requestEntity, OAuthResponse.class);
+  }
+
+  /**
+   * Get a OAuth2 token response for the test user created by {@link #setUp(String...)}.
+   * 
+   * @see OAuthRequest
+   * @see OAuthResponse
+   * @see CustomTokenEnhancer
+   * 
+   * @throws URISyntaxException if the OAuth2 token request URL could not be created.
+   */
+  protected ResponseEntity<OAuthResponse> getFullTokenResponse() throws URISyntaxException {
+    return this.getFullTokenResponse(getTestUser(), PASSWORD);
+  }
+
+  /**
+   * Get a OAuth2 token for the test user created by {@link #setUp(String...)}.
+   * 
+   * @see OAuthRequest
+   * @see OAuthResponse
+   * @see CustomTokenEnhancer
+   * 
+   * @param user user to authenticate
+   * @param password user password
+   * 
+   * @throws URISyntaxException if the OAuth2 token request URL could not be created.
+   */
+  protected String getFullToken(User user, char[] password) throws URISyntaxException {
+    final ResponseEntity<OAuthResponse> responseEntity = this.getFullTokenResponse(user, password);
+
+    assertNotNull(responseEntity);
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+    final OAuthResponse response = responseEntity.getBody();
+
+    assertNotNull(response);
+    assertNotNull(response.getAccessToken());
+
+    return response.getAccessToken();
   }
 
   /**
@@ -159,17 +203,7 @@ public abstract class AbstractControllerFullIT extends AbstractControllerIT {
    * @throws URISyntaxException if the OAuth2 token request URL could not be created.
    */
   protected String getFullToken() throws URISyntaxException {
-    final ResponseEntity<OAuthResponse> responseEntity = this.getFullTokenResponse();
-
-    assertNotNull(responseEntity);
-    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-    final OAuthResponse response = responseEntity.getBody();
-
-    assertNotNull(response);
-    assertNotNull(response.getAccessToken());
-
-    return response.getAccessToken();
+    return this.getFullToken(getTestUser(), PASSWORD);
   }
 
   /**

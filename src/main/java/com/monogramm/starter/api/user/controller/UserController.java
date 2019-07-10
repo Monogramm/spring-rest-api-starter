@@ -211,21 +211,23 @@ public class UserController extends AbstractGenericController<User, UserDto> {
 
   @Override
   @GetMapping(value = CONTROLLER_PATH)
-  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  @PreAuthorize(value = "hasAnyAuthority('" + AUTH_LIST + "', '" + AUTH_READ + "')")
   public List<UserDto> getAllData(
-      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort) {
-    return super.getAllData(sort);
+      @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
+      Authentication authentication) {
+    return super.getAllData(sort, authentication);
   }
 
   @Override
   @GetMapping(value = CONTROLLER_PATH, params = {PAGE})
-  @PreAuthorize(value = "hasAuthority('" + AUTH_LIST + "')")
+  @PreAuthorize(value = "hasAnyAuthority('" + AUTH_LIST + "', '" + AUTH_READ + "')")
   public List<UserDto> getAllDataPaginated(
       @RequestParam(value = SORT, defaultValue = DEFAULT_SORT_QUERY) String sort,
       @RequestParam(value = PAGE) int page,
-      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size, WebRequest request,
-      UriComponentsBuilder builder, HttpServletResponse response) {
-    return super.getAllDataPaginated(sort, page, size, request, builder, response);
+      @RequestParam(value = SIZE, defaultValue = DEFAULT_SIZE) int size,
+      Authentication authentication, WebRequest request, UriComponentsBuilder builder,
+      HttpServletResponse response) {
+    return super.getAllDataPaginated(sort, page, size, authentication, request, builder, response);
   }
 
   @Override

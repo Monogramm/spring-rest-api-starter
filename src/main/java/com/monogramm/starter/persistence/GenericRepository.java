@@ -54,6 +54,39 @@ public interface GenericRepository<T extends AbstractGenericEntity> extends JpaR
   Page<T> findAll(Pageable pageable);
 
   /**
+   * Find all entities from the repository owned by user.
+   * 
+   * @param owner the entities owner.
+   * 
+   * @return the list of all the entities available through the repository.
+   */
+  @Transactional(readOnly = true)
+  List<T> findAllByOwner(final User owner);
+
+  /**
+   * Returns all entities owned by user sorted by the given options.
+   * 
+   * @param sort sort conditions.
+   * @param owner the entities owner.
+   * 
+   * @return all entities sorted by the given options
+   */
+  @Transactional(readOnly = true)
+  List<T> findAllByOwner(Sort sort, final User owner);
+
+  /**
+   * Returns a {@link Page} of entities owned by user meeting the paging restriction provided in the
+   * {@code Pageable} object.
+   * 
+   * @param pageable paging conditions.
+   * @param owner the entities owner.
+   * 
+   * @return a page of entities
+   */
+  @Transactional(readOnly = true)
+  Page<T> findAllByOwner(Pageable pageable, final User owner);
+
+  /**
    * Find an entity through its primary key.
    * 
    * @param entityId the entity unique identifier.

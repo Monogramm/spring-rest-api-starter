@@ -256,10 +256,10 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
         .andExpect(status().isCreated()).andExpect(jsonPath("$.id", notNullValue()))
         .andExpect(jsonPath("$.name", equalToIgnoringCase(newName)))
         .andExpect(jsonPath("$.createdAt", notNullValue()))
-        .andExpect(jsonPath("$.createdBy", nullValue()))
+        .andExpect(jsonPath("$.createdBy", equalToIgnoringCase(getTestUser().getId().toString())))
         .andExpect(jsonPath("$.modifiedAt", nullValue()))
         .andExpect(jsonPath("$.modifiedBy", nullValue()))
-        .andExpect(jsonPath("$.owner", nullValue()));
+        .andExpect(jsonPath("$.owner", equalToIgnoringCase(getTestUser().getId().toString())));
 
     // Insert again should generate conflict
     getMockMvc()

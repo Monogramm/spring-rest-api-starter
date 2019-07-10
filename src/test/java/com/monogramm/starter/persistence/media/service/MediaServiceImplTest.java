@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -235,15 +236,28 @@ public class MediaServiceImplTest
     final User owner = User.builder().id(ownerId).build();
 
     when(getMockRepository().findByIdAndOwner(ID, owner)).thenReturn(model);
-    when(getMockRepository().deleteById(ID)).thenReturn(1);
+    //when(getMockRepository().delete(model));
 
     getService().deleteByIdAndOwner(ID, ownerId);
 
     verify(getMockRepository(), times(1)).findByIdAndOwner(ID, owner);
-    verify(getMockRepository(), times(1)).deleteById(ID);
+    verify(getMockRepository(), times(1)).delete(model);
     verifyNoMoreInteractions(getMockRepository());
 
     assertFalse(tempExistingDirectory.toFile().exists());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testDeleteByIdAndOwnerException() {
+    final Media model = this.buildTestEntity();
+    model.setPath(tempExistingDirectory);
+    final UUID ownerId = null;
+    final User owner = User.builder().id(ownerId).build();
+
+    when(getMockRepository().findByIdAndOwner(ID, owner)).thenReturn(model);
+    doThrow(new IllegalArgumentException()).when(getMockRepository()).delete(model);
+
+    getService().deleteByIdAndOwner(ID, ownerId);
   }
 
   /**

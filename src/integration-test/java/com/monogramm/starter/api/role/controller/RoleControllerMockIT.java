@@ -253,15 +253,19 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
         .andExpect(status().isCreated()).andExpect(jsonPath("$.id", notNullValue()))
         .andExpect(jsonPath("$.name", equalToIgnoringCase(newName)))
         .andExpect(jsonPath("$.createdAt", notNullValue()))
-        .andExpect(jsonPath("$.createdBy", nullValue()))
+        .andExpect(jsonPath("$.createdBy", equalToIgnoringCase(getTestUser().getId().toString())))
         .andExpect(jsonPath("$.modifiedAt", nullValue()))
         .andExpect(jsonPath("$.modifiedBy", nullValue()))
-        .andExpect(jsonPath("$.owner", nullValue()));
+        .andExpect(jsonPath("$.owner", equalToIgnoringCase(getTestUser().getId().toString())));
 
     // Insert again should generate conflict
     this.getMockMvc()
         .perform(post(CONTROLLER_PATH).headers(getHeaders(getMockToken())).content(roleJson))
         .andExpect(status().isConflict()).andExpect(content().bytes(new byte[] {}));
+
+    // FIXME This test should be rollbacked
+    final Role actualRole = getRoleService().findByName(model.getName());
+    getRoleService().deleteById(actualRole.getId());
   }
 
   /**

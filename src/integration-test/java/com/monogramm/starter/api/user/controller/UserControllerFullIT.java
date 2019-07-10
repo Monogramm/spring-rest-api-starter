@@ -325,10 +325,10 @@ public class UserControllerFullIT extends AbstractControllerFullIT {
     getUserService().deleteById(content.getId());
 
     assertNotNull(content.getCreatedAt());
-    assertNull(content.getCreatedBy());
+    assertEquals(getTestUser().getId(), content.getCreatedBy());
     assertNull(content.getModifiedAt());
     assertNull(content.getModifiedBy());
-    assertNull(content.getOwner());
+    assertEquals(getTestUser().getId(), content.getOwner());
     assertEquals(dto.getUsername(), content.getUsername());
     assertEquals(dto.getEmail(), content.getEmail());
 

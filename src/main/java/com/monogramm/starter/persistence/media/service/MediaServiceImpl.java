@@ -7,6 +7,7 @@ package com.monogramm.starter.persistence.media.service;
 import com.monogramm.starter.config.security.IAuthenticationFacade;
 import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.AbstractGenericService;
+import com.monogramm.starter.persistence.EntityNotFoundException;
 import com.monogramm.starter.persistence.media.dao.MediaRepository;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
@@ -170,7 +171,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
 
 
   @Override
-  @Transactional
+  @Transactional(rollbackFor = {EntityNotFoundException.class}, readOnly=false)
   public void deleteById(UUID entityId) {
     // Only delete if has administration authorities
     final Media entity = getRepository().findById(entityId);
@@ -179,11 +180,19 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
       throw this.createEntityNotFoundException(entityId);
     }
 
-    this.deleteFromRepositoryAndStorage(entity);
+    final Path mediaFolder = this.getEntityDirectory(entity);
+    final Integer deleted = getRepository().deleteById(entityId);
+
+    if (deleted == null || deleted == 0) {
+      throw this.createEntityNotFoundException(entityId);
+    } else {
+      StorageUtils.deleteFile(mediaFolder);
+      // If storage removal fails, the exception should trigger the rollback in database
+    }
   }
 
   @Override
-  @Transactional
+  @Transactional(rollbackFor = {EntityNotFoundException.class}, readOnly=false)
   public void deleteByIdAndOwner(UUID entityId, User owner) {
     // Only delete if has administration authorities
     final Media entity = getRepository().findByIdAndOwner(entityId, owner);
@@ -192,19 +201,10 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
       throw this.createEntityNotFoundException(entityId);
     }
 
-    this.deleteFromRepositoryAndStorage(entity);
-  }
-
-  private void deleteFromRepositoryAndStorage(final Media entity) {
-    final Integer deleted = getRepository().deleteById(entity.getId());
-
-    if (deleted == null || deleted == 0) {
-      throw this.createEntityNotFoundException(entity.getId());
-    } else {
-      final Path mediaFolder = this.getEntityDirectory(entity);
-      StorageUtils.deleteFile(mediaFolder);
-      // If storage removal fails, the exception should trigger the rollback of persistence
-    }
+    final Path mediaFolder = this.getEntityDirectory(entity);
+    getRepository().delete(entity);
+    StorageUtils.deleteFile(mediaFolder);
+    // If storage removal fails, the exception should trigger the rollback in database
   }
 
 

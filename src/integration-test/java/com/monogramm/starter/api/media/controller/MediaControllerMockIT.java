@@ -29,6 +29,7 @@ import com.monogramm.starter.dto.media.MediaDto;
 import com.monogramm.starter.persistence.media.entity.Media;
 import com.monogramm.starter.persistence.media.exception.MediaNotFoundException;
 import com.monogramm.starter.persistence.media.service.MediaService;
+import com.monogramm.starter.persistence.role.entity.Role;
 import com.monogramm.starter.persistence.user.entity.User;
 
 import java.io.FileInputStream;
@@ -54,6 +55,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 
 /**
@@ -103,6 +106,8 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
   private User testOwner;
   private Media testEntity;
 
+  private Role nonAdminRole;
+
   @Autowired
   private MediaService mediaService;
 
@@ -115,14 +120,23 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
     super.setUpMockMvc();
     super.setUpValidUser(GenericOperation.allPermissionNames(TYPE));
 
+    // Add a non-admin role
+    final String[] nonAdminPermissions =
+        GenericOperation.allPermissionNames(TYPE, GenericOperation.READ, GenericOperation.CREATE,
+            GenericOperation.UPDATE, GenericOperation.DELETE);
+    nonAdminRole = this.createRole("Media-User", nonAdminPermissions);
+    assertNotNull(nonAdminRole);
+
     this.randomId = UUID.randomUUID();
 
     // Add the users
-    testCreatedBy =
-        User.builder(DISPLAYNAME + "_Creator", DISPLAYNAME + ".creator@creation.org").build();
-    assertTrue(getUserService().add(testCreatedBy));
-    testOwner = User.builder(DISPLAYNAME + "_Owner", DISPLAYNAME + ".owner@creation.org").build();
-    assertTrue(getUserService().add(testOwner));
+    testCreatedBy = this.createUser(DISPLAYNAME + "_Creator", DISPLAYNAME + ".creator@creation.org",
+        PASSWORD.clone(), nonAdminRole);
+    assertNotNull(testCreatedBy);
+
+    testOwner = this.createUser(DISPLAYNAME + "_Owner", DISPLAYNAME + ".owner@creation.org",
+        PASSWORD.clone(), nonAdminRole);
+    assertNotNull(testOwner);
 
     // Add a media
     this.tempDirectory = Files.createTempDirectory(PREFIX);
@@ -167,6 +181,9 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
 
     super.deleteUser(testOwner);
     testOwner = null;
+
+    this.deleteRole(nonAdminRole);
+    nonAdminRole = null;
   }
 
   /**
@@ -242,6 +259,53 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
   }
 
   /**
+   * Test method for {@link MediaController#getAllData()}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllMediasOwner() throws Exception {
+    // There should be only the test entities...
+    int expectedSize = 1;
+
+    // Call listing by owner should work and only return owned objects
+    final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+    params.add("grant_type", PASSWORD_GRANT_TYPE);
+    params.add("username", testOwner.getEmail());
+    params.add("email", testOwner.getEmail());
+    params.add("password", new String(PASSWORD));
+
+    getMockMvc().perform(get(CONTROLLER_PATH).headers(getHeaders(getMockToken(params))))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for {@link MediaController#getAllData()}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllMediasCreator() throws Exception {
+    // The creator, if not owner or admin, should not see anything
+    int expectedSize = 0;
+
+    final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+    params.add("grant_type", PASSWORD_GRANT_TYPE);
+    params.add("username", testCreatedBy.getEmail());
+    params.add("email", testCreatedBy.getEmail());
+    params.add("password", new String(PASSWORD));
+
+    getMockMvc().perform(get(CONTROLLER_PATH).headers(getHeaders(getMockToken(params))))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
    * Test method for
    * {@link MediaController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
    * 
@@ -254,6 +318,59 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
     getMockMvc()
         .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
             .headers(getHeaders(getMockToken())))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link MediaController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllMediasPaginatedOwner() throws Exception {
+    // There should be only the test entities...
+    int expectedSize = 1;
+
+    // Call listing by owner should work and only return owned objects
+    final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+    params.add("grant_type", PASSWORD_GRANT_TYPE);
+    params.add("username", testOwner.getEmail());
+    params.add("email", testOwner.getEmail());
+    params.add("password", new String(PASSWORD));
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
+            .headers(getHeaders(getMockToken(params))))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  }
+
+  /**
+   * Test method for
+   * {@link MediaController#getAllDataPaginated(int, int, org.springframework.web.context.request.WebRequest, org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)}.
+   * 
+   * @throws Exception if the test crashes.
+   */
+  @Test
+  public void testGetAllMediasPaginatedCreator() throws Exception {
+    // The creator, if not owner or admin, should not see anything
+    int expectedSize = 0;
+
+    final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+    params.add("grant_type", PASSWORD_GRANT_TYPE);
+    params.add("username", testCreatedBy.getEmail());
+    params.add("email", testCreatedBy.getEmail());
+    params.add("password", new String(PASSWORD));
+
+    getMockMvc()
+        .perform(get(CONTROLLER_PATH).param("page", "0").param("size", "1")
+            .headers(getHeaders(getMockToken(params))))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$", hasSize(expectedSize)));
@@ -322,6 +439,56 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
   }
 
   /**
+   * Test method for {@link MediaController#updateData(String, Media)}.
+   * 
+   * @throws MediaNotFoundException if the media entity to update is not found.
+   */
+  @Test
+  public void testUpdateMediaOwner() throws Exception {
+    // Update on random UUID should not find any media
+    final Media dummyModel = Media.builder("God").id(randomId).build();
+    final MediaDto dummyDto = mediaService.toDto(dummyModel);
+
+    final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+    params.add("grant_type", PASSWORD_GRANT_TYPE);
+    params.add("username", testOwner.getEmail());
+    params.add("email", testOwner.getEmail());
+    params.add("password", new String(PASSWORD));
+
+    this.getMockMvc().perform(put(CONTROLLER_PATH + '/' + randomId)
+        .headers(getHeaders(getMockToken(params))).content(dummyDto.toJson()))
+        .andExpect(status().isNotFound());
+
+    // Update the media
+    final String newName = "Bar";
+    this.testEntity.setName(newName);
+    this.testEntity.setModifiedBy(testOwner);
+    final MediaDto dto = mediaService.toDto(this.testEntity);
+
+    // Update test media should work
+    final String entityJson = this.testEntity.toJson();
+    final String dtoJson = dto.toJson();
+
+    assertEquals(dtoJson, entityJson);
+
+    this.getMockMvc()
+        .perform(put(CONTROLLER_PATH + '/' + this.testEntity.getId())
+            .headers(getHeaders(getMockToken())).content(dtoJson))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.id", notNullValue()))
+        .andExpect(jsonPath("$.id", equalToIgnoringCase(this.testEntity.getId().toString())))
+        .andExpect(jsonPath("$.name", equalToIgnoringCase(newName)))
+        .andExpect(jsonPath("$.createdAt", notNullValue()))
+        .andExpect(jsonPath("$.createdBy", notNullValue()))
+        .andExpect(jsonPath("$.createdBy", equalToIgnoringCase(testCreatedBy.getId().toString())))
+        .andExpect(jsonPath("$.modifiedAt", notNullValue()))
+        .andExpect(jsonPath("$.modifiedBy", notNullValue()))
+        .andExpect(jsonPath("$.modifiedBy", equalToIgnoringCase(testOwner.getId().toString())))
+        .andExpect(jsonPath("$.owner", notNullValue()))
+        .andExpect(jsonPath("$.owner", equalToIgnoringCase(testOwner.getId().toString())));
+  }
+
+  /**
    * Test method for {@link MediaController#deleteData(java.lang.String)}.
    * 
    * @throws MediaNotFoundException if the media entity to delete is not found.
@@ -336,6 +503,26 @@ public class MediaControllerMockIT extends AbstractControllerMockIT {
     // Delete test media should work
     this.getMockMvc().perform(
         delete(CONTROLLER_PATH + '/' + this.testEntity.getId()).headers(getHeaders(getMockToken())))
+        .andExpect(status().isNoContent());
+  }
+
+  /**
+   * Test method for {@link MediaController#deleteData(java.lang.String)}.
+   * 
+   * @throws MediaNotFoundException if the media entity to delete is not found.
+   */
+  @Test
+  public void testDeleteMediaOwner() throws Exception {
+    final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+    params.add("grant_type", PASSWORD_GRANT_TYPE);
+    params.add("username", testOwner.getEmail());
+    params.add("email", testOwner.getEmail());
+    params.add("password", new String(PASSWORD));
+
+    // Delete test media should work
+    this.getMockMvc().perform(
+        delete(CONTROLLER_PATH + '/' + this.testEntity.getId()).headers(getHeaders(getMockToken(params))))
         .andExpect(status().isNoContent());
   }
 

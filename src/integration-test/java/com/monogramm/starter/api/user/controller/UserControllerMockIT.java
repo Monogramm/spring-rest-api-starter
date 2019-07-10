@@ -303,9 +303,10 @@ public class UserControllerMockIT extends AbstractControllerMockIT {
         .andExpect(jsonPath("$.username", equalToIgnoringCase(newUsername)))
         .andExpect(jsonPath("$.email", equalToIgnoringCase(newEmail)))
         .andExpect(jsonPath("$.createdAt", notNullValue()))
-        .andExpect(jsonPath("$.createdBy", nullValue()))
+        .andExpect(jsonPath("$.createdBy", equalToIgnoringCase(getTestUser().getId().toString())))
         .andExpect(jsonPath("$.modifiedAt", nullValue()))
-        .andExpect(jsonPath("$.modifiedBy", nullValue()));
+        .andExpect(jsonPath("$.modifiedBy", nullValue()))
+        .andExpect(jsonPath("$.owner", equalToIgnoringCase(getTestUser().getId().toString())));
 
     // Insert again should generate conflict
     getMockMvc()

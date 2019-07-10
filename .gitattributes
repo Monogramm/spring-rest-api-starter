@@ -12,6 +12,8 @@
 *.cmd text eol=crlf
 *.sh text eol=lf
 *.yml text eol=lf
+*.xml text eol=lf
+*.java text eol=lf
 *.properties text eol=lf
 
 # Ensure those won't be messed up with
