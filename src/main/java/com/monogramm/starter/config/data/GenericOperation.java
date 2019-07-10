@@ -141,10 +141,23 @@ public enum GenericOperation {
    */
   public static String[] allPermissionNames(final String typeName) {
     final GenericOperation[] values = GenericOperation.values();
-    final String[] permissionNames = new String[values.length];
+    return allPermissionNames(typeName, values);
+  }
 
-    for (int i = 0; i < values.length; i++) {
-      final GenericOperation genericOperation = values[i];
+  /**
+   * Create all regular {@link Permission} names for the given type.
+   * 
+   * @param typeName a type name for which to create all permission names.
+   * @param permissions an array of granted permissions.
+   * 
+   * @return all regular {@link Permission} names for the given type.
+   */
+  public static String[] allPermissionNames(final String typeName,
+      final GenericOperation... permissions) {
+    final String[] permissionNames = new String[permissions.length];
+
+    for (int i = 0; i < permissions.length; i++) {
+      final GenericOperation genericOperation = permissions[i];
       permissionNames[i] = permissionName(typeName, genericOperation);
     }
 
