@@ -171,7 +171,7 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
 
 
   @Override
-  @Transactional(rollbackFor = {EntityNotFoundException.class})
+  @Transactional(rollbackFor = {EntityNotFoundException.class}, readOnly=false)
   public void deleteById(UUID entityId) {
     // Only delete if has administration authorities
     final Media entity = getRepository().findById(entityId);
@@ -180,19 +180,19 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
       throw this.createEntityNotFoundException(entityId);
     }
 
+    final Path mediaFolder = this.getEntityDirectory(entity);
     final Integer deleted = getRepository().deleteById(entityId);
 
     if (deleted == null || deleted == 0) {
       throw this.createEntityNotFoundException(entityId);
     } else {
-      final Path mediaFolder = this.getEntityDirectory(entity);
       StorageUtils.deleteFile(mediaFolder);
-      // If storage removal fails, the exception should trigger the rollback of persistence
+      // If storage removal fails, the exception should trigger the rollback in database
     }
   }
 
   @Override
-  @Transactional(rollbackFor = {EntityNotFoundException.class})
+  @Transactional(rollbackFor = {EntityNotFoundException.class}, readOnly=false)
   public void deleteByIdAndOwner(UUID entityId, User owner) {
     // Only delete if has administration authorities
     final Media entity = getRepository().findByIdAndOwner(entityId, owner);
@@ -201,15 +201,10 @@ public class MediaServiceImpl extends AbstractGenericService<Media, MediaDto>
       throw this.createEntityNotFoundException(entityId);
     }
 
-    final Integer deleted = getRepository().deleteByIdAndOwner(entityId, owner);
-
-    if (deleted == null || deleted == 0) {
-      throw this.createEntityNotFoundException(entityId);
-    } else {
-      final Path mediaFolder = this.getEntityDirectory(entity);
-      StorageUtils.deleteFile(mediaFolder);
-      // If storage removal fails, the exception should trigger the rollback of persistence
-    }
+    final Path mediaFolder = this.getEntityDirectory(entity);
+    getRepository().delete(entity);
+    StorageUtils.deleteFile(mediaFolder);
+    // If storage removal fails, the exception should trigger the rollback in database
   }
 
 
