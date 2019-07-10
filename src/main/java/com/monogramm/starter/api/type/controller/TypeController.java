@@ -94,6 +94,12 @@ public class TypeController extends AbstractGenericController<Type, TypeDto> {
    */
   protected static final String[] ADMIN_AUTH = {AUTH_LIST};
 
+  /**
+   * Default sort applied in listing functions when none provided.
+   */
+  public static final String DEFAULT_SORT_QUERY =
+      "name" + SORT_OPT_SEP + "ASC" + SORT_PROP_SEP + AbstractGenericController.DEFAULT_SORT_QUERY;
+
 
   /**
    * Create a {@link TypeController}.
