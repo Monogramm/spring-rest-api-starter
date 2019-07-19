@@ -174,12 +174,16 @@ public class MediaControllerFullIT extends AbstractControllerFullIT {
       testInputStream = null;
     }
 
-    Files.delete(tempFile);
-    FileUtils.cleanDirectory(tempDirectory.toFile());
-    Files.delete(tempDirectory);
+    if (tempFile != null) {
+      Files.delete(tempFile);
+    }
+    if (tempDirectory != null) {
+      FileUtils.cleanDirectory(tempDirectory.toFile());
+      Files.delete(tempDirectory);
+    }
 
     this.deleteMedia(testEntity);
-    testDto = null;
+    testEntity = null;
 
     this.deleteUser(testCreatedBy);
     testCreatedBy = null;
