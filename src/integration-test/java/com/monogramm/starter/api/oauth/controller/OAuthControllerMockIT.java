@@ -138,8 +138,9 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     params.add("password", new String(PASSWORD));
 
     // User is not active: authentication is unauthorized
-    getMockTokenResponse(params).andExpect(status().isBadRequest()).andExpect(
-        content().json("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}"));
+    getMockTokenResponse(params).andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(content()
+            .json("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}"));
   }
 
   /**
@@ -165,6 +166,7 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
 
     // User is not verified: authentication is acceptable
     getMockTokenResponse(params).andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
         .andExpect(jsonPath("$.access_token", notNullValue()))
         .andExpect(jsonPath("$.principal_id", equalToIgnoringCase(model.getId().toString())))
         .andExpect(jsonPath("$.principal_name", equalToIgnoringCase(model.getUsername())))
@@ -195,8 +197,9 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     params.add("password", "dummy");
 
     // User password do not match: authentication is forbidden
-    getMockTokenResponse(params).andExpect(status().isBadRequest()).andExpect(content()
-        .string("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}"));
+    getMockTokenResponse(params).andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(content()
+            .string("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}"));
   }
 
   /**
@@ -213,8 +216,9 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     params.add("email", EMAIL);
 
     // Request by password without a password should fail
-    getMockTokenResponse(params).andExpect(status().isBadRequest()).andExpect(
-        content().json("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}"));
+    getMockTokenResponse(params).andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(content()
+            .json("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}"));
   }
 
   /**
@@ -232,8 +236,10 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     params.add("password", new String(PASSWORD));
 
     // Request without a valid grant type should fail
-    getMockTokenResponse(params).andExpect(status().isBadRequest()).andExpect(content().json(
-        "{\"error\":\"unsupported_grant_type\",\"error_description\":\"Unsupported grant type: dummy\"}"));
+    getMockTokenResponse(params).andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        .andExpect(content().json(
+            "{\"error\":\"unsupported_grant_type\",\"error_description\":\"Unsupported grant type: dummy\"}"));
   }
 
   /**
@@ -250,8 +256,9 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     params.add("password", new String(PASSWORD));
 
     // Request without a grant type should fail
-    getMockTokenResponse(params).andExpect(status().isBadRequest()).andExpect(content()
-        .json("{\"error\":\"invalid_request\",\"error_description\":\"Missing grant type\"}"));
+    getMockTokenResponse(params).andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(content()
+            .json("{\"error\":\"invalid_request\",\"error_description\":\"Missing grant type\"}"));
   }
 
   /**
@@ -265,9 +272,9 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     final String token = getMockToken();
 
     // FIXME We receive a 401 unauthorized
-//    // Revoke self OAuth access token should work
-//    getMockMvc().perform(delete(TOKEN_PATH).headers(getHeaders(token)))
-//        .andExpect(status().is2xxSuccessful()).andExpect(content().json(token));
+    // // Revoke self OAuth access token should work
+    // getMockMvc().perform(delete(TOKEN_PATH).headers(getHeaders(token)))
+    // .andExpect(status().is2xxSuccessful()).andExpect(content().json(token));
   }
 
   /**
@@ -280,10 +287,10 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     final String token = getMockToken();
 
     // FIXME We receive a 302 redirection to login
-//    // Revoke OAuth access token should work
-//    getMockMvc()
-//        .perform(post(REVOKE_TOKEN_PATH + "/" + token).with(csrf()).headers(getHeaders(token)))
-//        .andExpect(status().is2xxSuccessful()).andExpect(content().json(token));
+    // // Revoke OAuth access token should work
+    // getMockMvc()
+    // .perform(post(REVOKE_TOKEN_PATH + "/" + token).with(csrf()).headers(getHeaders(token)))
+    // .andExpect(status().is2xxSuccessful()).andExpect(content().json(token));
   }
 
   /**
@@ -296,10 +303,10 @@ public class OAuthControllerMockIT extends AbstractControllerMockIT {
     final String token = getMockToken();
 
     // FIXME We receive a 302 redirection to login
-//    // Revoke OAuth refresh token should work
-//    getMockMvc()
-//        .perform(post(REVOKE_TOKEN_PATH + "/" + "dummy").with(csrf()).headers(getHeaders(token)))
-//        .andExpect(status().is2xxSuccessful()).andExpect(content().json("dummy"));
+    // // Revoke OAuth refresh token should work
+    // getMockMvc()
+    // .perform(post(REVOKE_TOKEN_PATH + "/" + "dummy").with(csrf()).headers(getHeaders(token)))
+    // .andExpect(status().is2xxSuccessful()).andExpect(content().json("dummy"));
   }
 
 }

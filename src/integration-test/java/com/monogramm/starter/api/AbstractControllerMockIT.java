@@ -8,6 +8,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.monogramm.starter.config.component.CustomTokenEnhancer;
@@ -88,11 +89,9 @@ public class AbstractControllerMockIT extends AbstractControllerIT {
   protected ResultActions getMockTokenResponse(final MultiValueMap<String, String> params)
       throws Exception {
     // User login successful
-    return mockMvc
-        .perform(post(TOKEN_PATH).params(params).with(basicAuthClient())
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+    return mockMvc.perform(post(TOKEN_PATH).params(params).with(basicAuthClient())
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .accept(MediaType.APPLICATION_JSON_UTF8_VALUE));
   }
 
   /**
@@ -127,7 +126,9 @@ public class AbstractControllerMockIT extends AbstractControllerIT {
    * @throws Exception if the mock fails.
    */
   protected String getMockToken(final MultiValueMap<String, String> params) throws Exception {
-    final ResultActions result = this.getMockTokenResponse(params);
+    final ResultActions result =
+        this.getMockTokenResponse(params).andExpect(status().is2xxSuccessful())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     String resultString = result.andReturn().getResponse().getContentAsString();
 

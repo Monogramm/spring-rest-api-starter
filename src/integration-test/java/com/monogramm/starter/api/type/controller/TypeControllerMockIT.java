@@ -27,6 +27,8 @@ import com.monogramm.starter.persistence.type.exception.TypeNotFoundException;
 import com.monogramm.starter.persistence.type.service.TypeService;
 import com.monogramm.starter.persistence.user.entity.User;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -97,6 +99,8 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
   private User testOwner;
   private Type testEntity;
 
+  private List<Type> testEntities;
+
   @Before
   public void setUp() {
     super.setUpMockMvc();
@@ -114,17 +118,17 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
     // Add a test type
     testEntity = Type.builder(DISPLAYNAME).createdBy(testCreatedBy).owner(testOwner).build();
     assertTrue(typeService.add(testEntity));
+
+    testEntities = new ArrayList<>();
+    testEntities.add(testEntity);
   }
 
   @After
   public void tearDown() {
-    try {
-      if (testEntity.getId() != null) {
-        typeService.deleteById(testEntity.getId());
-      }
-    } catch (TypeNotFoundException e) {
-      LOG.trace("Type already deleted: " + testEntity, e);
+    for (Type entity : this.testEntities) {
+      this.deleteType(entity);
     }
+    this.testEntities.clear();
     testEntity = null;
 
     super.deleteUser(testCreatedBy);
@@ -132,7 +136,24 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
 
     super.deleteUser(testOwner);
     testOwner = null;
+
+    super.tearDownValidUser();
   }
+
+
+  private void deleteType(Type entity) {
+    try {
+      if (entity.getId() != null) {
+        typeService.deleteById(entity.getId());
+      } else {
+        final Type type = typeService.findByName(entity.getName());
+        typeService.deleteById(type.getId());
+      }
+    } catch (TypeNotFoundException e) {
+      LOG.trace("Type already deleted: " + entity, e);
+    }
+  }
+
 
   /**
    * Test method for
@@ -249,6 +270,8 @@ public class TypeControllerMockIT extends AbstractControllerMockIT {
     final TypeDto dto = typeService.toDto(model);
 
     final String typeJson = dto.toJson();
+
+    this.testEntities.add(model);
 
     // Insert test type should work
     getMockMvc()

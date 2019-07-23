@@ -108,8 +108,6 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
 
   @After
   public void tearDown() {
-    super.tearDownValidUser();
-
     super.deleteRole(testEntity);
     testEntity = null;
 
@@ -118,6 +116,8 @@ public class RoleControllerMockIT extends AbstractControllerMockIT {
 
     super.deleteUser(testOwner);
     testOwner = null;
+
+    super.tearDownValidUser();
   }
 
   /**

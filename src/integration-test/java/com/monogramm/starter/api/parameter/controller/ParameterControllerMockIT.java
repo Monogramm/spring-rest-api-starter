@@ -31,6 +31,8 @@ import com.monogramm.starter.persistence.parameter.exception.ParameterNotFoundEx
 import com.monogramm.starter.persistence.parameter.service.ParameterService;
 import com.monogramm.starter.persistence.user.entity.User;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -102,6 +104,8 @@ public class ParameterControllerMockIT extends AbstractControllerMockIT {
   private User testOwner;
   private Parameter testEntity;
 
+  private List<Parameter> testEntities;
+
   @Before
   public void setUp() {
     super.setUpMockMvc();
@@ -120,17 +124,17 @@ public class ParameterControllerMockIT extends AbstractControllerMockIT {
     testEntity = Parameter.builder(DUMMY_NAME, DUMMY_VALUE).createdBy(testCreatedBy)
         .owner(testOwner).build();
     assertTrue(parameterService.add(testEntity));
+
+    testEntities = new ArrayList<>();
+    testEntities.add(testEntity);
   }
 
   @After
   public void tearDown() {
-    try {
-      if (testEntity.getId() != null) {
-        parameterService.deleteById(testEntity.getId());
-      }
-    } catch (ParameterNotFoundException e) {
-      LOG.trace("Parameter already deleted: " + testEntity, e);
+    for (Parameter entity : this.testEntities) {
+      this.deleteParameter(entity);
     }
+    this.testEntities.clear();
     testEntity = null;
 
     super.deleteUser(testCreatedBy);
@@ -138,7 +142,33 @@ public class ParameterControllerMockIT extends AbstractControllerMockIT {
 
     super.deleteUser(testOwner);
     testOwner = null;
+
+    super.tearDownValidUser();
   }
+
+
+  /**
+   * Get the {@link #parameterService}.
+   * 
+   * @return the {@link #parameterService}.
+   */
+  protected ParameterService getParameterService() {
+    return parameterService;
+  }
+
+  private void deleteParameter(Parameter entity) {
+    try {
+      if (entity.getId() != null) {
+        getParameterService().deleteById(entity.getId());
+      } else {
+        final Parameter parameter = getParameterService().findByName(entity.getName());
+        getParameterService().deleteById(parameter.getId());
+      }
+    } catch (ParameterNotFoundException e) {
+      LOG.trace("Parameter already deleted: " + entity, e);
+    }
+  }
+
 
   /**
    * Test method for
@@ -256,6 +286,8 @@ public class ParameterControllerMockIT extends AbstractControllerMockIT {
     final ParameterDto dto = parameterService.toDto(model);
 
     final String parameterJson = dto.toJson();
+
+    this.testEntities.add(model);
 
     // Insert test parameter should work
     getMockMvc()

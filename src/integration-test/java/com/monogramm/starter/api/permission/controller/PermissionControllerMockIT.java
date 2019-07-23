@@ -26,6 +26,8 @@ import com.monogramm.starter.persistence.permission.entity.Permission;
 import com.monogramm.starter.persistence.permission.exception.PermissionNotFoundException;
 import com.monogramm.starter.persistence.user.entity.User;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.transaction.Transactional;
@@ -90,6 +92,8 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
   private User testOwner;
   private Permission testEntity;
 
+  private List<Permission> testEntities;
+
   @Autowired
   private InitialDataLoader initialDataLoader;
 
@@ -110,17 +114,17 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
     // Add a test permission
     testEntity = Permission.builder(DISPLAYNAME).createdBy(testCreatedBy).owner(testOwner).build();
     assertTrue(getPermissionService().add(testEntity));
+
+    testEntities = new ArrayList<>();
+    testEntities.add(testEntity);
   }
 
   @After
   public void tearDown() {
-    try {
-      if (testEntity.getId() != null) {
-        getPermissionService().deleteById(testEntity.getId());
-      }
-    } catch (PermissionNotFoundException e) {
-      LOG.trace("Permission already deleted: " + testEntity, e);
+    for (Permission entity : this.testEntities) {
+      this.deletePermission(entity);
     }
+    this.testEntities.clear();
     testEntity = null;
 
     super.deleteUser(testCreatedBy);
@@ -128,7 +132,24 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
 
     super.deleteUser(testOwner);
     testOwner = null;
+
+    super.tearDownValidUser();
   }
+
+
+  private void deletePermission(Permission entity) {
+    try {
+      if (entity.getId() != null) {
+        getPermissionService().deleteById(entity.getId());
+      } else {
+        final Permission permission = getPermissionService().findByName(entity.getName());
+        getPermissionService().deleteById(permission.getId());
+      }
+    } catch (PermissionNotFoundException e) {
+      LOG.trace("Permission already deleted: " + entity, e);
+    }
+  }
+
 
   /**
    * Test method for
@@ -245,6 +266,8 @@ public class PermissionControllerMockIT extends AbstractControllerMockIT {
     final PermissionDto dto = getPermissionService().toDto(model);
 
     final String permissionJson = dto.toJson();
+
+    this.testEntities.add(model);
 
     // Insert test permission should work
     getMockMvc()
