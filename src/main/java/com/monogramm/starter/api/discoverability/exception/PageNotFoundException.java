@@ -11,6 +11,7 @@ import com.monogramm.starter.persistence.EntityNotFoundException;
  * <em>"Page not found"</em> Exception.
  * 
  * @see AbstractGenericController#getAllDataPaginated(String, int, int,
+ *      org.springframework.security.core.Authentication,
  *      org.springframework.web.context.request.WebRequest,
  *      org.springframework.web.util.UriComponentsBuilder, javax.servlet.http.HttpServletResponse)
  * 

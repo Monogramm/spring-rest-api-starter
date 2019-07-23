@@ -20,6 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * </p>
  * 
  * @see AbstractGenericController#getAllDataPaginated(String, int, int,
+ *      org.springframework.security.core.Authentication,
  *      org.springframework.web.context.request.WebRequest, UriComponentsBuilder,
  *      HttpServletResponse)
  * 
