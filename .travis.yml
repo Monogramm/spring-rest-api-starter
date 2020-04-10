@@ -1,14 +1,16 @@
-language: java
-sudo: false # faster builds
+os: linux
+dist: trusty
 
 services: docker
+
+language: shell
 
 branches:
   only:
     - master
 
-jdk:
-  - oraclejdk8
+#jdk:
+#  - oraclejdk8
 
 before_install:
   - env | sort
