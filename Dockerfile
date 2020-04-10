@@ -80,10 +80,11 @@ HEALTHCHECK --start-period=10m --interval=3m --timeout=30s \
 # Copy entrypoint and expected JAR file in container
 COPY docker-entrypoint.sh /entrypoint.sh
 
+COPY --from=builder ${JAR_FILE} /srv/app/app.jar
+
 RUN set -ex; \
 	chmod 755 /entrypoint.sh /srv/app/app.jar
 
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
 
-COPY --from=builder ${JAR_FILE} /srv/app/app.jar
