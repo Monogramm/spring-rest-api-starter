@@ -3,6 +3,10 @@ sudo: false # faster builds
 
 services: docker
 
+branches:
+  only:
+    - master
+
 jdk:
   - oraclejdk8
 
