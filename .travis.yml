@@ -9,16 +9,15 @@ jdk:
 before_install:
   - env | sort
   - name="spring-rest-api-starter"
-  - image="monogramm/docker-spring-rest-api-starter"
+  - TAG="travis"
+  - IMAGE_NAME="monogramm/docker-spring-rest-api-starter:${TAG}"
   - dir="."
 
 install:
-  - mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  # If you provide access to repository
-  #- mvn dockerfile:build
-  - chmod 755 docker-entrypoint.sh
-  - docker build --build-arg=target/*.jar -t "$image" "$dir"
-  - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
+  #- mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  #- docker build --build-arg=target/*.jar -t "$IMAGE_NAME" "$dir"
+  - docker build -t "$IMAGE_NAME" "$dir"
+  - docker run --name "$name" -d "$IMAGE_NAME" "$dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
   - docker logs "$name"
   - docker logs "$name" | grep "Launching application..."
   - docker stop "$name"

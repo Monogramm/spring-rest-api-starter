@@ -1,3 +1,20 @@
+FROM maven:3-jdk-8-slim AS builder
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN set -ex; \
+	mvn \
+		clean \
+		install \
+		dockerfile:build \
+		-DskipTests=true \
+		-Dmaven.javadoc.skip=true \
+		-B \
+		-V \
+	;
+
 FROM openjdk:8-jre-alpine
 
 # Expected JAR file path as argument
@@ -63,10 +80,11 @@ HEALTHCHECK --start-period=10m --interval=3m --timeout=30s \
 
 # Copy entrypoint and expected JAR file in container
 COPY docker-entrypoint.sh /entrypoint.sh
-COPY ${JAR_FILE} /srv/app/app.jar
 
 RUN set -ex; \
 	chmod 755 /entrypoint.sh /srv/app/app.jar
 
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
+
+COPY --from=builder ${JAR_FILE} /srv/app/app.jar
