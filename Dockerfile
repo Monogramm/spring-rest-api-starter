@@ -8,7 +8,6 @@ RUN set -ex; \
 	mvn \
 		clean \
 		install \
-		dockerfile:build \
 		-DskipTests=true \
 		-Dmaven.javadoc.skip=true \
 		-B \
