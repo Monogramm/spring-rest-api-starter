@@ -22,16 +22,29 @@ before_install:
   - export travis_dir="${home}/."
 
 install:
-  #- mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  #- docker build --build-arg=target/*.jar -t "$IMAGE_NAME" "$dir"
-  - docker build -t "$IMAGE_NAME" "$travis_dir"
-  - docker run --name "$name" -d "$IMAGE_NAME" "$travis_dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
-  - docker logs "$name"
-  - docker logs "$name" | grep "Launching application..."
-  - docker stop "$name"
+  # Test app build locally
+  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  # Test app build through docker container
+  - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" build
 
-script: 
+before_script:
+  - docker images
+
+script:
+  # Execute tests locally
   - mvn test verify -P all-tests
+  # Test container run
+  - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 20
+  - docker-compose -f "docker-compose_${DATABASE}.yml" ps
+  - docker-compose -f "docker-compose_${DATABASE}.yml" logs "app_api"
+  - docker-compose -f "docker-compose_${DATABASE}.yml" ps "app_api" | grep "Up" || exit 1
 
 after_success:
+  # Send test coverage report to CodeCov
   - bash <(curl -s https://codecov.io/bash)
+
+env: # Environments
+  - DATABASE=h2
+  - DATABASE=mysql
+  - DATABASE=mariadb
+  - DATABASE=postgres

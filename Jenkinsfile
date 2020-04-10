@@ -1,62 +1,66 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
-    tools {
-        maven 'Maven 3.3'
-        jdk 'JDK 1.8'
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
     }
-stages {
-        stage ('Initialize') {
+    parameters {
+        string(name: 'IMAGE_NAME', defaultValue: 'monogramm/spring-rest-api-starter', description: 'Docker Image name.')
+
+        string(name: 'DOCKER_TAG', defaultValue: 'latest', description: 'Docker Image tag.')
+
+        choice(name: 'VARIANT', choices: [], description: 'Docker Image variant.')
+
+        string(name: 'DOCKER_REGISTRY', defaultValue: 'registry-1.docker.io', description: 'Docker Registry to publish the result image to.')
+
+        credentials(name: 'DOCKER_CREDENTIALS', credentialType: 'Username with password', required: true, defaultValue: 'mg-nxrm', description: 'Docker credentials to push on the Docker registry.')
+    }
+    triggers {
+        cron('H 6 * * 1-5')
+    }
+    stages {
+        stage('pending') {
             steps {
-                sh '''
-                    echo "PATH = ${PATH}"
-                    java -version
-                    echo "M2_HOME = ${M2_HOME}"
-                    echo "MAVEN_HOME = ${MAVEN_HOME}"
-                    mvn --version
-                '''
+                updateGitlabCommitStatus name: 'jenkins', state: 'pending'
             }
         }
 
-        stage ('Build') {
+        stage('check docker') {
             steps {
-                sh 'mvn clean compile' 
+                sh "docker --version"
+                sh "docker-compose --version"
             }
         }
 
-        stage ('Test') {
+        stage('build') {
             steps {
-                sh 'mvn test verify -P all-tests' 
-            }
-            post {
-                success {
-                    junit 'target/surefire-reports/*.xml,target/failsafe-reports/*.xml' 
+                updateGitlabCommitStatus name: 'jenkins', state: 'running'
+
+                script {
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
+                        def customImage = docker.build(
+                            "${DOCKER_REGISTRY}/${IMAGE_NAME}:${DOCKER_TAG}",
+                            "--build-arg TAG=${DOCKER_TAG} --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg BUILD_DATE=`date -u +'%Y-%m-%dT%H:%M:%SZ'` -f Dockerfile ."
+                        )
+
+                        customImage.push()
+                        //customImage.push("${VARIANT}")
+                    }
                 }
             }
         }
-
-        stage ('Packaging') {
-            steps {
-                sh 'mvn package -Dmaven.test.skip=true' 
-            }
-            post {
-                success {
-                    archiveArtifacts '*target/*.jar'
-                }
-            }
+    }
+    post {
+        always {
+            // Always cleanup after the build.
+            sh 'docker image prune -f --filter until=$(date -d "yesterday" +%Y-%m-%d)'
         }
-
-        stage ('Reporting') {
-            steps {
-               sh 'mvn site -Dmaven.test.skip=true' 
-            }
-            post {
-              success {
-                  findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/findbugs.xml', unHealthy: ''
-                  checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/checkstyle-result.xml', unHealthy: ''
-                  pmd canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/pmd.xml', unHealthy: ''
-                  publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site', reportFiles: 'index.html', reportName: 'Maven Site Reports', reportTitles: ''])
-              }
-            }
+        success {
+            updateGitlabCommitStatus name: 'jenkins', state: 'success'
+        }
+        failure {
+            updateGitlabCommitStatus name: 'jenkins', state: 'failed'
         }
     }
 }
