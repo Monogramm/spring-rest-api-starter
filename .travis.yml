@@ -3,7 +3,7 @@ dist: trusty
 
 services: docker
 
-language: shell
+language: java
 
 branches:
   only:
@@ -22,7 +22,7 @@ before_install:
   - export travis_dir="${home}/."
 
 install:
-  # Test app build locally
+  # Test app build locally with maven
   - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   # Test app build through docker container
   - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" build
@@ -31,7 +31,7 @@ before_script:
   - docker images
 
 script:
-  # Execute tests locally
+  # Execute tests locally with maven
   - mvn test verify -P all-tests
   # Test container run
   - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 20
