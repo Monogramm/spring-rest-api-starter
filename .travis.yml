@@ -23,7 +23,7 @@ before_install:
 
 install:
   # Test app build locally with maven
-  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  #- mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   # Test app build through docker container
   - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" build
 
@@ -32,7 +32,7 @@ before_script:
 
 script:
   # Execute tests locally with maven
-  - mvn test verify -P all-tests
+  - mvn clean test verify -P all-tests
   # Test container run
   - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 20
   - docker-compose -f "docker-compose_${DATABASE}.yml" ps
