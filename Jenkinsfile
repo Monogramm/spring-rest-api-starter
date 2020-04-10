@@ -14,7 +14,7 @@ pipeline {
 
         string(name: 'DOCKER_REGISTRY', defaultValue: 'registry-1.docker.io', description: 'Docker Registry to publish the result image to.')
 
-        credentials(name: 'DOCKER_CREDENTIALS', credentialType: 'Username with password', required: true, defaultValue: 'mg-nxrm', description: 'Docker credentials to push on the Docker registry.')
+        credentials(name: 'DOCKER_CREDENTIALS', credentialType: 'Username with password', required: true, description: 'Docker credentials to push on the Docker registry.')
     }
     triggers {
         cron('H 6 * * 1-5')
