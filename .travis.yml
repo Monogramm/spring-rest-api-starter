@@ -9,21 +9,23 @@ branches:
   only:
     - master
 
-#jdk:
-#  - oraclejdk8
+jdk:
+  - oraclejdk11
 
 before_install:
   - env | sort
+  - export DOCKER_REPO="monogramm/spring-rest-api-starter"
+  - export TAG="travis"
+  - export IMAGE_NAME="${DOCKER_REPO}:${TAG}"
   - name="spring-rest-api-starter"
-  - TAG="travis"
-  - IMAGE_NAME="monogramm/docker-spring-rest-api-starter:${TAG}"
-  - dir="."
+  - export home=$(pwd)
+  - export travis_dir="${home}/images/${VARIANT}"
 
 install:
   #- mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   #- docker build --build-arg=target/*.jar -t "$IMAGE_NAME" "$dir"
-  - docker build -t "$IMAGE_NAME" "$dir"
-  - docker run --name "$name" -d "$IMAGE_NAME" "$dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
+  - docker build -t "$IMAGE_NAME" "$travis_dir"
+  - docker run --name "$name" -d "$IMAGE_NAME" "$travis_dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
   - docker logs "$name"
   - docker logs "$name" | grep "Launching application..."
   - docker stop "$name"
