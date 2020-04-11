@@ -67,3 +67,4 @@ services:
 
 networks:
   app_external_network:
+  app_internal_network:
