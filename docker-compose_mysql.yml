@@ -46,7 +46,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     container_name: app_api
-    restart: always
+    #restart: always
     healthcheck:
       test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
     ports:
