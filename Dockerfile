@@ -20,12 +20,13 @@ RUN set -ex; \
 		-Dmaven.javadoc.skip=true \
 		-B \
 		-V \
-	;
+	; \
+	ls -al target
 
 FROM openjdk:8-jre-alpine
 
 # Expected JAR file path as argument
-ARG JAR_FILE=/usr/src/app/app.jar
+ARG JAR_FILE=/usr/src/app/target/app.jar
 
 # Setup application folders and tools
 RUN set -ex; \
