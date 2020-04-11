@@ -25,7 +25,7 @@ RUN set -ex; \
 FROM openjdk:8-jre-alpine
 
 # Expected JAR file path as argument
-ARG JAR_FILE
+ARG JAR_FILE=/usr/src/app/app.jar
 
 # Setup application folders and tools
 RUN set -ex; \
