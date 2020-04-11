@@ -10,7 +10,7 @@ pipeline {
 
         string(name: 'DOCKER_TAG', defaultValue: 'latest', description: 'Docker Image tag.')
 
-        choice(name: 'VARIANT', choices: [], description: 'Docker Image variant.')
+        choice(name: 'VARIANT', choices: ['8-jre-alpine'], description: 'Docker Image variant.')
 
         string(name: 'DOCKER_REGISTRY', defaultValue: 'registry-1.docker.io', description: 'Docker Registry to publish the result image to.')
 
@@ -33,10 +33,27 @@ pipeline {
             }
         }
 
-        stage('build') {
+        stage('test') {
             steps {
                 updateGitlabCommitStatus name: 'jenkins', state: 'running'
 
+                docker run -it --rm \
+                    -v "$(pwd)":/usr/src/app \
+                    -w /usr/src/app \
+                    maven:3-jdk-8-slim \
+                    mvn \
+                        clean \
+                        test \
+                        verify \
+                        -P all-tests \
+                        -B \
+                        -V \
+                ; \
+            }
+        }
+
+        stage('build') {
+            steps {
                 script {
                     docker.withRegistry("https://${DOCKER_REGISTRY}", "${DOCKER_CREDENTIALS}") {
                         def customImage = docker.build(
@@ -45,7 +62,7 @@ pipeline {
                         )
 
                         customImage.push()
-                        //customImage.push("${VARIANT}")
+                        customImage.push("${VARIANT}")
                     }
                 }
             }

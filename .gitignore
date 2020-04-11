@@ -24,6 +24,8 @@ target/
 
 # gradle
 gradle/
+.gradle/
+bin/
 
 # eclipse
 .project
