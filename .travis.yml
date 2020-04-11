@@ -32,7 +32,7 @@ before_script:
 
 script:
   # Execute tests locally with maven
-  - mvn clean test verify -P all-tests
+  #- mvn clean test verify -P all-tests
   # Test container run
   - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 20
   - docker-compose -f "docker-compose_${DATABASE}.yml" ps
