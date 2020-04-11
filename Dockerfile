@@ -21,6 +21,8 @@ RUN set -ex; \
 		-B \
 		-V \
 	; \
+	ls -al target; \
+	cp target/*.jar app.jar; \
 	ls -al target
 
 FROM openjdk:8-jre-alpine
