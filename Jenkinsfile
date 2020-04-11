@@ -37,18 +37,7 @@ pipeline {
             steps {
                 updateGitlabCommitStatus name: 'jenkins', state: 'running'
 
-                docker run -it --rm \
-                    -v "$(pwd)":/usr/src/app \
-                    -w /usr/src/app \
-                    maven:3-jdk-8-slim \
-                    mvn \
-                        clean \
-                        test \
-                        verify \
-                        -P all-tests \
-                        -B \
-                        -V \
-                ; \
+                docker run -it --rm -v "$(pwd)":/usr/src/app -w /usr/src/app maven:3-jdk-8-slim mvn clean test verify -P all-tests -B -V 
             }
         }
 
