@@ -10,8 +10,10 @@ services:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 10s
       retries: 5
-    ports:
-      - "53306:3306"
+    expose:
+      - 3306
+    #ports:
+    #  - "3306:3306"
     networks:
       - app_internal_network
     volumes:
@@ -48,7 +50,7 @@ services:
     healthcheck:
       test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
     ports:
-      - "8080:8080"
+      - "8080:${APP_SERVER_PORT}"
     networks:
       - app_internal_network
       - app_external_network
