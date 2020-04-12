@@ -15,6 +15,7 @@
 *.xml text eol=lf
 *.java text eol=lf
 *.properties text eol=lf
+Dockerfile text eol=lf
 
 # Ensure those won't be messed up with
 *.jpg binary
