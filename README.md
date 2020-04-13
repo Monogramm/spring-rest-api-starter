@@ -4,6 +4,8 @@
 [![Build
 Status](https://secure.travis-ci.org/Monogramm/spring-rest-api-starter.png)](https://travis-ci.org/Monogramm/spring-rest-api-starter)
 [![codecov](https://codecov.io/gh/Monogramm/spring-rest-api-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/Monogramm/spring-rest-api-starter)
+[![Docker Automated buid](https://img.shields.io/docker/build/monogramm/spring-rest-api-starter.svg)](https://hub.docker.com/r/monogramm/spring-rest-api-starter/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/monogramm/spring-rest-api-starter.svg)](https://hub.docker.com/r/monogramm/spring-rest-api-starter/)
 
 ### What is this repository for? ###
 
