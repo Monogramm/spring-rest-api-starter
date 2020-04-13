@@ -1,30 +1,56 @@
-language: java
-sudo: false # faster builds
+os: linux
+dist: trusty
 
 services: docker
 
+language: java
+
+branches:
+  only:
+    - master
+
 jdk:
-  - oraclejdk8
+  - oraclejdk11
 
 before_install:
   - env | sort
+  - export DOCKER_REPO="monogramm/spring-rest-api-starter"
+  - export TAG="travis"
+  - export IMAGE_NAME="${DOCKER_REPO}:${TAG}"
   - name="spring-rest-api-starter"
-  - image="monogramm/docker-spring-rest-api-starter"
-  - dir="."
+  - export home=$(pwd)
+  - export travis_dir="${home}/."
 
 install:
-  - mvn clean install dockerfile:build -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  # If you provide access to repository
-  #- mvn dockerfile:build
-  - chmod 755 docker-entrypoint.sh
-  - docker build --build-arg=target/*.jar -t "$image" "$dir"
-  - docker run --name "$name" -d "$image" "$dir" -eDB_PLATFORM=h2 -eAPP_VERIFIER_KEY_PASS=averysecretpasswordforjks
-  - docker logs "$name"
-  - docker logs "$name" | grep "Launching application..."
-  - docker stop "$name"
+  # Test app build locally with maven
+  #- mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  # Test app build through docker container
+  - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" build
 
-script: 
-  - mvn test verify -P all-tests
+before_script:
+  - docker images
+
+script:
+  # Execute tests locally with maven
+  #- mvn clean test verify -P all-tests -B -V
+  # Execute tests in container with maven
+  - docker run -it --rm -v "$(pwd)":/usr/src/app -w /usr/src/app maven:3-jdk-8-slim mvn clean test verify -P all-tests -B -V
+  # Test container run
+  - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 20
+  - docker-compose -f "docker-compose_${DATABASE}.yml" ps
+  - docker-compose -f "docker-compose_${DATABASE}.yml" logs "app_api"
+  - docker-compose -f "docker-compose_${DATABASE}.yml" ps "app_api" | grep "Up" || exit 1
 
 after_success:
+  # Send test coverage report to CodeCov
   - bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  allow_failures:
+    - env: DATABASE=h2
+
+env: # Environments
+  - DATABASE=h2
+  - DATABASE=mysql
+  - DATABASE=mariadb
+  - DATABASE=postgres

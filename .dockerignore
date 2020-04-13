@@ -1,0 +1,58 @@
+# Ignore SCM and IDE items
+.git
+.idea
+.project
+.eclipse
+.vscode
+
+# maven
+target/
+.mvn
+
+# gradle
+gradle/
+.gradle/
+bin/
+
+# eclipse
+.project
+.classpath
+.settings
+
+#ant specific
+dist/
+build/
+
+#netbeans specific
+#core
+nbproject/*
+!nbproject/project.properties
+!nbproject/project.xml
+
+#spring specific
+.springBeans
+
+#project specific
+h2
+data
+
+#general swap/backup files
+*.so
+*.log
+*.out
+*~
+*.swp
+*.DS_Store
+*.lock
+
+# Docker files
+docker-compose*.yml
+
+# CI
+Jenkinsfile
+.travis.yml
+
+# Custom files
+.docker-build-date
+.docker-build
+manage.sh

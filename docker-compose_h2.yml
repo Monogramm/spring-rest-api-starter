@@ -1,0 +1,70 @@
+version: '2.3'
+
+services:
+  app_mailer:
+    image: sj26/mailcatcher:latest
+    hostname: app_mailer
+    container_name: app_mailer
+    restart: always
+    expose:
+      - 1025
+    ports:
+      - 1080:1080
+    networks:
+      - app_internal_network
+      - app_external_network
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  app_api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: app_api
+    #restart: always
+    healthcheck:
+      test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
+    ports:
+      - "8080:${APP_SERVER_PORT}"
+    networks:
+      - app_internal_network
+      - app_external_network
+    depends_on:
+      - app_mailer
+    volumes:
+      - /srv/spring_rest_api_starter/back/logs:/srv/app/logs
+      - /srv/spring_rest_api_starter/back/keys:/srv/app/keys
+      - /srv/spring_rest_api_starter/back/config:/srv/app/config
+      - /srv/spring_rest_api_starter/back/data:/srv/app/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      # Application configuration
+      - APP_SERVER_PORT=${APP_SERVER_PORT}
+      - APP_SERVER_CONTEXT_PATH=${APP_SERVER_CONTEXT_PATH}
+      - APP_TITLE=${APP_TITLE}
+      - APP_DOMAIN_NAME=${APP_DOMAIN_NAME}
+      - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
+      - APP_SIGNING_KEY=
+      - APP_SIGNING_KEYPAIR_PASS=${APP_SIGNING_KEYPAIR_PASS}
+      - APP_DEMO_DATA=true
+      # Database configuration (H2)
+      - DB_PLATFORM=h2
+      - DB_NAME=${APP_DB_NAME}
+      - DB_USER=${APP_DB_USER}
+      - DB_PASSWORD=${APP_DB_PASSWORD}
+      # Mail configuration
+      - MAIL_HOST=app_mailer
+      - MAIL_PORT=1025
+      - MAIL_PROTOCOL=smtp
+      - MAIL_USER=${APP_SMTP_USER}
+      - MAIL_PASSWORD=${APP_SMTP_PASSWD}
+      - MAIL_SSL=false
+      - MAIL_STARTTLS=false
+
+# You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
+
+networks:
+  app_external_network:
+  app_internal_network:
