@@ -17,6 +17,7 @@ pipeline {
         credentials(name: 'DOCKER_CREDENTIALS', credentialType: 'Username with password', required: true, description: 'Docker credentials to push on the Docker registry.')
     }
     triggers {
+        // Daily build, at 5 AM (server time), every business day
         cron('H 6 * * 1-5')
     }
     stages {
