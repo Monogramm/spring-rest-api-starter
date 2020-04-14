@@ -7,15 +7,7 @@ COPY . .
 RUN set -ex; \
 	mvn \
 		clean \
-		test \
-		verify \
-		-P all-tests \
-		-B \
-		-V \
-	; \
-	mvn \
-		clean \
-		install \
+		package \
 		-DskipTests=true \
 		-Dmaven.javadoc.skip=true \
 		-B \
