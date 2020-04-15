@@ -76,7 +76,7 @@ services:
       - APP_SIGNING_KEYPAIR_PASS=${APP_SIGNING_KEYPAIR_PASS}
       - APP_DEMO_DATA=true
       # Database configuration (PostgreSQL)
-      - DB_PLATFORM=postgres
+      - DB_PLATFORM=postgresql
       - DB_HOST=app_db
       - DB_NAME=${APP_DB_NAME}
       - DB_USER=${APP_DB_USER}
