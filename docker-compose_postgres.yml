@@ -78,6 +78,7 @@ services:
       # Database configuration (PostgreSQL)
       - DB_PLATFORM=postgresql
       - DB_HOST=app_db
+      - DB_PORT=5432
       - DB_NAME=${APP_DB_NAME}
       - DB_USER=${APP_DB_USER}
       - DB_PASSWORD=${APP_DB_PASSWORD}
@@ -89,6 +90,8 @@ services:
       - MAIL_PASSWORD=${APP_SMTP_PASSWD}
       - MAIL_SSL=false
       - MAIL_STARTTLS=false
+      # Wait for it...
+      - WAIT_FOR=app_db:5432
 
 # You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
 
