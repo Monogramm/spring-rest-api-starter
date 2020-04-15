@@ -45,9 +45,9 @@ after_success:
   # Send test coverage report to CodeCov
   - bash <(curl -s https://codecov.io/bash)
 
-jobs:
-  allow_failures:
-    - env: DATABASE=h2
+#jobs:
+#  allow_failures:
+#    - env: DATABASE=h2
 
 env: # Environments
   - DATABASE=h2
