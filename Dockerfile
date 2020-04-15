@@ -23,6 +23,7 @@ FROM openjdk:8-jre-alpine
 ARG JAR_FILE=/usr/src/app/target/app.jar
 
 # Setup application folders and tools
+# install dependencies
 RUN set -ex; \
 	mkdir -p /srv/app; \
 	chmod 755 /srv/app; \
@@ -30,10 +31,12 @@ RUN set -ex; \
 	mkdir -p /srv/app/logs; \
 	mkdir -p /srv/app/keys; \
 	mkdir -p /srv/app/config; \
-	# install dependencies
 	apk add --update \
+		libpq \
+		mariadb-common \
 		openssh-keygen \
 		openssl \
+		zlib \
 	; \
 	rm -rf /var/cache/apk/*
 
