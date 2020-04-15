@@ -162,7 +162,7 @@ if [ ! -f "${APP_CONFIG}" ]; then
 	if [ ! -z "${DB_DIALECT}" ]; then
 		echo "spring.jpa.properties.hibernate.dialect=${DB_DIALECT}" >> "${APP_CONFIG}"
 	elif [ "${DB_PLATFORM}" = 'h2' ]; then
-		echo "spring.jpa.properties.hibernate.dialect=org.h2.Driver" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect" >> "${APP_CONFIG}"
 	elif [ "${DB_PLATFORM}" = 'mariadb' ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB53Dialect" >> "${APP_CONFIG}"
 	elif [ "${DB_PLATFORM}" = 'mysql' ]; then
