@@ -1,6 +1,7 @@
 # README #
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](http://www.gnu.org/licenses/agpl.html)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/Monogramm/spring-rest-api-starter)
 [![Build
 Status](https://secure.travis-ci.org/Monogramm/spring-rest-api-starter.png)](https://travis-ci.org/Monogramm/spring-rest-api-starter)
 [![codecov](https://codecov.io/gh/Monogramm/spring-rest-api-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/Monogramm/spring-rest-api-starter)
