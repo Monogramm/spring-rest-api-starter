@@ -1,22 +1,6 @@
 version: '2.3'
 
 services:
-  app_mailer:
-    image: sj26/mailcatcher:latest
-    hostname: app_mailer
-    container_name: app_mailer
-    restart: always
-    expose:
-      - 1025
-    ports:
-      - 1080:1080
-    networks:
-      - app_internal_network
-      - app_external_network
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-
   app_api:
     build:
       context: ./
@@ -62,6 +46,22 @@ services:
       - MAIL_PASSWORD=${APP_SMTP_PASSWD}
       - MAIL_SSL=false
       - MAIL_STARTTLS=false
+
+  app_mailer:
+    image: sj26/mailcatcher:latest
+    hostname: app_mailer
+    container_name: app_mailer
+    restart: always
+    expose:
+      - 1025
+    ports:
+      - 1080:1080
+    networks:
+      - app_internal_network
+      - app_external_network
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
 # You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
 
