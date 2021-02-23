@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# See documentation for details:
+# https://docs.docker.com/docker-hub/builds/advanced/
+
+if [ ! -d ./coverage ]; then
+    mkdir -p ./coverage
+fi
+
+# Update Code Coverage Reports container path with local path
+for f in cobertura.xml clover.xml; do
+    if [ -f "${APP_HOME:-.docker/app}/html/.docker/coverage-phpunit-$f" ]; then
+        sed -e "s|/usr/src/symfony/src|$(pwd)/app/src|g" "${APP_HOME:-.docker/app}/html/.docker/coverage-phpunit-$f" > "./coverage/coverage-phpunit-$f"
+    fi
+done
+
+if [ -d "${APP_HOME:-.docker/app}/html/.docker/coverage-phpunit-html" ]; then
+    cp -r "${APP_HOME:-.docker/app}/html/.docker/coverage-phpunit-html" ./coverage/coverage-phpunit-html
+fi
+
+#echo 'Removing persisted data...'
+#rm -rf "${APP_HOME:-.docker/app}"

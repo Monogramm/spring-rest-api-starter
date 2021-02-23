@@ -1,8 +1,26 @@
 FROM maven:3-jdk-8-slim AS builder
 
+RUN set -ex; \
+	apt-get update; \
+	apt-get install -y --allow-unauthenticated \
+		git \
+		graphviz \
+	; \
+	dot -V; \
+	rm -rf /var/lib/apt/lists/*
+
 WORKDIR /usr/src/app
 
+COPY docker/maven/settings-docker.xml /usr/share/maven/ref/settings-docker.xml
 COPY . .
+
+# Maven arguments
+ARG MAVEN_PROFILE=dev
+ARG MAVEN_RELEASE=N
+
+# Credentials to private Nexus
+ARG NEXUS_LOGIN
+ARG NEXUS_PASSWORD
 
 RUN set -ex; \
 	mvn \
@@ -12,6 +30,8 @@ RUN set -ex; \
 		-Dmaven.javadoc.skip=true \
 		-B \
 		-V \
+		-s /usr/share/maven/ref/settings-docker.xml \
+		-P "${MAVEN_PROFILE}" \
 	; \
 	ls -al target; \
 	mv target/*.jar target/app.jar; \
@@ -46,8 +66,8 @@ WORKDIR /srv/app/
 
 EXPOSE 8080 8443
 
+# Application configuration
 ENV \
-	# Application configuration
 	APP_TITLE=App \
 	APP_CONFIG=/srv/app/config/application.properties \
 	APP_SERVER_CONTEXT_PATH=/api \
@@ -90,3 +110,35 @@ RUN set -ex; \
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 CMD ["java", "-jar", "app.jar"]
 
+# Arguments to label built container
+ARG TAG=unknown
+ARG VCS_REF=unknown
+ARG BUILD_DATE=unknown
+
+# Keep track of image version
+RUN set -ex; \
+    echo "${TAG} ${VCS_REF} ${BUILD_DATE}" > '/srv/app/.docker-app-version'
+
+# Container labels (http://label-schema.org/)
+# Container annotations (https://github.com/opencontainers/image-spec)
+LABEL maintainer="Monogramm Maintainers <opensource at monogramm dot io>" \
+      product="SPRING-REST-API" \
+      version=$TAG \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/Monogramm/spring-rest-api-starter/" \
+      org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="SPRING-REST-API" \
+      org.label-schema.description="Spring RESTful API." \
+      org.label-schema.url="https://github.com/Monogramm/spring-rest-api-starter/" \
+      org.label-schema.vendor="Monogramm" \
+      org.label-schema.version=$TAG \
+      org.label-schema.schema-version="1.0" \
+      org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.source="https://github.com/Monogramm/spring-rest-api-starter/" \
+      org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.title="SPRING-REST-API" \
+      org.opencontainers.image.description="Spring RESTful API." \
+      org.opencontainers.image.url="https://github.com/Monogramm/spring-rest-api-starter/" \
+      org.opencontainers.image.vendor="Monogramm" \
+      org.opencontainers.image.version=$TAG \
+      org.opencontainers.image.authors="Monogramm Maintainers <opensource at monogramm dot io>"

@@ -1,27 +1,16 @@
 version: '2.3'
 
-services:
-  app_mailer:
-    image: sj26/mailcatcher:latest
-    hostname: app_mailer
-    container_name: app_mailer
-    restart: always
-    expose:
-      - 1025
-    ports:
-      - 1080:1080
-    networks:
-      - app_internal_network
-      - app_external_network
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+networks:
+  app_external_network:
+  app_internal_network:
+    internal: true
 
-  app_api:
+services:
+  app_backend:
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: app_api
+    container_name: app_backend
     #restart: always
     healthcheck:
       test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
@@ -65,6 +54,44 @@ services:
 
 # You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
 
-networks:
-  app_external_network:
-  app_internal_network:
+  # Test services (do not use in production)
+
+  # https://docs.docker.com/docker-hub/builds/automated-testing/
+  sut:
+    build:
+      context: ./docker/test
+      dockerfile: Dockerfile
+    command: sh /docker_test.sh
+    networks:
+      - app_internal_network
+      - app_external_network
+    depends_on:
+      app_backend:
+        condition: service_started
+    environment:
+      - DOCKER_TEST_CONTAINER=app_backend
+      - DOCKER_WEB_CONTAINER=app_backend
+      - DOCKER_WEB_PORT=${APP_SERVER_PORT}
+      - DOCKER_WEB_HEALTH_API=${APP_SERVER_CONTEXT_PATH}/health
+    volumes_from:
+      - app_backend
+    # If you want, you can sync time & timezone with host
+    #volumes:
+    #  - /etc/localtime:/etc/localtime:ro
+    #  - /etc/timezone:/etc/timezone:ro
+
+  app_mailer:
+    image: sj26/mailcatcher:latest
+    hostname: app_mailer
+    container_name: app_mailer
+    restart: always
+    expose:
+      - 1025
+    ports:
+      - 1080:1080
+    networks:
+      - app_internal_network
+      - app_external_network
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro

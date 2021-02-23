@@ -38,8 +38,8 @@ script:
   # Test container run
   - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 180
   - docker-compose -f "docker-compose_${DATABASE}.yml" ps
-  - docker-compose -f "docker-compose_${DATABASE}.yml" logs "app_api"
-  - docker-compose -f "docker-compose_${DATABASE}.yml" ps "app_api" | grep "Up" || exit 1
+  - docker-compose -f "docker-compose_${DATABASE}.yml" logs "app_backend"
+  - docker-compose -f "docker-compose_${DATABASE}.yml" ps "app_backend" | grep "Up" || exit 1
 
 after_success:
   # Send test coverage report to CodeCov
