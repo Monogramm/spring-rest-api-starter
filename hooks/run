@@ -16,7 +16,7 @@ COMMIT_MSG=$(git log -1 --format=%s)
 
 export DOCKER_REPO=monogramm/spring-rest-api-starter
 export DOCKERFILE_PATH=Dockerfile
-export DOCKER_TAG=latest
+export DOCKER_TAG=${1:-latest}
 export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
 
 # Execute hooks in given order

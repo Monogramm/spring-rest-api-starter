@@ -71,13 +71,13 @@ function init_compose {
         log 'Init docker compose environment variables...'
         cp .env_template .env.tmp
 
-        ask_field 'APP_NEXUS_LOGIN' 'Enter your Nexus login' "${1}"
-        sed -i -e "s|APP_NEXUS_LOGIN=.*|APP_NEXUS_LOGIN=${APP_NEXUS_LOGIN}|" .env.tmp
-        APP_NEXUS_LOGIN=
+        ask_field 'APP_PACKAGE_REPO_LOGIN' 'Enter your Private Package Repository login' "${1}"
+        sed -i -e "s|APP_PACKAGE_REPO_LOGIN=.*|APP_PACKAGE_REPO_LOGIN=${APP_PACKAGE_REPO_LOGIN}|" .env.tmp
+        APP_PACKAGE_REPO_LOGIN=
 
-        ask_field 'APP_NEXUS_PASSWORD' 'Enter your Nexus password' "${2}"
-        sed -i -e "s|APP_NEXUS_PASSWORD=.*|APP_NEXUS_PASSWORD=${APP_NEXUS_PASSWORD}|" .env.tmp
-        APP_NEXUS_PASSWORD=
+        ask_field 'APP_PACKAGE_REPO_PASSWORD' 'Enter your Private Package Repository password' "${2}"
+        sed -i -e "s|APP_PACKAGE_REPO_PASSWORD=.*|APP_PACKAGE_REPO_PASSWORD=${APP_PACKAGE_REPO_PASSWORD}|" .env.tmp
+        APP_PACKAGE_REPO_PASSWORD=
 
         mv .env.tmp .env
     fi

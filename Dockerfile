@@ -18,9 +18,9 @@ COPY . .
 ARG MAVEN_PROFILE=dev
 ARG MAVEN_RELEASE=N
 
-# Credentials to private Nexus
-ARG NEXUS_LOGIN
-ARG NEXUS_PASSWORD
+# Credentials to private Package Repository
+ARG PACKAGE_REPO_LOGIN
+ARG PACKAGE_REPO_PASSWORD
 
 RUN set -ex; \
 	mvn \

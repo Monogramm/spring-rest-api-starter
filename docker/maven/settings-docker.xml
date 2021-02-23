@@ -8,18 +8,18 @@
         <!--
         <server>
             <id>private-maven-public</id>
-            <username>${env.NEXUS_LOGIN}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <username>${env.PACKAGE_REPO_LOGIN}</username>
+            <password>${env.PACKAGE_REPO_PASSWORD}</password>
         </server>
         <server>
             <id>private-maven-releases</id>
-            <username>${env.NEXUS_LOGIN}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <username>${env.PACKAGE_REPO_LOGIN}</username>
+            <password>${env.PACKAGE_REPO_PASSWORD}</password>
         </server>
         <server>
             <id>private-maven-snapshots</id>
-            <username>${env.NEXUS_LOGIN}</username>
-            <password>${env.NEXUS_PASSWORD}</password>
+            <username>${env.PACKAGE_REPO_LOGIN}</username>
+            <password>${env.PACKAGE_REPO_PASSWORD}</password>
         </server>
         -->
     </servers>
