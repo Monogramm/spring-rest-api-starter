@@ -8,7 +8,7 @@ if [ "${DOCKERFILE_PATH}" = "Dockerfile.develop" ] || [ "${DOCKERFILE_PATH}" = "
     exit 0
 fi
 
-for file in "docker-compose.${BASE:-fpm}"*.test.yml; do
+for file in docker-compose.*.test.yml; do
 
     echo "Starting Test in ${file}..."
 
