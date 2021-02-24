@@ -9,30 +9,37 @@ services:
   app_backend:
     build:
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: ${DOCKERFILE_PATH}
+      args:
+        - VERSION=${TAG}
+        - VCS_REF=${VCS_REF}
+        - BUILD_DATE=${BUILD_DATE}
+    image: ${IMAGE_NAME}
     container_name: app_backend
     #restart: always
     healthcheck:
-      test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
+      test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}/${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
     ports:
       - "8080:${APP_SERVER_PORT}"
     networks:
       - app_internal_network
       - app_external_network
     depends_on:
-      - app_db
-      - app_mailer
+      app_db:
+        condition: service_healthy
+      app_mailer:
+        condition: service_started
     volumes:
-      - /srv/spring_rest_api_starter/back/logs:/srv/app/logs
-      - /srv/spring_rest_api_starter/back/keys:/srv/app/keys
-      - /srv/spring_rest_api_starter/back/config:/srv/app/config
-      - /srv/spring_rest_api_starter/back/data:/srv/app/data
+      - /srv/spring_rest_api_starter_mysql/back/logs:/srv/app/logs
+      - /srv/spring_rest_api_starter_mysql/back/keys:/srv/app/keys
+      - /srv/spring_rest_api_starter_mysql/back/config:/srv/app/config
+      - /srv/spring_rest_api_starter_mysql/back/data:/srv/app/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     environment:
       # Application configuration
       - APP_SERVER_PORT=${APP_SERVER_PORT}
-      - APP_SERVER_CONTEXT_PATH=${APP_SERVER_CONTEXT_PATH}
+      - APP_SERVER_CONTEXT_PATH=/${APP_SERVER_CONTEXT_PATH}
       - APP_TITLE=${APP_TITLE}
       - APP_DOMAIN_NAME=${APP_DOMAIN_NAME}
       - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
@@ -73,10 +80,11 @@ services:
     networks:
       - app_internal_network
     volumes:
-      - /srv/spring_rest_api_starter/mysql/data:/var/lib/mysql
+      - /srv/spring_rest_api_starter_mysql/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=${APP_DB_NAME}
       - MYSQL_USER=${APP_DB_USER}
       - MYSQL_PASSWORD=${APP_DB_PASSWORD}

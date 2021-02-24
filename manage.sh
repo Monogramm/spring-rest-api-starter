@@ -87,7 +87,7 @@ function compose {
     init_compose
 
     docker-compose \
-        -f "docker-compose_${DATABASE:-postgres}.yml" \
+        -f "docker-compose.${DATABASE:-postgres}.test.yml" \
         "$@"
 }
 
@@ -95,7 +95,7 @@ function compose_config {
     init_compose "$@"
 
     docker-compose \
-        -f "docker-compose_${DATABASE:-postgres}.yml" \
+        -f "docker-compose.${DATABASE:-postgres}.test.yml" \
         config
 }
 
@@ -107,7 +107,7 @@ function compose_test {
     compose up -d osrm_backend nominatim
 
     docker-compose \
-        -f "docker-compose_${DATABASE:-postgres}.yml" \
+        -f "docker-compose.${DATABASE:-postgres}.test.yml" \
         --build-arg MAVEN_PROFILE=all-tests
         build
 

@@ -42,8 +42,10 @@ if [ -n "${DOCKER_WEB_CONTAINER}" ]; then
         exit 2
     fi
 
-    log 'Checking Health API is responding...'
-    curl --fail "http://${DOCKER_WEB_CONTAINER}:${DOCKER_WEB_PORT-:80}/${DOCKER_WEB_HEALTH_API:-health}" | grep -q -e 'UP' || exit 1
+    DOCKER_WEB_HEALTH_URL="http://${DOCKER_WEB_CONTAINER}:${DOCKER_WEB_PORT-:80}/${DOCKER_WEB_HEALTH_API:-health}"
+    log "TODO Checking Health API: ${DOCKER_WEB_HEALTH_URL}"
+    curl "${DOCKER_WEB_HEALTH_URL}"
+    #curl --fail "${DOCKER_WEB_HEALTH_URL}" | grep -q -e 'UP' || exit 1
 fi
 
 ################################################################################

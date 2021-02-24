@@ -1,0 +1,110 @@
+version: '2.3'
+
+networks:
+  app_dev_external_network:
+  app_dev_internal_network:
+    internal: true
+
+services:
+  app_dev_backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile.develop
+      args:
+        - VERSION=${TAG}
+        - VCS_REF=${VCS_REF}
+        - BUILD_DATE=${BUILD_DATE}
+    image: develop
+    container_name: app_dev_backend
+    #restart: always
+    healthcheck:
+      test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}/${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      #start_period: 40s
+    ports:
+      - "8080:${APP_SERVER_PORT}"
+    networks:
+      - app_dev_internal_network
+      - app_dev_external_network
+    depends_on:
+      app_dev_db:
+        condition: service_healthy
+      app_dev_mailer:
+        condition: service_started
+    volumes:
+      - /srv/spring_rest_api_starter_develop/back/logs:/srv/app/logs
+      - /srv/spring_rest_api_starter_develop/back/keys:/srv/app/keys
+      - /srv/spring_rest_api_starter_develop/back/config:/srv/app/config
+      - /srv/spring_rest_api_starter_develop/back/data:/srv/app/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      # Application configuration
+      - server.port=${APP_SERVER_PORT}
+      - server.context-path=/${APP_SERVER_CONTEXT_PATH}
+      - application.email.app_title=${APP_TITLE}
+      - application.data.domain_name=${APP_DOMAIN_NAME}
+      - application.data.admin_password=${APP_ADMIN_PASSWORD}
+      - application.security.signing-key=${APP_SIGNING_KEYPAIR_PASS}
+      - application.data.demo=true
+      # Database configuration (PostgreSQL)
+      - spring.datasource.platform=postgresql
+      - spring.datasource.url=jdbc:postgresql://app_dev_db:5432/${APP_DB_NAME}
+      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+      - spring.datasource.username=${APP_DB_USER}
+      - spring.datasource.password=${APP_DB_PASSWORD}
+      # Mail configuration
+      - spring.mail.host=app_dev_mailer
+      - spring.mail.port=1025
+      - spring.mail.protocol=smtp
+      - spring.mail.username=${APP_SMTP_USER}
+      - spring.mail.password=${APP_SMTP_PASSWD}
+      - spring.mail.properties.mail.transport.protocol=smtp
+      - spring.mail.properties.mail.smtp.debug=false
+      - spring.mail.properties.mail.smtp.auth=true
+      - spring.mail.properties.mail.smtp.ssl.enable=true
+      - spring.mail.properties.mail.smtp.starttls.enable=false
+      - spring.mail.properties.mail.smtp.timeout=8000
+
+  app_dev_db:
+    image: postgres:10-alpine
+    container_name: app_dev_db
+    restart: always
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${APP_DB_USER}"]
+    expose:
+      - 5432
+    #ports:
+    #  - "5432:5432"
+    networks:
+      - app_dev_internal_network
+    volumes:
+      - /srv/spring_rest_api_starter_develop/postgres/data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - POSTGRES_DB=${APP_DB_NAME}
+      - POSTGRES_USER=${APP_DB_USER}
+      - POSTGRES_PASSWORD=${APP_DB_PASSWORD}
+
+# You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
+
+  # Test services (do not use in production)
+
+  app_dev_mailer:
+    image: sj26/mailcatcher:latest
+    hostname: app_dev_mailer
+    container_name: app_dev_mailer
+    restart: always
+    expose:
+      - 1025
+    ports:
+      - 1080:1080
+    networks:
+      - app_dev_internal_network
+      - app_dev_external_network
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro

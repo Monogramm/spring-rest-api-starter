@@ -9,40 +9,43 @@ services:
   app_backend:
     build:
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: ${DOCKERFILE_PATH}
+      args:
+        - VERSION=${TAG}
+        - VCS_REF=${VCS_REF}
+        - BUILD_DATE=${BUILD_DATE}
+    image: ${IMAGE_NAME}
     container_name: app_backend
     #restart: always
     healthcheck:
-      test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
+      test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}/${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
     ports:
       - "8080:${APP_SERVER_PORT}"
     networks:
       - app_internal_network
       - app_external_network
     depends_on:
-      - app_db
-      - app_mailer
+      app_mailer:
+        condition: service_started
     volumes:
-      - /srv/spring_rest_api_starter/back/logs:/srv/app/logs
-      - /srv/spring_rest_api_starter/back/keys:/srv/app/keys
-      - /srv/spring_rest_api_starter/back/config:/srv/app/config
-      - /srv/spring_rest_api_starter/back/data:/srv/app/data
+      - /srv/spring_rest_api_starter_h2/back/logs:/srv/app/logs
+      - /srv/spring_rest_api_starter_h2/back/keys:/srv/app/keys
+      - /srv/spring_rest_api_starter_h2/back/config:/srv/app/config
+      - /srv/spring_rest_api_starter_h2/back/data:/srv/app/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     environment:
       # Application configuration
       - APP_SERVER_PORT=${APP_SERVER_PORT}
-      - APP_SERVER_CONTEXT_PATH=${APP_SERVER_CONTEXT_PATH}
+      - APP_SERVER_CONTEXT_PATH=/${APP_SERVER_CONTEXT_PATH}
       - APP_TITLE=${APP_TITLE}
       - APP_DOMAIN_NAME=${APP_DOMAIN_NAME}
       - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
       - APP_SIGNING_KEY=
       - APP_SIGNING_KEYPAIR_PASS=${APP_SIGNING_KEYPAIR_PASS}
       - APP_DEMO_DATA=true
-      # Database configuration (MariaDB only)
-      - DB_PLATFORM=mariadb
-      - DB_HOST=app_db
-      - DB_PORT=3306
+      # Database configuration (H2)
+      - DB_PLATFORM=h2
       - DB_NAME=${APP_DB_NAME}
       - DB_USER=${APP_DB_USER}
       - DB_PASSWORD=${APP_DB_PASSWORD}
@@ -54,32 +57,6 @@ services:
       - MAIL_PASSWORD=${APP_SMTP_PASSWD}
       - MAIL_SSL=false
       - MAIL_STARTTLS=false
-      # Wait for it...
-      - WAIT_FOR=app_db:3306
-
-  app_db:
-    image: mariadb:10
-    container_name: app_db
-    command: --character_set_client=utf8 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --character-set-client-handshake=FALSE
-    restart: always
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 10s
-      retries: 5
-    expose:
-      - 3306
-    #ports:
-    #  - "3306:3306"
-    networks:
-      - app_internal_network
-    volumes:
-      - /srv/spring_rest_api_starter/mariadb/data:/var/lib/mysql
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-    environment:
-      - MYSQL_DATABASE=${APP_DB_NAME}
-      - MYSQL_USER=${APP_DB_USER}
-      - MYSQL_PASSWORD=${APP_DB_PASSWORD}
 
 # You can also add a web server (like NGinx or Apache) to serve as reverse proxy and enforce HTTPS
 

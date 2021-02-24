@@ -14,13 +14,15 @@ SOURCE_COMMIT=$(git rev-parse --short HEAD)
 export COMMIT_MSG
 COMMIT_MSG=$(git log -1 --format=%s)
 
+export VARIANT=${2:-alpine}
+
 export DOCKER_REPO=monogramm/spring-rest-api-starter
-export DOCKERFILE_PATH=Dockerfile
-export DOCKER_TAG=${1:-latest}
+export DOCKERFILE_PATH=Dockerfile.${VARIANT}
+export DOCKER_TAG=${VARIANT}
 export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
 
 # Execute hooks in given order
-IFS=',' read -ra STEPS <<< "${1:-build}"
+IFS=',' read -ra STEPS <<< "${1:-build,test}"
 for step in "${STEPS[@]}"
 do
     for hook in "pre_${step}" "${step}" "post_${step}"; do

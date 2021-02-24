@@ -67,6 +67,8 @@ WORKDIR /srv/app/
 EXPOSE 8080 8443
 
 # Application configuration
+# Database configuration
+# Mail configuration
 ENV \
 	APP_TITLE=App \
 	APP_CONFIG=/srv/app/config/application.properties \
@@ -80,7 +82,6 @@ ENV \
 	APP_SIGNING_KEYPAIR_PASS='' \
 	APP_SIGNING_KEYPAIR_ALIAS=spring_rest_api_starter_key \
 	APP_DEMO_DATA=false \
-	# Database configuration
 	DB_DIALECT='' \
 	DB_STORAGE='' \
 	DB_DRIVER='' \
@@ -90,7 +91,6 @@ ENV \
 	DB_NAME='spring_rest_api_starter' \
 	DB_USER='spring_rest_api_starter' \
 	DB_PASSWORD='spring_rest_api_starter_password' \
-	# Mail configuration
 	MAIL_HOST= \
 	MAIL_PORT= \
 	MAIL_PROTOCOL= \
