@@ -30,7 +30,7 @@ pipeline {
 
         string(name: 'DOCKER_TAG', defaultValue: 'latest', description: 'Docker Image tag.')
 
-        choice(name: 'VARIANT', choices: ['8-jre-alpine'], description: 'Docker Image variant.')
+        choice(name: 'VARIANT', choices: ['alpine'], description: 'Docker Image variant.')
 
         choice(name: 'MAVEN_PROFILE', choices: ['dev', 'integration-test', 'all-tests'], description: 'Maven build and test profile.')
 
