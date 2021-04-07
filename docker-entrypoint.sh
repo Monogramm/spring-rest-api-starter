@@ -105,7 +105,7 @@ if [ ! -f "${APP_CONFIG}" ]; then
 	mkdir -p /srv/app/data/media
 	echo "application.file.upload_dir=/srv/app/data/media" >> "${APP_CONFIG}"
 
-	if [ ! -z "${APP_SIGNING_KEYPAIR_PASS}" ]; then
+	if [ -n "${APP_SIGNING_KEYPAIR_PASS}" ]; then
 		mkdir -p /srv/app/keys
 
 		log "Generating RSA Java Key Store for verifying access tokens..."
@@ -147,7 +147,7 @@ if [ ! -f "${APP_CONFIG}" ]; then
 	echo "# ~~~~~" >> "${APP_CONFIG}"
 	echo "spring.datasource.platform=${DB_PLATFORM}" >> "${APP_CONFIG}"
 
-	if [ ! -z "${DB_DRIVER}" ]; then
+	if [ -n "${DB_DRIVER}" ]; then
 		echo "spring.datasource.driver-class-name=${DB_DRIVER}" >> "${APP_CONFIG}"
 	elif [ "${DB_PLATFORM}" = 'h2' ]; then
 		echo "spring.datasource.driver-class-name=org.h2.Driver" >> "${APP_CONFIG}"
@@ -159,7 +159,7 @@ if [ ! -f "${APP_CONFIG}" ]; then
 		echo "spring.datasource.driver-class-name=org.postgresql.Driver" >> "${APP_CONFIG}"
 	fi
 
-	if [ ! -z "${DB_DIALECT}" ]; then
+	if [ -n "${DB_DIALECT}" ]; then
 		echo "spring.jpa.properties.hibernate.dialect=${DB_DIALECT}" >> "${APP_CONFIG}"
 	elif [ "${DB_PLATFORM}" = 'h2' ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect" >> "${APP_CONFIG}"
@@ -171,7 +171,7 @@ if [ ! -f "${APP_CONFIG}" ]; then
 		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect" >> "${APP_CONFIG}"
 	fi
 
-	if [ ! -z "${DB_STORAGE}" ]; then
+	if [ -n "${DB_STORAGE}" ]; then
 		echo "spring.jpa.properties.hibernate.dialect.storage_engine=${DB_STORAGE}" >> "${APP_CONFIG}"
 	elif [ "${DB_PLATFORM}" = 'mariadb' ]; then
 		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >> "${APP_CONFIG}"
@@ -189,7 +189,7 @@ if [ ! -f "${APP_CONFIG}" ]; then
 		fi
 	fi
 
-	if [ ! -z "${DB_HOST}" ]; then
+	if [ -n "${DB_HOST}" ]; then
 		if [ "${DB_PLATFORM}" = 'mariadb' ]; then
 			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull" >> "${APP_CONFIG}"
 		elif [ "${DB_PLATFORM}" = 'mysql' ]; then
