@@ -53,6 +53,7 @@ Jenkinsfile
 .travis.yml
 
 # Custom files
+.docker/
 .docker-build-date
 .docker-build
 manage.sh

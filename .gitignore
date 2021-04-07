@@ -59,5 +59,6 @@ nbproject/*
 .springBeans
 
 #project specific
+.docker/
 data
 logs

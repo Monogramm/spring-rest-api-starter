@@ -16,10 +16,16 @@ COMMIT_MSG=$(git log -1 --format=%s)
 
 export VARIANT=${2:-alpine}
 
-export DOCKER_REPO=monogramm/spring-rest-api-starter
+export DOCKER_REPO=${DOCKER_REPO:-monogramm/spring-rest-api-starter}
 export DOCKERFILE_PATH=Dockerfile.${VARIANT}
 export DOCKER_TAG=${VARIANT}
-export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
+export DOCKER_TAG=${DOCKER_TAG:-${VARIANT}}
+
+if [ -n "${DOCKER_REGISTRY}" ]; then
+    export IMAGE_NAME=${DOCKER_REGISTRY}/${DOCKER_REPO}:${DOCKER_TAG}
+else
+    export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
+fi
 
 # Execute hooks in given order
 IFS=',' read -ra STEPS <<< "${1:-build,test}"

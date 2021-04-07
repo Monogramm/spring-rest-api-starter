@@ -7,9 +7,14 @@ if [ ! -f '.env' ]; then
     echo 'Init docker compose environment variables...'
     cp .env_template .env.tmp
 
+    sed -i \
+        -e "s|APP_PACKAGE_REPO_LOGIN=.*|APP_PACKAGE_REPO_LOGIN=${PACKAGE_REPO_LOGIN}|" \
+        -e "s|APP_PACKAGE_REPO_PASSWORD=.*|APP_PACKAGE_REPO_PASSWORD=${PACKAGE_REPO_PASSWORD}|" \
+        .env.tmp
+
     mv .env.tmp .env
 fi
 
 #echo 'Preparing persisted data...'
 #mkdir -p "${APP_HOME:-.docker/app}"
-#chown 777 "${APP_HOME:-.docker/app}"
+#chmod 777 "${APP_HOME:-.docker/app}"

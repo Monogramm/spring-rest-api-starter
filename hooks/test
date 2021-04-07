@@ -18,7 +18,7 @@ for file in docker-compose.*.test.yml; do
     docker-compose --no-ansi -f "${file}" up -d && sleep 60
     docker-compose --no-ansi -f "${file}" logs -f "sut"
     docker-compose --no-ansi -f "${file}" ps
-    docker-compose --no-ansi -f "${file}" logs --no-color "app_db"
+    #docker-compose --no-ansi -f "${file}" logs --no-color "app_db"
     docker-compose --no-ansi -f "${file}" logs --no-color "app_backend"
     docker-compose --no-ansi -f "${file}" ps "sut" | grep "Exit 0" || exit 1
     docker-compose --no-ansi -f "${file}" down
@@ -27,7 +27,7 @@ for file in docker-compose.*.test.yml; do
     docker-compose --no-ansi -f "${file}" up -d && sleep 60
     docker-compose --no-ansi -f "${file}" logs -f "sut"
     docker-compose --no-ansi -f "${file}" ps
-    docker-compose --no-ansi -f "${file}" logs --no-color "app_db"
+    #docker-compose --no-ansi -f "${file}" logs --no-color "app_db"
     docker-compose --no-ansi -f "${file}" logs --no-color "app_backend"
     docker-compose --no-ansi -f "${file}" ps "sut" | grep "Exit 0" || exit 1
     docker-compose --no-ansi -f "${file}" down -v

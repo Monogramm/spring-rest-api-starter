@@ -16,6 +16,7 @@ services:
         - BUILD_DATE=${BUILD_DATE}
     image: ${IMAGE_NAME}
     container_name: app_backend
+    # [TODO] Enable auto-restart when production-ready
     #restart: always
     healthcheck:
       test: CMD curl -v --silent http://localhost:${APP_SERVER_PORT}/${APP_SERVER_CONTEXT_PATH}/health 2>&1 | grep UP
@@ -30,12 +31,13 @@ services:
       app_mailer:
         condition: service_started
     volumes:
-      - /srv/spring_rest_api_starter_mariadb/back/logs:/srv/app/logs
-      - /srv/spring_rest_api_starter_mariadb/back/keys:/srv/app/keys
-      - /srv/spring_rest_api_starter_mariadb/back/config:/srv/app/config
-      - /srv/spring_rest_api_starter_mariadb/back/data:/srv/app/data
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - ${APP_HOME}_mariadb/back/logs:/srv/app/logs
+      - ${APP_HOME}_mariadb/back/keys:/srv/app/keys
+      - ${APP_HOME}_mariadb/back/config:/srv/app/config
+      - ${APP_HOME}_mariadb/back/data:/srv/app/data
+      # If you want, you can sync time & timezone with host
+      #- /etc/localtime:/etc/localtime:ro
+      #- /etc/timezone:/etc/timezone:ro
     environment:
       # Application configuration
       - APP_SERVER_PORT=${APP_SERVER_PORT}
@@ -68,21 +70,23 @@ services:
     image: mariadb:10
     container_name: app_db
     command: --character_set_client=utf8 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --character-set-client-handshake=FALSE
-    restart: always
+    # [TODO] Enable auto-restart when production-ready
+    #restart: always
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 10s
       retries: 5
     expose:
-      - 3306
+      - '3306'
     #ports:
     #  - "3306:3306"
     networks:
       - app_internal_network
     volumes:
-      - /srv/spring_rest_api_starter_mariadb/mariadb/data:/var/lib/mysql
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      - ${APP_HOME}_mariadb/db/data:/var/lib/mysql
+      # If you want, you can sync time & timezone with host
+      #- /etc/localtime:/etc/localtime:ro
+      #- /etc/timezone:/etc/timezone:ro
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MYSQL_DATABASE=${APP_DB_NAME}
@@ -127,12 +131,13 @@ services:
     container_name: app_mailer
     restart: always
     expose:
-      - 1025
+      - '1025'
     ports:
-      - 1080:1080
+      - "1080:1080"
     networks:
       - app_internal_network
       - app_external_network
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+    # If you want, you can sync time & timezone with host
+    #volumes:
+    #  - /etc/localtime:/etc/localtime:ro
+    #  - /etc/timezone:/etc/timezone:ro

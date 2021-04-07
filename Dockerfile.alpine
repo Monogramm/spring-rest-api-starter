@@ -16,7 +16,6 @@ COPY . .
 
 # Maven arguments
 ARG MAVEN_PROFILE=dev
-ARG MAVEN_RELEASE=N
 
 # Credentials to private Package Repository
 ARG PACKAGE_REPO_LOGIN
@@ -25,13 +24,15 @@ ARG PACKAGE_REPO_PASSWORD
 RUN set -ex; \
 	mvn \
 		clean \
+		test \
+		verify \
 		package \
-		-DskipTests=true \
+		-DskipTests=false \
 		-Dmaven.javadoc.skip=true \
 		-B \
 		-V \
 		-s /usr/share/maven/ref/settings-docker.xml \
-		-P "${MAVEN_PROFILE}" \
+		-P "${MAVEN_PROFILE:-dev}" \
 	; \
 	ls -al target; \
 	mv target/*.jar target/app.jar; \
