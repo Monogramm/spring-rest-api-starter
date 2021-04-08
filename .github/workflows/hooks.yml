@@ -23,6 +23,9 @@ jobs:
       - name: Execute CI build hooks
         id: docker_build
         run: |
+          # Export variables to tag against GitHub Container Registry
+          #export DOCKER_REGISTRY=ghcr.io
+          #export DOCKER_REPO=${{ github.repository }}
           ./hooks/run build ${{ matrix.variant }}
 
       - name: Display docker images
@@ -38,3 +41,12 @@ jobs:
       #  with:
       #    project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
       #    coverage-reports: ./coverage/coverage-phpunit-cobertura.xml
+
+      #- name: Execute CI push hooks
+      #  id: docker_push
+      #  run: |
+      #    # Export variables to login and push to GitHub Container Registry
+      #    #export DOCKER_REGISTRY=ghcr.io
+      #    #export DOCKER_LOGIN=${{ github.repository_owner }}
+      #    #export DOCKER_PASSWORD=${{ secrets.GITHUB_REGISTRY_TOKEN }}
+      #    ./hooks/run push ${{ matrix.variant }}

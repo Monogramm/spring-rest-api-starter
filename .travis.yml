@@ -15,34 +15,22 @@ jdk:
 before_install:
   - env | sort
   - export DOCKER_REPO="monogramm/spring-rest-api-starter"
-  - export TAG="travis"
-  - export IMAGE_NAME="${DOCKER_REPO}:${TAG}"
-  - name="spring-rest-api-starter"
-  - export home=$(pwd)
-  - export travis_dir="${home}/."
 
 install:
-  # Test app build locally with maven
-  #- mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  # Test app build through docker container
-  - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" build
+  # Execute CI build hooks
+  # TODO Mount local dir as volume to retrieve test results (-v "$(pwd)":/usr/src/app)
+  - ./hooks/run build "${VARIANT}"
 
 before_script:
+  # Display docker images
   - docker images
 
 script:
-  # Execute tests locally with maven
-  #- mvn clean test verify -P all-tests -B -V
-  # Execute tests in container with maven
-  - docker run -it --rm -v "$(pwd)":/usr/src/app -w /usr/src/app maven:3-jdk-8-slim mvn clean test verify -P all-tests -B -V
-  # Test container run
-  - travis_retry docker-compose -f "docker-compose_${DATABASE}.yml" up -d && sleep 180
-  - docker-compose -f "docker-compose_${DATABASE}.yml" ps
-  - docker-compose -f "docker-compose_${DATABASE}.yml" logs "app_backend"
-  - docker-compose -f "docker-compose_${DATABASE}.yml" ps "app_backend" | grep "Up" || exit 1
+    # Execute CI test hooks
+    - ./hooks/run test "${VARIANT}"
 
 after_success:
-  # Send test coverage report to CodeCov
+  # TODO Send test coverage report to CodeCov
   - bash <(curl -s https://codecov.io/bash)
 
 #jobs:
@@ -50,7 +38,4 @@ after_success:
 #    - env: DATABASE=h2
 
 env: # Environments
-  - DATABASE=h2
-  - DATABASE=mysql
-  - DATABASE=mariadb
-  - DATABASE=postgres
+  - VARIANT=alpine
