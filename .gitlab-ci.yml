@@ -1,0 +1,98 @@
+# see https://docs.gitlab.com/ce/ci/yaml/README.html for all available options
+
+# Docker-in-Docker
+image:
+  name: docker/compose:1.24.1
+  entrypoint: ["sh", "-c"]
+
+services:
+  - name: docker:19.03.12-dind
+    alias: docker
+
+variables:
+  VARIANT: alpine
+  DOCKER_REPO: monogramm/spring-rest-api-starter
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  # This instructs Docker NOT to start over TLS.
+  DOCKER_TLS_CERTDIR: ""
+  # This instructs Docker to start over TLS.
+  #DOCKER_TLS_CERTDIR: "/certs"
+
+# Check docker
+before_script:
+  - pwd
+  - id
+  - apk add bash git
+  - docker --version
+  - docker-compose --version
+  - docker info
+
+# Always cleanup after the build
+after_script:
+  - docker images
+  - docker image prune -f --filter until=$(TZ=EST+24 date +%Y-%m-%d)
+
+# Execute CI build hooks
+build-hooks:
+  stage: build
+  tags:
+    - docker
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  script:
+    # Export variables to tag against GitLab Registry
+    #- [ -z "${CI_REGISTRY_IMAGE}" ] || export DOCKER_REPO=${$CI_REGISTRY_IMAGE}
+    - ./hooks/run build "${VARIANT}"
+    # Save docker image as artifact
+    - mkdir -p .docker/image
+    - docker save "${DOCKER_REGISTRY}/${DOCKER_REPO}:${VARIANT}" > .docker/image/app.tar
+    - ls -al .docker/image/app.tar
+  artifacts:
+    expire_in: 24 hrs
+    paths:
+      - .docker/image
+
+# Execute CI test hooks
+test-hooks:
+  stage: test
+  tags:
+    - docker
+  script:
+    # Load artifact from build stage
+    - docker load -i .docker/image/app.tar
+    - ./hooks/run test "${VARIANT}"
+
+# Publish images
+#push-hooks:
+#  stage: deploy
+#  tags:
+#    - docker
+#  script:
+#    # Export variables to login and push to GitLab Registry
+#    - [ -z "${CI_REGISTRY_IMAGE}" ] || export DOCKER_LOGIN=${CI_REGISTRY_USER}
+#    - [ -z "${CI_REGISTRY_IMAGE}" ] || export DOCKER_PASSWORD=${CI_REGISTRY_PASSWORD}
+#    - [ -z "${CI_REGISTRY_IMAGE}" ] || export DOCKER_REGISTRY=${CI_REGISTRY}
+#    # Load artifact from build stage
+#    - docker load -i .docker/image/app.tar
+#    - ./hooks/run push
+
+# Publish test results
+#push-coverage:
+#  stage: deploy
+#  script:
+#    - echo "TBD"
+
+# Deploy to stage
+#staging:
+#  stage: staging
+#  script:
+#    - echo "TBD"
+
+# Deploy to production
+#production:
+#  stage: production
+#  script:
+#    - echo "TBD"
+#  when: manual
+#  only:
+#    - master
