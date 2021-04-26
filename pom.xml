@@ -74,7 +74,7 @@
 		<!-- Build properties -->
 		<madmath03.passwords.version>password-1.1.5</madmath03.passwords.version>
 		<commons-lang.version>2.2</commons-lang.version>
-		<commons-io.version>2.3</commons-io.version>
+		<commons-io.version>2.7</commons-io.version>
 		<spring-security-oauth.version>2.2.1.RELEASE</spring-security-oauth.version>
 		<dockerfile.version>1.4.10</dockerfile.version>
 
