@@ -78,35 +78,41 @@ log "Application entrypoint initialization..."
 # If no config provided in volume, setup a default config from environment variables
 if [ ! -f "${APP_CONFIG}" ]; then
 	log "Setting up initial application configuration..."
-	echo "# Initial configuration generated at $(date +%Y-%m-%dT%H:%M:%S%z)" > ${APP_CONFIG}
+	echo "# Initial configuration generated at $(date +%Y-%m-%dT%H:%M:%S%z)" > "${APP_CONFIG}.temp"
 
-	echo "# ~~~~~" >> "${APP_CONFIG}"
-	echo "# Application Configuration" >> "${APP_CONFIG}"
-	echo "# ~~~~~" >> "${APP_CONFIG}"
-	echo "# Email" >> "${APP_CONFIG}"
-	echo "application.email.app_title=${APP_TITLE}" >> "${APP_CONFIG}"
-	echo "application.email.no_reply=no_reply@${APP_DOMAIN_NAME}" >> "${APP_CONFIG}"
+	{
+		echo "# ~~~~~"
+		echo "# Application Configuration"
+		echo "# ~~~~~"
+		echo "# Email"
+		echo "application.email.app_title=${APP_TITLE}"
+		echo "application.email.no_reply=no_reply@${APP_DOMAIN_NAME}"
 
-	echo "server.context-path=${APP_SERVER_CONTEXT_PATH}" >> "${APP_CONFIG}"
-	echo "server.port=${APP_SERVER_PORT}" >> "${APP_CONFIG}"
+		echo "# Server"
+		echo "server.context-path=${APP_SERVER_CONTEXT_PATH}"
+		echo "server.port=${APP_SERVER_PORT}"
 
-	echo "spring.http.multipart.max-file-size=${APP_MAX_FILE_SIZE}" >> "${APP_CONFIG}"
-	echo "spring.http.multipart.max-request-size=${APP_MAX_REQUEST_SIZE}" >> "${APP_CONFIG}"
+		echo "# Spring HTTP"
+		echo "spring.http.multipart.max-file-size=${APP_MAX_FILE_SIZE}"
+		echo "spring.http.multipart.max-request-size=${APP_MAX_REQUEST_SIZE}"
 
-	echo "# Default domain name" >> "${APP_CONFIG}"
-	echo "application.data.domain_name=${APP_DOMAIN_NAME}" >> "${APP_CONFIG}"
-	echo "# Default admin password" >> "${APP_CONFIG}"
-	echo "application.data.admin_password=${APP_ADMIN_PASSWORD}" >> "${APP_CONFIG}"
+		echo "# Default domain name"
+		echo "application.data.domain_name=${APP_DOMAIN_NAME}"
+		echo "# Default admin password"
+		echo "application.data.admin_password=${APP_ADMIN_PASSWORD}"
+		echo "# Disable demo data import"
+		echo "application.data.demo=false"
+	} >> "${APP_CONFIG}.temp"
 
-	echo "# disable demo data import" >> "${APP_CONFIG}"
-	echo "application.data.demo=false" >> "${APP_CONFIG}"
-
-	echo "# Media storage directory" >> "${APP_CONFIG}"
 	mkdir -p /srv/app/data/media
-	echo "application.file.upload_dir=/srv/app/data/media" >> "${APP_CONFIG}"
+	{
+		echo "# Media storage directory"
+		echo "application.file.upload_dir=/srv/app/data/media"
+	} >> "${APP_CONFIG}.temp"
 
 	if [ -n "${APP_SIGNING_KEYPAIR_PASS}" ]; then
 		mkdir -p /srv/app/keys
+		rm -rf /srv/app/keys/.private.jks /srv/app/keys/.private.jks.old /srv/app/keys/public.txt
 
 		log "Generating RSA Java Key Store for verifying access tokens..."
 		keytool -genkeypair -alias "${APP_SIGNING_KEYPAIR_ALIAS}" -dname "CN=${APP_DOMAIN_NAME}, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keystore /srv/app/keys/.private.jks -keyalg RSA -keypass "$APP_SIGNING_KEYPAIR_PASS" -storepass "$APP_SIGNING_KEYPAIR_PASS"
@@ -118,65 +124,84 @@ if [ ! -f "${APP_CONFIG}" ]; then
 		keytool -list -rfc --keystore /srv/app/keys/.private.jks -storepass "${APP_SIGNING_KEYPAIR_PASS}" | openssl x509 -inform pem -pubkey -noout > /srv/app/keys/public.txt
 		log "Public key extracted in /srv/app/keys/"
 
-		echo "# Access token signing key" >> "${APP_CONFIG}"
-		echo "application.security.key-pair-path=/srv/app/keys/.private.jks" >> "${APP_CONFIG}"
-		echo "application.security.key-pair-password=${APP_SIGNING_KEYPAIR_PASS}" >> "${APP_CONFIG}"
-		echo "application.security.key-pair-alias=${APP_SIGNING_KEYPAIR_ALIAS}" >> "${APP_CONFIG}"
-		echo "application.security.verifying-key-path=/srv/app/keys/public.txt" >> "${APP_CONFIG}"
+		log "Setting RSA JKS key for signing access tokens..."
+		{
+			echo "# Access token signing key"
+			echo "application.security.key-pair-path=/srv/app/keys/.private.jks"
+			echo "application.security.key-pair-password=${APP_SIGNING_KEYPAIR_PASS}"
+			echo "application.security.key-pair-alias=${APP_SIGNING_KEYPAIR_ALIAS}"
+			echo "application.security.verifying-key-path=/srv/app/keys/public.txt"
+		} >> "${APP_CONFIG}.temp"
 		log "RSA JKS configured"
 	elif [ -z "${APP_SIGNING_KEY}" ]; then
 		mkdir -p /srv/app/keys
+		rm -rf /srv/app/keys/.id_rsa.pub /srv/app/keys/.id_rsa
 
 		log "Generating RSA SSH key for signing access tokens..."
 		ssh-keygen -b 2048 -m PEM -t rsa -f /srv/app/keys/.id_rsa -q -N ""
 		log "RSA SSH key generated in /srv/app/keys/"
 
-		echo "# Access token signing key" >> "${APP_CONFIG}"
-		echo "application.security.signing-key-path=/srv/app/keys/.id_rsa.pub" >> "${APP_CONFIG}"
-		echo "application.security.verifying-key-path=/srv/app/keys/.id_rsa" >> "${APP_CONFIG}"
+		log "Setting RSA SSH key for signing access tokens..."
+		{
+			echo "# Access token signing key"
+			echo "application.security.signing-key-path=/srv/app/keys/.id_rsa.pub"
+			echo "application.security.verifying-key-path=/srv/app/keys/.id_rsa"
+		} >> "${APP_CONFIG}.temp"
 		log "RSA SSH key configured"
 	else
 		log "Setting signing key (not recommended for production)..."
-		echo "# Access token signing key" >> "${APP_CONFIG}"
-		echo "application.security.signing-key=${APP_SIGNING_KEY}" >> "${APP_CONFIG}"
+		{
+			echo "# Access token signing key"
+			echo "application.security.signing-key=${APP_SIGNING_KEY}"
+		} >> "${APP_CONFIG}.temp"
 	fi
 
 
-	echo "# ~~~~~" >> "${APP_CONFIG}"
-	echo "# Database Configuration" >> "${APP_CONFIG}"
-	echo "# ~~~~~" >> "${APP_CONFIG}"
-	echo "spring.datasource.platform=${DB_PLATFORM}" >> "${APP_CONFIG}"
+	{
+		echo "# ~~~~~"
+		echo "# Log Configuration"
+		echo "# ~~~~~"
+		echo "logging.level.com.monogramm=${LOG_LEVEL}"
+	} >> "${APP_CONFIG}.temp"
+
+
+	{
+		echo "# ~~~~~"
+		echo "# Database Configuration"
+		echo "# ~~~~~"
+		echo "spring.datasource.platform=${DB_PLATFORM}"
+	} >> "${APP_CONFIG}.temp"
 
 	if [ -n "${DB_DRIVER}" ]; then
-		echo "spring.datasource.driver-class-name=${DB_DRIVER}" >> "${APP_CONFIG}"
+		echo "spring.datasource.driver-class-name=${DB_DRIVER}" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'h2' ]; then
-		echo "spring.datasource.driver-class-name=org.h2.Driver" >> "${APP_CONFIG}"
+		echo "spring.datasource.driver-class-name=org.h2.Driver" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'mariadb' ]; then
-		echo "spring.datasource.driver-class-name=org.mariadb.jdbc.Driver" >> "${APP_CONFIG}"
+		echo "spring.datasource.driver-class-name=org.mariadb.jdbc.Driver" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'mysql' ]; then
-		echo "spring.datasource.driver-class-name=com.mysql.jdbc.Driver" >> "${APP_CONFIG}"
+		echo "spring.datasource.driver-class-name=com.mysql.jdbc.Driver" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'postgresql' ]; then
-		echo "spring.datasource.driver-class-name=org.postgresql.Driver" >> "${APP_CONFIG}"
+		echo "spring.datasource.driver-class-name=org.postgresql.Driver" >> "${APP_CONFIG}.temp"
 	fi
 
 	if [ -n "${DB_DIALECT}" ]; then
-		echo "spring.jpa.properties.hibernate.dialect=${DB_DIALECT}" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect=${DB_DIALECT}" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'h2' ]; then
-		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'mariadb' ]; then
-		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB53Dialect" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB53Dialect" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'mysql' ]; then
-		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'postgresql' ]; then
-		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect" >> "${APP_CONFIG}.temp"
 	fi
 
 	if [ -n "${DB_STORAGE}" ]; then
-		echo "spring.jpa.properties.hibernate.dialect.storage_engine=${DB_STORAGE}" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect.storage_engine=${DB_STORAGE}" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'mariadb' ]; then
-		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >> "${APP_CONFIG}.temp"
 	elif [ "${DB_PLATFORM}" = 'mysql' ]; then
-		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >> "${APP_CONFIG}"
+		echo "spring.jpa.properties.hibernate.dialect.storage_engine=innodb" >> "${APP_CONFIG}.temp"
 	fi
 
 	if [ -z "${DB_PORT}" ]; then
@@ -191,66 +216,83 @@ if [ ! -f "${APP_CONFIG}" ]; then
 
 	if [ -n "${DB_HOST}" ]; then
 		if [ "${DB_PLATFORM}" = 'mariadb' ]; then
-			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull" >> "${APP_CONFIG}"
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull" >> "${APP_CONFIG}.temp"
 		elif [ "${DB_PLATFORM}" = 'mysql' ]; then
-			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull&verifyServerCertificate=false&useSSL=false" >> "${APP_CONFIG}"
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}?zeroDateTimeBehavior=convertToNull&verifyServerCertificate=false&useSSL=false" >> "${APP_CONFIG}.temp"
 		else
-			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >> "${APP_CONFIG}"
+			echo "spring.datasource.url=jdbc:${DB_PLATFORM}://${DB_HOST}:${DB_PORT}/${DB_NAME}" >> "${APP_CONFIG}.temp"
 		fi
 	elif [ "${DB_PLATFORM}" = 'h2' ]; then
 		mkdir -p /srv/app/data/h2
 
 		log "In memory H2 database will be stored in /srv/app/data/h2"
-		echo "spring.datasource.url=jdbc:h2:file:/srv/app/data/h2/${DB_NAME}" >> "${APP_CONFIG}"
+		echo "spring.datasource.url=jdbc:h2:file:/srv/app/data/h2/${DB_NAME}" >> "${APP_CONFIG}.temp"
 	else
-		echo "spring.datasource.url=jdbc:${DB_PLATFORM}://localhost:${DB_PORT}/${DB_NAME}" >> "${APP_CONFIG}"
+		echo "spring.datasource.url=jdbc:${DB_PLATFORM}://localhost:${DB_PORT}/${DB_NAME}" >> "${APP_CONFIG}.temp"
 	fi
 
-	echo "spring.datasource.username=${DB_USER}" >> "${APP_CONFIG}"
-	echo "spring.datasource.password=${DB_PASSWORD}" >> "${APP_CONFIG}"
+	if [ -n "${DB_USER}" ] && [ -n "${DB_PASSWORD}" ]; then
+		{
+			echo "spring.datasource.username=${DB_USER}"
+			echo "spring.datasource.password=${DB_PASSWORD}"
+		} >> "${APP_CONFIG}.temp"
+	fi
 
 
-	echo "# ~~~~~" >> "${APP_CONFIG}"
-	echo "# Mail Configuration" >> "${APP_CONFIG}"
-	echo "# ~~~~~" >> "${APP_CONFIG}"
-	echo "spring.mail.host=${MAIL_HOST}" >> "${APP_CONFIG}"
-	echo "spring.mail.port=${MAIL_PORT}" >> "${APP_CONFIG}"
-	echo "spring.mail.username=${MAIL_USER}" >> "${APP_CONFIG}"
-	echo "spring.mail.password=${MAIL_PASSWORD}" >> "${APP_CONFIG}"
-	echo "spring.mail.protocol=${MAIL_PROTOCOL}" >> "${APP_CONFIG}"
-	echo "spring.mail.properties.mail.transport.protocol=${MAIL_PROTOCOL}" >> "${APP_CONFIG}"
-	echo "spring.mail.properties.mail.smtp.auth=true" >> "${APP_CONFIG}"
-	echo "spring.mail.properties.mail.smtp.ssl.enable=${MAIL_SSL}" >> "${APP_CONFIG}"
-	echo "spring.mail.properties.mail.smtp.starttls.enable=${MAIL_STARTTLS}" >> "${APP_CONFIG}"
+	{
+		echo "# ~~~~~"
+		echo "# Mail Configuration"
+		echo "# ~~~~~"
+		echo "spring.mail.host=${MAIL_HOST}"
+		echo "spring.mail.port=${MAIL_PORT}"
+		echo "spring.mail.protocol=${MAIL_PROTOCOL}"
+		echo "spring.mail.properties.mail.transport.protocol=${MAIL_PROTOCOL}"
+		echo "spring.mail.properties.mail.${MAIL_PROTOCOL}.ssl.enable=${MAIL_SSL}"
+		echo "spring.mail.properties.mail.${MAIL_PROTOCOL}.starttls.enable=${MAIL_STARTTLS}"
+	} >> "${APP_CONFIG}.temp"
+
+	if [ -n "${MAIL_USER}" ]; then
+		{
+			echo "spring.mail.username=${MAIL_USER}"
+			echo "spring.mail.password=${MAIL_PASSWORD}"
+			echo "spring.mail.properties.mail.${MAIL_PROTOCOL}.auth=true"
+		} >> "${APP_CONFIG}.temp"
+	else
+		echo "spring.mail.properties.mail.${MAIL_PROTOCOL}.auth=false" >> "${APP_CONFIG}.temp"
+	fi
 
 
 	# Coming features
-	#echo "# ~~~~~" >> "${APP_CONFIG}"
-	#echo "# LDAP Configuration" >> "${APP_CONFIG}"
-	#echo "# ~~~~~" >> "${APP_CONFIG}"
-	#echo "# something like 'ldap://localhost:389'" >> "${APP_CONFIG}"
-	#echo "ldap.server.url=${LDAP_URL}" >> "${APP_CONFIG}"
+	if [ -n "${LDAP_URL}" ]; then
+		{
+			echo "# ~~~~~"
+			echo "# LDAP Configuration"
+			echo "# ~~~~~"
+			echo "# something like 'ldap://localhost:389'"
+			echo "ldap.server.url=${LDAP_URL}"
 
-	#echo "# can be 'simple' or 'CRAM-MD5'" >> "${APP_CONFIG}"
-	#echo "ldap.auth.type=${LDAP_AUTH_TYPE}" >> "${APP_CONFIG}"
+			echo "# can be 'simple' or 'CRAM-MD5'"
+			echo "ldap.auth.type=${LDAP_AUTH_TYPE}"
+			echo "ldap.system.user=${LDAP_ADMIN_LOGIN}"
+			echo "ldap.system.password=${LDAP_ADMIN_PASS}"
 
-	#echo "ldap.system.user=${LDAP_ADMIN_LOGIN}" >> "${APP_CONFIG}"
-	#echo "ldap.system.password=${LDAP_ADMIN_PASS}" >> "${APP_CONFIG}"
+			echo "# user search base"
+			echo "ldap.user.base=${LDAP_USER_BASE}"
+			echo "# a template to search user by user login id"
+			echo "ldap.user.filter=${LDAP_USER_FILTER}"
 
-	#echo "# user search base" >> "${APP_CONFIG}"
-	#echo "ldap.user.base=${LDAP_USER_BASE}" >> "${APP_CONFIG}"
+			if [ -n "${LDAP_GROUP_BASE}" ]; then
+				echo "# group search base"
+				echo "ldap.group.base=${LDAP_GROUP_BASE}"
+				echo "# a template to search groups by user login id"
+				echo "ldap.group.filter=${LDAP_GROUP_FILTER}"
+				echo "# if set, create groups on ldap server under ldap.group.base"
+				echo "ldap.group.object.class=${LDAP_GROUP_CLASS}"
+			fi
+		} >> "${APP_CONFIG}.temp"
+	fi
 
-	#echo "# a template to search user by user login id" >> "${APP_CONFIG}"
-	#echo "ldap.user.filter=${LDAP_USER_FILTER}" >> "${APP_CONFIG}"
-
-	#echo "# group search base" >> "${APP_CONFIG}"
-	#echo "ldap.group.base=${LDAP_GROUP_BASE}" >> "${APP_CONFIG}"
-
-	#echo "# a template to search groups by user login id" >> "${APP_CONFIG}"
-	#echo "ldap.group.filter=${LDAP_GROUP_FILTER}" >> "${APP_CONFIG}"
-
-	#echo "# if set, create groups on ldap server under ldap.group.base" >> "${APP_CONFIG}"
-	#echo "ldap.group.object.class=${LDAP_GROUP_CLASS}" >> "${APP_CONFIG}"
+	mv "${APP_CONFIG}.temp" "${APP_CONFIG}"
 
 	log "Configuration generated."
 else
