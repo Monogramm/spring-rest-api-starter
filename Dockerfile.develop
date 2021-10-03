@@ -11,7 +11,7 @@ RUN set -ex; \
 
 WORKDIR /usr/src/app
 
-EXPOSE 8080 8443
+EXPOSE 8080 8443 35729
 
 # Application configuration
 # Database configuration
@@ -65,4 +65,4 @@ RUN set -ex; \
 		-P "${MAVEN_PROFILE}" \
 	;
 
-ENTRYPOINT ["mvn", "spring-boot:run"]
+CMD [ "mvn", "spring-boot:run" ]
